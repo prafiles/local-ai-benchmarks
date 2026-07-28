@@ -1,0 +1,68 @@
+services:
+  vllm:
+    # NOTE: pinned to v0.22.1, not the v0.13.0 used by the other stacks —
+    # Qwen3_5ForConditionalGeneration is only registered from 0.22 onward.
+    image: vllm/vllm-openai:v0.22.1
+    container_name: q35
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ipc: host
+    shm_size: "6gb"
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    volumes:
+      # reuse the existing volume: the 14 GB checkpoint is already cached there
+      - gemma4-vllm-aio_hf-cache:/root/.cache/huggingface
+      - gemma4-vllm-aio_vllm-cache:/root/.cache/vllm
+    environment:
+      HUGGING_FACE_HUB_TOKEN: "${HUGGING_FACE_HUB_TOKEN}"
+      HF_HOME: /root/.cache/huggingface
+      HF_HUB_ENABLE_HF_TRANSFER: "1"
+      VLLM_WORKER_MULTIPROC_METHOD: "spawn"
+      PYTORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
+      TOKENIZERS_PARALLELISM: "false"
+      PYTHONUNBUFFERED: "1"
+    command:
+      - "--model"
+      - "RedHatAI/Qwen3.5-9B-FP8-dynamic"
+      - "--dtype"
+      - "auto"
+      - "--gpu-memory-utilization"
+      - "0.93"
+      - "--kv-cache-dtype"
+      - "fp8"
+      - "--max-model-len"
+      - "131072"
+      - "--max-num-seqs"
+      - "4"
+      # caps the activation peak during profiling — without it vLLM reserves for a
+      # full-length batch and leaves nothing for KV on a 16 GB card
+      - "--max-num-batched-tokens"
+      - "2048"
+      # this benchmark is text-only; admitting no images stops the profiler from
+      # reserving vision-tower working memory it will never use
+      - "--limit-mm-per-prompt"
+      - '{"image": 0, "video": 0}'
+      - "--mm-processor-kwargs"
+      - '{"max_pixels": 1003520}'
+      # Qwen3.5 emits reasoning; without a parser it leaks into `content`
+      # and breaks first-line extraction for the shell/git categories
+      - "--reasoning-parser"
+      - "qwen3"
+      - "--enforce-eager"
+      - "--trust-remote-code"
+
+volumes:
+  gemma4-vllm-aio_hf-cache:
+    external: true
+  gemma4-vllm-aio_vllm-cache:
+    external: true

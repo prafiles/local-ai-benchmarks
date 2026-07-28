@@ -1,0 +1,610 @@
+{
+ "models": [
+  {
+   "key": "gemma",
+   "label": "Gemma 4 12B QAT",
+   "short_ok": 546,
+   "short_n": 600,
+   "short_tps": 18.4,
+   "deep_ok": 46,
+   "shal_ok": 49,
+   "long_n": 60,
+   "retention": 93.9,
+   "errors": 0,
+   "truncated": 0,
+   "max_ptok": 129249,
+   "deep_secs": 2303
+  },
+  {
+   "key": "qwen",
+   "label": "Qwen2.5-Coder-14B",
+   "short_ok": 539,
+   "short_n": 600,
+   "short_tps": 23.0,
+   "deep_ok": 28,
+   "shal_ok": 48,
+   "long_n": 60,
+   "retention": 58.3,
+   "errors": 24,
+   "truncated": 0,
+   "max_ptok": 0,
+   "deep_secs": 1384
+  },
+  {
+   "key": "mellum",
+   "label": "Mellum2-12B-A2.5B",
+   "short_ok": 530,
+   "short_n": 600,
+   "short_tps": 26.1,
+   "deep_ok": 16,
+   "shal_ok": 47,
+   "long_n": 60,
+   "retention": 34.0,
+   "errors": 0,
+   "truncated": 1,
+   "max_ptok": 129008,
+   "deep_secs": 782
+  },
+  {
+   "key": "q35",
+   "label": "Qwen3.5-9B FP8",
+   "short_ok": 500,
+   "short_n": 600,
+   "short_tps": 21.3,
+   "deep_ok": 45,
+   "shal_ok": 44,
+   "long_n": 60,
+   "retention": 102.3,
+   "errors": 0,
+   "truncated": 0,
+   "max_ptok": 118069,
+   "deep_secs": 2281
+  }
+ ],
+ "cats": {
+  "Python": {
+   "gemma": {
+    "short": 46,
+    "deep": 3,
+    "shal": 5
+   },
+   "qwen": {
+    "short": 42,
+    "deep": 1,
+    "shal": 3
+   },
+   "mellum": {
+    "short": 45,
+    "deep": 0,
+    "shal": 4
+   },
+   "q35": {
+    "short": 43,
+    "deep": 4,
+    "shal": 4
+   }
+  },
+  "Django": {
+   "gemma": {
+    "short": 42,
+    "deep": 3,
+    "shal": 2
+   },
+   "qwen": {
+    "short": 43,
+    "deep": 2,
+    "shal": 3
+   },
+   "mellum": {
+    "short": 38,
+    "deep": 1,
+    "shal": 3
+   },
+   "q35": {
+    "short": 39,
+    "deep": 1,
+    "shal": 1
+   }
+  },
+  "SQL": {
+   "gemma": {
+    "short": 42,
+    "deep": 4,
+    "shal": 5
+   },
+   "qwen": {
+    "short": 42,
+    "deep": 3,
+    "shal": 4
+   },
+   "mellum": {
+    "short": 43,
+    "deep": 2,
+    "shal": 5
+   },
+   "q35": {
+    "short": 33,
+    "deep": 2,
+    "shal": 3
+   }
+  },
+  "JS": {
+   "gemma": {
+    "short": 49,
+    "deep": 5,
+    "shal": 5
+   },
+   "qwen": {
+    "short": 47,
+    "deep": 3,
+    "shal": 4
+   },
+   "mellum": {
+    "short": 48,
+    "deep": 3,
+    "shal": 5
+   },
+   "q35": {
+    "short": 47,
+    "deep": 4,
+    "shal": 4
+   }
+  },
+  "TS": {
+   "gemma": {
+    "short": 47,
+    "deep": 5,
+    "shal": 5
+   },
+   "qwen": {
+    "short": 49,
+    "deep": 2,
+    "shal": 4
+   },
+   "mellum": {
+    "short": 49,
+    "deep": 1,
+    "shal": 5
+   },
+   "q35": {
+    "short": 44,
+    "deep": 4,
+    "shal": 5
+   }
+  },
+  "Bash": {
+   "gemma": {
+    "short": 46,
+    "deep": 4,
+    "shal": 3
+   },
+   "qwen": {
+    "short": 44,
+    "deep": 2,
+    "shal": 4
+   },
+   "mellum": {
+    "short": 39,
+    "deep": 3,
+    "shal": 3
+   },
+   "q35": {
+    "short": 39,
+    "deep": 5,
+    "shal": 4
+   }
+  },
+  "Git": {
+   "gemma": {
+    "short": 46,
+    "deep": 5,
+    "shal": 4
+   },
+   "qwen": {
+    "short": 45,
+    "deep": 3,
+    "shal": 5
+   },
+   "mellum": {
+    "short": 41,
+    "deep": 2,
+    "shal": 5
+   },
+   "q35": {
+    "short": 43,
+    "deep": 5,
+    "shal": 5
+   }
+  },
+  "SSH": {
+   "gemma": {
+    "short": 42,
+    "deep": 2,
+    "shal": 4
+   },
+   "qwen": {
+    "short": 44,
+    "deep": 2,
+    "shal": 5
+   },
+   "mellum": {
+    "short": 40,
+    "deep": 1,
+    "shal": 2
+   },
+   "q35": {
+    "short": 38,
+    "deep": 2,
+    "shal": 2
+   }
+  },
+  "GitHub": {
+   "gemma": {
+    "short": 39,
+    "deep": 3,
+    "shal": 4
+   },
+   "qwen": {
+    "short": 41,
+    "deep": 3,
+    "shal": 5
+   },
+   "mellum": {
+    "short": 41,
+    "deep": 0,
+    "shal": 4
+   },
+   "q35": {
+    "short": 32,
+    "deep": 4,
+    "shal": 4
+   }
+  },
+  "Docs": {
+   "gemma": {
+    "short": 48,
+    "deep": 3,
+    "shal": 4
+   },
+   "qwen": {
+    "short": 43,
+    "deep": 1,
+    "shal": 2
+   },
+   "mellum": {
+    "short": 48,
+    "deep": 0,
+    "shal": 3
+   },
+   "q35": {
+    "short": 44,
+    "deep": 4,
+    "shal": 4
+   }
+  },
+  "ReactNative": {
+   "gemma": {
+    "short": 49,
+    "deep": 5,
+    "shal": 4
+   },
+   "qwen": {
+    "short": 49,
+    "deep": 3,
+    "shal": 4
+   },
+   "mellum": {
+    "short": 49,
+    "deep": 0,
+    "shal": 3
+   },
+   "q35": {
+    "short": 48,
+    "deep": 5,
+    "shal": 4
+   }
+  },
+  "RAG": {
+   "gemma": {
+    "short": 50,
+    "deep": 4,
+    "shal": 4
+   },
+   "qwen": {
+    "short": 50,
+    "deep": 3,
+    "shal": 5
+   },
+   "mellum": {
+    "short": 49,
+    "deep": 3,
+    "shal": 5
+   },
+   "q35": {
+    "short": 50,
+    "deep": 5,
+    "shal": 4
+   }
+  }
+ },
+ "depths": {
+  "10000": {
+   "gemma": {
+    "deep": 8,
+    "shal": 9,
+    "n": 12,
+    "avg_ptok": 11316,
+    "errors": 0
+   },
+   "qwen": {
+    "deep": 9,
+    "shal": 9,
+    "n": 12,
+    "avg_ptok": 10167,
+    "errors": 0
+   },
+   "mellum": {
+    "deep": 5,
+    "shal": 8,
+    "n": 12,
+    "avg_ptok": 11442,
+    "errors": 0
+   },
+   "q35": {
+    "deep": 6,
+    "shal": 8,
+    "n": 12,
+    "avg_ptok": 10649,
+    "errors": 0
+   }
+  },
+  "35000": {
+   "gemma": {
+    "deep": 10,
+    "shal": 10,
+    "n": 12,
+    "avg_ptok": 39286,
+    "errors": 0
+   },
+   "qwen": {
+    "deep": 9,
+    "shal": 8,
+    "n": 12,
+    "avg_ptok": 35218,
+    "errors": 0
+   },
+   "mellum": {
+    "deep": 5,
+    "shal": 11,
+    "n": 12,
+    "avg_ptok": 39741,
+    "errors": 0
+   },
+   "q35": {
+    "deep": 9,
+    "shal": 10,
+    "n": 12,
+    "avg_ptok": 36941,
+    "errors": 0
+   }
+  },
+  "65000": {
+   "gemma": {
+    "deep": 10,
+    "shal": 10,
+    "n": 12,
+    "avg_ptok": 72863,
+    "errors": 0
+   },
+   "qwen": {
+    "deep": 10,
+    "shal": 10,
+    "n": 12,
+    "avg_ptok": 65295,
+    "errors": 0
+   },
+   "mellum": {
+    "deep": 3,
+    "shal": 8,
+    "n": 12,
+    "avg_ptok": 73705,
+    "errors": 0
+   },
+   "q35": {
+    "deep": 9,
+    "shal": 9,
+    "n": 12,
+    "avg_ptok": 68509,
+    "errors": 0
+   }
+  },
+  "95000": {
+   "gemma": {
+    "deep": 12,
+    "shal": 11,
+    "n": 12,
+    "avg_ptok": 106384,
+    "errors": 0
+   },
+   "qwen": {
+    "deep": 0,
+    "shal": 11,
+    "n": 12,
+    "avg_ptok": 0,
+    "errors": 12
+   },
+   "mellum": {
+    "deep": 1,
+    "shal": 10,
+    "n": 12,
+    "avg_ptok": 107624,
+    "errors": 0
+   },
+   "q35": {
+    "deep": 11,
+    "shal": 10,
+    "n": 12,
+    "avg_ptok": 100036,
+    "errors": 0
+   }
+  },
+  "112000": {
+   "gemma": {
+    "deep": 6,
+    "shal": 9,
+    "n": 12,
+    "avg_ptok": 122652,
+    "errors": 0
+   },
+   "qwen": {
+    "deep": 0,
+    "shal": 10,
+    "n": 12,
+    "avg_ptok": 0,
+    "errors": 12
+   },
+   "mellum": {
+    "deep": 2,
+    "shal": 10,
+    "n": 12,
+    "avg_ptok": 122743,
+    "errors": 0
+   },
+   "q35": {
+    "deep": 10,
+    "shal": 7,
+    "n": 12,
+    "avg_ptok": 117898,
+    "errors": 0
+   }
+  }
+ },
+ "notes": [],
+ "all_fail_deep": [
+  "x-dj-2",
+  "x-dj-5",
+  "x-sql-5",
+  "x-ssh-1",
+  "x-doc-1"
+ ],
+ "solo_deep": {
+  "gemma": [
+   "x-dj-4",
+   "x-ts-1"
+  ],
+  "qwen": [
+   "x-py-1",
+   "x-ssh-3",
+   "x-gh-1"
+  ],
+  "mellum": [],
+  "q35": [
+   "x-py-2",
+   "x-sh-5",
+   "x-ssh-5",
+   "x-doc-5",
+   "x-rag-5"
+  ]
+ },
+ "context_loss": {
+  "gemma": [
+   "x-py-1",
+   "x-py-2",
+   "x-sql-5",
+   "x-ssh-1",
+   "x-ssh-5",
+   "x-gh-3",
+   "x-doc-1",
+   "x-doc-5"
+  ],
+  "qwen": [
+   "x-py-4",
+   "x-py-5",
+   "x-dj-4",
+   "x-sql-4",
+   "x-js-4",
+   "x-js-5",
+   "x-ts-4",
+   "x-ts-5",
+   "x-sh-4",
+   "x-sh-5",
+   "x-git-4",
+   "x-git-5",
+   "x-ssh-1",
+   "x-ssh-4",
+   "x-ssh-5",
+   "x-gh-4",
+   "x-gh-5",
+   "x-doc-5",
+   "x-rn-4",
+   "x-rn-5",
+   "x-rag-4",
+   "x-rag-5"
+  ],
+  "mellum": [
+   "x-py-2",
+   "x-py-3",
+   "x-py-4",
+   "x-py-5",
+   "x-dj-3",
+   "x-dj-4",
+   "x-sql-3",
+   "x-sql-4",
+   "x-sql-5",
+   "x-js-1",
+   "x-js-4",
+   "x-ts-1",
+   "x-ts-3",
+   "x-ts-4",
+   "x-ts-5",
+   "x-sh-2",
+   "x-git-2",
+   "x-git-3",
+   "x-git-4",
+   "x-ssh-5",
+   "x-gh-2",
+   "x-gh-3",
+   "x-gh-4",
+   "x-gh-5",
+   "x-doc-1",
+   "x-doc-2",
+   "x-doc-5",
+   "x-rn-2",
+   "x-rn-4",
+   "x-rn-5",
+   "x-rag-4",
+   "x-rag-5"
+  ],
+  "q35": [
+   "x-dj-2",
+   "x-sql-1",
+   "x-ts-1",
+   "x-ssh-1",
+   "x-doc-1"
+  ]
+ },
+ "context_gain": {
+  "gemma": [
+   "x-dj-1",
+   "x-sh-3",
+   "x-git-2",
+   "x-doc-4",
+   "x-rn-1"
+  ],
+  "qwen": [
+   "x-js-2",
+   "x-rn-1"
+  ],
+  "mellum": [
+   "x-sh-3"
+  ],
+  "q35": [
+   "x-dj-1",
+   "x-sh-5",
+   "x-ssh-4",
+   "x-doc-5",
+   "x-rn-1",
+   "x-rag-5"
+  ]
+ }
+}

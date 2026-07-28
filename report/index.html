@@ -1,0 +1,713 @@
+<title>Four local models, short and long context, one 16 GB GPU</title>
+
+<style>
+  :root {
+    --paper: #f7f8f9; --surface: #fdfdfd;
+    --ink: #171c22; --ink-2: #414d5a; --ink-3: #6b7684;
+    --rule: #dde1e6; --rule-strong: #c3cad2;
+    --a: #bd7714;   /* Mellum2  &#8212; categorical slot 1 */
+    --b: #a03050;   /* Gemma    &#8212; categorical slot 2 */
+    --c: #00819f;   /* Qwen2.5  &#8212; categorical slot 3 */
+    --d: #6a5acd;   /* Qwen3.5  &#8212; categorical slot 4 */
+    --diff: #bd771412; --pass: #3f7d4f; --warn: #b0432c;
+    --shadow: 0 1px 2px #171c220d, 0 8px 24px #171c2208;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper: #101419; --surface: #171c22; --ink: #e8ecf0; --ink-2: #b3bdc7;
+      --ink-3: #7d8896; --rule: #262d36; --rule-strong: #38424e;
+      --a: #bd8a2e; --b: #d1657f; --c: #1f9fba; --d: #7a63d8; --diff: #bd8a2e14;
+      --pass: #6aa87a; --warn: #d4735c; --shadow: 0 1px 2px #0006, 0 8px 24px #0004; }
+  }
+  :root[data-theme="dark"] { --paper: #101419; --surface: #171c22; --ink: #e8ecf0;
+    --ink-2: #b3bdc7; --ink-3: #7d8896; --rule: #262d36; --rule-strong: #38424e;
+    --a: #bd8a2e; --b: #d1657f; --c: #1f9fba; --d: #7a63d8; --diff: #bd8a2e14;
+    --pass: #6aa87a; --warn: #d4735c; --shadow: 0 1px 2px #0006, 0 8px 24px #0004; }
+  :root[data-theme="light"] { --paper: #f7f8f9; --surface: #fdfdfd; --ink: #171c22;
+    --ink-2: #414d5a; --ink-3: #6b7684; --rule: #dde1e6; --rule-strong: #c3cad2;
+    --a: #bd7714; --b: #a03050; --c: #00819f; --d: #6a5acd; --diff: #bd771412;
+    --pass: #3f7d4f; --warn: #b0432c; --shadow: 0 1px 2px #171c220d, 0 8px 24px #171c2208; }
+
+  .wrap { background: var(--paper); color: var(--ink); font-family: var(--sans);
+          line-height: 1.6; padding: clamp(1.5rem,4vw,4rem) clamp(1rem,5vw,2rem) 5rem; }
+  .col { max-width: 68rem; margin: 0 auto; display: flex; flex-direction: column; gap: 3.5rem; }
+  .wrap :is(h1,h2,h3,p,ul,ol,table) { margin: 0; }
+  .eyebrow { font-family: var(--mono); font-size: .7rem; letter-spacing: .14em;
+             text-transform: uppercase; color: var(--ink-3); }
+
+  .mast { display: flex; flex-direction: column; gap: 1rem;
+          border-bottom: 2px solid var(--ink); padding-bottom: 1.75rem; }
+  .mast h1 { font-family: var(--mono); font-size: clamp(1.5rem,4vw,2.6rem); font-weight: 700;
+             letter-spacing: -.035em; line-height: 1.1; text-wrap: balance; }
+  .mast h1 em { font-style: normal; color: var(--ink-3); }
+  .lede { font-size: clamp(1rem,1.9vw,1.15rem); color: var(--ink-2); max-width: 60ch; }
+  .specs { display: flex; flex-wrap: wrap; gap: .4rem 1.5rem; font-family: var(--mono);
+           font-size: .72rem; color: var(--ink-3); }
+  .specs b { color: var(--ink-2); font-weight: 600; }
+
+  .verdict { display: grid; gap: .85rem; grid-template-columns: 1fr; }
+  @media (min-width: 640px) { .verdict { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1000px) { .verdict { grid-template-columns: repeat(4,1fr); } }
+  .card { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px;
+          padding: 1.2rem; box-shadow: var(--shadow); display: flex; flex-direction: column;
+          gap: .7rem; position: relative; }
+  .card::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px;
+                  background: var(--dot); border-radius: 3px 0 0 3px; }
+  .card.m { --dot: var(--a); } .card.g { --dot: var(--b); }
+  .card.q { --dot: var(--c); } .card.n { --dot: var(--d); }
+  .card h3 { font-family: var(--mono); font-size: .76rem; font-weight: 700; display: flex;
+             align-items: center; gap: .45rem; line-height: 1.3; flex-wrap: wrap; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; background: var(--dot); flex: none; }
+  .score { font-family: var(--mono); font-size: clamp(2rem,5.5vw,2.5rem); font-weight: 700;
+           letter-spacing: -.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .score span { font-size: .34em; color: var(--ink-3); letter-spacing: 0; }
+  .pct { font-family: var(--mono); font-size: .72rem; color: var(--ink-3); }
+  .rank { font-family: var(--mono); font-size: .58rem; letter-spacing: .1em;
+          text-transform: uppercase; color: var(--pass); border: 1px solid currentColor;
+          border-radius: 2px; padding: .08rem .3rem; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: .24rem .6rem; font-family: var(--mono);
+        font-size: .69rem; font-variant-numeric: tabular-nums; border-top: 1px solid var(--rule);
+        padding-top: .65rem; }
+  .kv dt { color: var(--ink-3); } .kv dd { text-align: right; }
+
+  section { display: flex; flex-direction: column; gap: 1.1rem; }
+  section > h2 { font-family: var(--mono); font-size: 1.05rem; font-weight: 700;
+                 letter-spacing: -.015em; padding-bottom: .5rem;
+                 border-bottom: 1px solid var(--rule-strong); }
+  .prose { color: var(--ink-2); max-width: 68ch; display: flex; flex-direction: column; gap: .8rem; }
+  .prose strong { color: var(--ink); font-weight: 650; }
+  code { font-family: var(--mono); font-size: .86em; background: var(--paper);
+         border: 1px solid var(--rule); border-radius: 2px; padding: .06em .3em; }
+
+  .legend { display: flex; gap: 1rem; font-family: var(--mono); font-size: .73rem;
+            color: var(--ink-2); flex-wrap: wrap; }
+  .legend span { display: flex; align-items: center; gap: .35rem; }
+  .chart { display: flex; flex-direction: column; }
+  .row { display: grid; grid-template-columns: 7.5rem 1fr; gap: .7rem; align-items: center;
+         padding: .5rem .4rem; border-bottom: 1px solid var(--rule); }
+  .row:last-child { border-bottom: 0; }
+  .row.diff { background: var(--diff); }
+  .rowlab { font-family: var(--mono); font-size: .74rem; }
+  .bars { display: flex; flex-direction: column; gap: 2px; }
+  .bar { display: flex; align-items: center; gap: .45rem; }
+  .track { flex: 1; height: 9px; background: var(--paper); border: 1px solid var(--rule);
+           border-radius: 2px; overflow: hidden; }
+  .fill { height: 100%; border-radius: 0 4px 4px 0; transition: filter .12s; }
+  .bar:hover .fill { filter: brightness(1.18); }
+  .fill.a { background: var(--a); } .fill.b { background: var(--b); }
+  .fill.c { background: var(--c); } .fill.d { background: var(--d); }
+  .val { font-family: var(--mono); font-size: .67rem; width: 1.6rem; text-align: right;
+         color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+  .scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 3px;
+            background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: .85rem; min-width: 34rem; }
+  th, td { text-align: left; padding: .55rem .8rem; border-bottom: 1px solid var(--rule);
+           vertical-align: top; }
+  th { font-family: var(--mono); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase;
+       color: var(--ink-3); font-weight: 600; background: var(--paper); }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.mono { font-family: var(--mono); font-size: .77rem; font-variant-numeric: tabular-nums;
+            white-space: nowrap; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+
+  .note { border-left: 3px solid var(--rule-strong); padding: .1rem 0 .1rem 1.1rem;
+          display: flex; flex-direction: column; gap: .55rem; color: var(--ink-2); max-width: 68ch; }
+  .note b { color: var(--ink); }
+  .note.alert { border-left-color: var(--warn); }
+  .grid2 { display: grid; gap: 1.5rem 2.5rem; grid-template-columns: 1fr; }
+  @media (min-width: 760px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+  .foot { font-family: var(--mono); font-size: .7rem; color: var(--ink-3);
+          border-top: 1px solid var(--rule); padding-top: 1.2rem; line-height: 1.7; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+<div class="col">
+
+  <header class="mast">
+    <p class="eyebrow">4 models &#183; 600 short tasks + 60 long-context probes &#183; 2,856 generations &#183; RTX 4060 Ti 16 GB</p>
+    <h1>The short-context ranking does not survive a 120K session</h1>
+    <p class="lede">Adding multi-turn sessions that grow to ~118K tokens reorders almost everything.
+      Gemma still leads. But <strong>Qwen3.5 &#8212; last on the 600-task suite &#8212; is the only model with
+      no measurable long-context degradation at all</strong>, Mellum2 loses two thirds of its
+      ability by 65K, and Qwen2.5-Coder cannot be given a 120K prompt on this card in the first
+      place.</p>
+    <div class="specs">
+      <span><b>Host</b> single self-hosted node</span>
+      <span><b>Engine</b> vLLM 0.22.1 &#183; eager</span>
+      <span><b>Temp</b> 0, single run</span>
+      <span><b>Depths</b> 10K &#183; 37K &#183; 70K &#183; 104K &#183; 120K measured</span>
+      <span><b>Oracle</b> 600/600 and 60/60</span>
+    </div>
+  </header>
+
+  <div class="note alert">
+    <p><b>Read the two suites as two different questions.</b> The 600-task suite asks whether a
+      model can do the work. The 60-probe suite asks whether it still can after 118,000 tokens of
+      conversation. A model can be good at one and bad at the other, and three of these four are.</p>
+  </div>
+
+  <div class="verdict">
+    <article class="card g">
+      <h3><i class="swatch"></i>Gemma 4 12B QAT <span class="rank">1st &#183; 1st</span></h3>
+      <p class="score">546<span>/600</span></p>
+      <p class="pct">91.0% &#183; 18.4 tok/s</p>
+      <dl class="kv">
+        <dt>Best in</dt><dd>6 of 12</dd>
+        <dt>Solo fails</dt><dd>17</dd>
+        <dt>Weakest</dt><dd>GitHub 39</dd>
+        <dt>Weights</dt><dd>8.3 GiB</dd>
+        <dt>Context</dt><dd>131K &#183; 3.47&times;</dd>
+        <dt>Long ctx</dt><dd><b>46/60</b> &#183; 94% kept</dd>
+      </dl>
+    </article>
+    <article class="card q">
+      <h3><i class="swatch"></i>Qwen2.5-Coder-14B <span class="rank">2nd &#183; 3rd</span></h3>
+      <p class="score">539<span>/600</span></p>
+      <p class="pct">89.8% &#183; 23.0 tok/s</p>
+      <dl class="kv">
+        <dt>Best in</dt><dd>4 of 12</dd>
+        <dt>Solo fails</dt><dd>19</dd>
+        <dt>Weakest</dt><dd>Docs 43</dd>
+        <dt>Weights</dt><dd>9.4 GiB</dd>
+        <dt>Context</dt><dd>82K &#183; hard ceiling</dd>
+        <dt>Long ctx</dt><dd><b>28/60</b> &#183; 24 rejected</dd>
+      </dl>
+    </article>
+    <article class="card m">
+      <h3><i class="swatch"></i>Mellum2-12B-A2.5B <span class="rank">3rd &#183; 4th</span></h3>
+      <p class="score">530<span>/600</span></p>
+      <p class="pct">88.3% &#183; 26.1 tok/s</p>
+      <dl class="kv">
+        <dt>Best in</dt><dd>3 of 12</dd>
+        <dt>Solo fails</dt><dd>22</dd>
+        <dt>Weakest</dt><dd>Django 38</dd>
+        <dt>Weights</dt><dd>11.9 GiB</dd>
+        <dt>Context</dt><dd>131K &#183; 1.34&times;</dd>
+        <dt>Long ctx</dt><dd><b>16/60</b> &#183; 34% kept</dd>
+      </dl>
+    </article>
+    <article class="card n">
+      <h3><i class="swatch"></i>Qwen3.5-9B FP8 <span class="rank">4th &#183; 2nd</span></h3>
+      <p class="score">500<span>/600</span></p>
+      <p class="pct">83.3% &#183; 21.3 tok/s</p>
+      <dl class="kv">
+        <dt>Best in</dt><dd>0 of 12</dd>
+        <dt>Solo fails</dt><dd>44</dd>
+        <dt>Weakest</dt><dd>GitHub 32</dd>
+        <dt>Weights</dt><dd>11.9 GiB</dd>
+        <dt>Context</dt><dd>131K &#183; 1.03&times;</dd>
+        <dt>Long ctx</dt><dd><b>45/60</b> &#183; 102% kept</dd>
+      </dl>
+    </article>
+  </div>
+
+  <section>
+    <h2>Pass rate by category &#8212; every category is out of 50</h2>
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--b)"></i>Gemma 4 QAT</span>
+      <span><i class="swatch" style="background:var(--c)"></i>Qwen2.5-Coder</span>
+      <span><i class="swatch" style="background:var(--a)"></i>Mellum2</span>
+      <span><i class="swatch" style="background:var(--d)"></i>Qwen3.5-9B</span>
+      <span style="color:var(--ink-3)">shaded = spread of 5+</span>
+    </div>
+    <div class="chart">
+      <div class="row"><div class="rowlab">RAG</div><div class="bars">
+        <div class="bar" title="Gemma &#8212; RAG 50/50"><div class="track"><div class="fill b" style="width:100%"></div></div><div class="val">50</div></div>
+        <div class="bar" title="Qwen2.5 &#8212; RAG 50/50"><div class="track"><div class="fill c" style="width:100%"></div></div><div class="val">50</div></div>
+        <div class="bar" title="Mellum2 &#8212; RAG 49/50"><div class="track"><div class="fill a" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; RAG 50/50"><div class="track"><div class="fill d" style="width:100%"></div></div><div class="val">50</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">React Native</div><div class="bars">
+        <div class="bar" title="Gemma 49"><div class="track"><div class="fill b" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Qwen2.5 49"><div class="track"><div class="fill c" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Mellum2 49"><div class="track"><div class="fill a" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Qwen3.5 48"><div class="track"><div class="fill d" style="width:96%"></div></div><div class="val">48</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">JavaScript</div><div class="bars">
+        <div class="bar" title="Gemma 49"><div class="track"><div class="fill b" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Qwen2.5 47"><div class="track"><div class="fill c" style="width:94%"></div></div><div class="val">47</div></div>
+        <div class="bar" title="Mellum2 48"><div class="track"><div class="fill a" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Qwen3.5 47"><div class="track"><div class="fill d" style="width:94%"></div></div><div class="val">47</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">TypeScript</div><div class="bars">
+        <div class="bar" title="Gemma 47"><div class="track"><div class="fill b" style="width:94%"></div></div><div class="val">47</div></div>
+        <div class="bar" title="Qwen2.5 49"><div class="track"><div class="fill c" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Mellum2 49"><div class="track"><div class="fill a" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Qwen3.5 44"><div class="track"><div class="fill d" style="width:88%"></div></div><div class="val">44</div></div>
+      </div></div>
+      <div class="row diff"><div class="rowlab">Docs</div><div class="bars">
+        <div class="bar" title="Gemma 48"><div class="track"><div class="fill b" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Qwen2.5 43"><div class="track"><div class="fill c" style="width:86%"></div></div><div class="val">43</div></div>
+        <div class="bar" title="Mellum2 48"><div class="track"><div class="fill a" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Qwen3.5 44"><div class="track"><div class="fill d" style="width:88%"></div></div><div class="val">44</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Python</div><div class="bars">
+        <div class="bar" title="Gemma 46"><div class="track"><div class="fill b" style="width:92%"></div></div><div class="val">46</div></div>
+        <div class="bar" title="Qwen2.5 42"><div class="track"><div class="fill c" style="width:84%"></div></div><div class="val">42</div></div>
+        <div class="bar" title="Mellum2 45"><div class="track"><div class="fill a" style="width:90%"></div></div><div class="val">45</div></div>
+        <div class="bar" title="Qwen3.5 43"><div class="track"><div class="fill d" style="width:86%"></div></div><div class="val">43</div></div>
+      </div></div>
+      <div class="row diff"><div class="rowlab">Bash</div><div class="bars">
+        <div class="bar" title="Gemma 46"><div class="track"><div class="fill b" style="width:92%"></div></div><div class="val">46</div></div>
+        <div class="bar" title="Qwen2.5 44"><div class="track"><div class="fill c" style="width:88%"></div></div><div class="val">44</div></div>
+        <div class="bar" title="Mellum2 39"><div class="track"><div class="fill a" style="width:78%"></div></div><div class="val">39</div></div>
+        <div class="bar" title="Qwen3.5 39"><div class="track"><div class="fill d" style="width:78%"></div></div><div class="val">39</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Git</div><div class="bars">
+        <div class="bar" title="Gemma 46"><div class="track"><div class="fill b" style="width:92%"></div></div><div class="val">46</div></div>
+        <div class="bar" title="Qwen2.5 45"><div class="track"><div class="fill c" style="width:90%"></div></div><div class="val">45</div></div>
+        <div class="bar" title="Mellum2 41"><div class="track"><div class="fill a" style="width:82%"></div></div><div class="val">41</div></div>
+        <div class="bar" title="Qwen3.5 43"><div class="track"><div class="fill d" style="width:86%"></div></div><div class="val">43</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">SSH</div><div class="bars">
+        <div class="bar" title="Gemma 42"><div class="track"><div class="fill b" style="width:84%"></div></div><div class="val">42</div></div>
+        <div class="bar" title="Qwen2.5 44"><div class="track"><div class="fill c" style="width:88%"></div></div><div class="val">44</div></div>
+        <div class="bar" title="Mellum2 40"><div class="track"><div class="fill a" style="width:80%"></div></div><div class="val">40</div></div>
+        <div class="bar" title="Qwen3.5 38"><div class="track"><div class="fill d" style="width:76%"></div></div><div class="val">38</div></div>
+      </div></div>
+      <div class="row diff"><div class="rowlab">Django</div><div class="bars">
+        <div class="bar" title="Gemma 42"><div class="track"><div class="fill b" style="width:84%"></div></div><div class="val">42</div></div>
+        <div class="bar" title="Qwen2.5 43"><div class="track"><div class="fill c" style="width:86%"></div></div><div class="val">43</div></div>
+        <div class="bar" title="Mellum2 38"><div class="track"><div class="fill a" style="width:76%"></div></div><div class="val">38</div></div>
+        <div class="bar" title="Qwen3.5 39"><div class="track"><div class="fill d" style="width:78%"></div></div><div class="val">39</div></div>
+      </div></div>
+      <div class="row diff"><div class="rowlab">SQL</div><div class="bars">
+        <div class="bar" title="Gemma 42"><div class="track"><div class="fill b" style="width:84%"></div></div><div class="val">42</div></div>
+        <div class="bar" title="Qwen2.5 42"><div class="track"><div class="fill c" style="width:84%"></div></div><div class="val">42</div></div>
+        <div class="bar" title="Mellum2 43"><div class="track"><div class="fill a" style="width:86%"></div></div><div class="val">43</div></div>
+        <div class="bar" title="Qwen3.5 33"><div class="track"><div class="fill d" style="width:66%"></div></div><div class="val">33</div></div>
+      </div></div>
+      <div class="row diff"><div class="rowlab">GitHub</div><div class="bars">
+        <div class="bar" title="Gemma 39"><div class="track"><div class="fill b" style="width:78%"></div></div><div class="val">39</div></div>
+        <div class="bar" title="Qwen2.5 41"><div class="track"><div class="fill c" style="width:82%"></div></div><div class="val">41</div></div>
+        <div class="bar" title="Mellum2 41"><div class="track"><div class="fill a" style="width:82%"></div></div><div class="val">41</div></div>
+        <div class="bar" title="Qwen3.5 32"><div class="track"><div class="fill d" style="width:64%"></div></div><div class="val">32</div></div>
+      </div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The long-context suite: one growing conversation per category</h2>
+    <div class="grid2">
+      <div class="prose">
+        <p>Each of the twelve categories gets <strong>one conversation that grows to about 118,000
+          tokens</strong>. Conventions are stated once in the opening turns &#8212; the default branch is
+          <code>trunk</code>, the CI runner is <code>aer-linux-x64</code>, every function returns a
+          <code>Result</code> &#8212; and then never repeated. Five graded tasks are interleaved at
+          increasing depth. All of them are graded the same way the 600-task suite is: code is
+          executed, SQL is run, configs go through <code>ssh -G</code>, TypeScript must survive
+          <code>tsc --strict</code>.</p>
+        <p><strong>The padding is not filler noise.</strong> It is more of the same kind of
+          material, and it carries deliberate near-misses: inventory blocks with
+          <code>ap-south</code> regions and <code>svc-*</code> users, workflows on
+          <code>ubuntu-latest</code>, legacy record types with <code>ok</code>-shaped fields. A model
+          that pattern-matches the nearest plausible thing instead of recalling the stated one gets
+          caught. Against lorem ipsum it would not.</p>
+      </div>
+      <div class="prose">
+        <p><strong>Every probe is asked twice.</strong> Once at depth, and once with the filler
+          removed and nothing else changed &#8212; same conventions, same prior turns, same worked
+          examples. That control is what separates "cannot do the task" from "could no longer reach
+          the fact", and it is the only number here worth trusting on its own.</p>
+        <p><strong>Model answers never enter the history.</strong> After each probe the reference
+          answer is inserted instead, so all four models see byte-identical context and one early
+          slip cannot cascade through a whole session. The cost is that those references restate the
+          conventions: at the deepest probe the nearest restatement is ~28K back, not 118K. So this
+          measures <em>holding a long session together</em>, not pure needle distance. RAG is the
+          exception &#8212; its answers restate nothing, making it the clean retrieval-at-distance
+          signal.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pass rate against conversation depth &#8212; 12 probes per rung</h2>
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--b)"></i>Gemma 4 QAT</span>
+      <span><i class="swatch" style="background:var(--c)"></i>Qwen2.5-Coder</span>
+      <span><i class="swatch" style="background:var(--a)"></i>Mellum2</span>
+      <span><i class="swatch" style="background:var(--d)"></i>Qwen3.5-9B</span>
+    </div>
+    <div class="scroll" style="padding:.6rem .4rem">
+      <svg viewBox="0 0 720 300" width="100%" style="min-width:33rem;display:block"
+           role="img" aria-label="Line chart of probes passed out of 12 against conversation depth.
+           Qwen3.5 stays between 6 and 11. Gemma rises to 12 at 104K then falls to 6 at 120K.
+           Qwen2.5-Coder stops after 70K at its window ceiling. Mellum2 falls from 5 to 1.">
+        <g stroke="var(--rule)" stroke-width="1">
+          <line x1="62" y1="250" x2="690" y2="250"/><line x1="62" y1="192.5" x2="690" y2="192.5"/>
+          <line x1="62" y1="135" x2="690" y2="135"/><line x1="62" y1="77.5" x2="690" y2="77.5"/>
+          <line x1="62" y1="20" x2="690" y2="20"/>
+        </g>
+        <g font-family="var(--mono)" font-size="10" fill="var(--ink-3)" text-anchor="end">
+          <text x="52" y="254">0</text><text x="52" y="196">3</text><text x="52" y="139">6</text>
+          <text x="52" y="81">9</text><text x="52" y="24">12</text>
+        </g>
+        <g font-family="var(--mono)" font-size="10" fill="var(--ink-3)" text-anchor="middle">
+          <text x="62" y="270">10K</text><text x="219" y="270">37K</text>
+          <text x="376" y="270">70K</text><text x="533" y="270">104K</text>
+          <text x="690" y="270">120K</text>
+          <text x="376" y="290" fill="var(--ink-3)">measured prompt tokens</text>
+        </g>
+        <polyline fill="none" stroke="var(--a)" stroke-width="2" stroke-linejoin="round"
+                  points="62,154.2 219,154.2 376,192.5 533,230.8 690,211.7"/>
+        <polyline fill="none" stroke="var(--c)" stroke-width="2" stroke-linejoin="round"
+                  points="62,77.5 219,77.5 376,58.3"/>
+        <polyline fill="none" stroke="var(--b)" stroke-width="2" stroke-linejoin="round"
+                  points="62,96.7 219,58.3 376,58.3 533,20 690,135"/>
+        <polyline fill="none" stroke="var(--d)" stroke-width="2" stroke-linejoin="round"
+                  points="62,135 219,77.5 376,77.5 533,39.2 690,58.3"/>
+        <g stroke="var(--surface)" stroke-width="2">
+          <circle cx="62" cy="154.2" r="4" fill="var(--a)"/><circle cx="219" cy="154.2" r="4" fill="var(--a)"/>
+          <circle cx="376" cy="192.5" r="4" fill="var(--a)"/><circle cx="533" cy="230.8" r="4" fill="var(--a)"/>
+          <circle cx="690" cy="211.7" r="4" fill="var(--a)"/>
+          <circle cx="62" cy="77.5" r="4" fill="var(--c)"/><circle cx="219" cy="77.5" r="4" fill="var(--c)"/>
+          <circle cx="376" cy="58.3" r="4" fill="var(--c)"/>
+          <circle cx="62" cy="96.7" r="4" fill="var(--b)"/><circle cx="219" cy="58.3" r="4" fill="var(--b)"/>
+          <circle cx="376" cy="58.3" r="4" fill="var(--b)"/><circle cx="533" cy="20" r="4" fill="var(--b)"/>
+          <circle cx="690" cy="135" r="4" fill="var(--b)"/>
+          <circle cx="62" cy="135" r="4" fill="var(--d)"/><circle cx="219" cy="77.5" r="4" fill="var(--d)"/>
+          <circle cx="376" cy="77.5" r="4" fill="var(--d)"/><circle cx="533" cy="39.2" r="4" fill="var(--d)"/>
+          <circle cx="690" cy="58.3" r="4" fill="var(--d)"/>
+        </g>
+        <line x1="376" y1="58.3" x2="394" y2="108" stroke="var(--c)" stroke-width="1"
+              stroke-dasharray="2 2"/>
+        <text x="398" y="112" font-family="var(--mono)" font-size="10.5" fill="var(--c)">
+          Qwen2.5-Coder: 84,880-token ceiling</text>
+      </svg>
+    </div>
+    <div class="note">
+      <p><b>Do not read this chart left-to-right as a decay curve.</b> The first rung is the first
+        probe in each session, so it has no earlier worked examples in front of it; the fifth has
+        four. Depth and example-count move together, which is why several lines <em>rise</em> at
+        first. The valid comparison is each model against its own control at the same rung, in the
+        table below.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Deep versus its own control &#8212; the number that matters</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Model</th><th class="num">At depth</th><th class="num">Control</th>
+          <th class="num">Kept</th><th class="num">Rejected</th><th>What it means</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">Qwen3.5-9B FP8</td><td class="num">45/60</td><td class="num">44/60</td>
+              <td class="num"><b>102%</b></td><td class="num">0</td>
+              <td>No measurable degradation at any depth</td></tr>
+          <tr><td class="mono">Gemma 4 QAT</td><td class="num">46/60</td><td class="num">49/60</td>
+              <td class="num"><b>94%</b></td><td class="num">0</td>
+              <td>Highest absolute score; mild loss, all at the deepest rung</td></tr>
+          <tr><td class="mono">Qwen2.5-Coder</td><td class="num">28/60</td><td class="num">48/60</td>
+              <td class="num">58%</td><td class="num"><b>24</b></td>
+              <td>Not degradation &#8212; 24 probes were refused by the server</td></tr>
+          <tr><td class="mono">Mellum2-12B</td><td class="num">16/60</td><td class="num">47/60</td>
+              <td class="num"><b>34%</b></td><td class="num">0</td>
+              <td>Loses two thirds of its ability; already halved by 65K</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose">
+      <p>Restricting to the three depths <em>every</em> model could physically attempt
+        (~10K / 37K / 70K, 36 probes) removes the ceiling effect entirely and separates the field
+        cleanly: <strong>Gemma 28/36 (&#8722;1 vs control), Qwen2.5-Coder 28/36 (+1), Qwen3.5 24/36
+        (&#8722;3), Mellum2 13/36 (&#8722;14)</strong>. On depths it can actually run, Qwen2.5-Coder shows no
+        long-context weakness at all. Mellum2 has already lost half its ability at 70K.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>How the failures happen: the model stops using the conversation</h2>
+    <div class="prose">
+      <p>Counting only whether an answer uses the values the session established &#8212; ignoring whether
+        the task passed &#8212; separates forgetting from ordinary error. <strong>Reverted</strong> means
+        the answer contains a generic default the session had explicitly ruled out by name.</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Depth</th><th class="num">Gemma kept</th><th class="num">Qwen3.5 kept</th>
+          <th class="num">Mellum2 kept</th><th class="num">Mellum2 reverted</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">~10K</td><td class="num">9/9</td><td class="num">9/9</td>
+              <td class="num">7/9</td><td class="num">1</td></tr>
+          <tr><td class="mono">~37K</td><td class="num">9/9</td><td class="num">9/9</td>
+              <td class="num">5/9</td><td class="num">2</td></tr>
+          <tr><td class="mono">~70K</td><td class="num">8/9</td><td class="num">8/9</td>
+              <td class="num"><b>1/9</b></td><td class="num">3</td></tr>
+          <tr><td class="mono">~104K</td><td class="num">7/9</td><td class="num">7/9</td>
+              <td class="num"><b>1/9</b></td><td class="num">1</td></tr>
+          <tr><td class="mono">~120K</td><td class="num">9/9</td><td class="num">9/9</td>
+              <td class="num">3/9</td><td class="num">3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose">
+      <p>Gemma and Qwen3.5 hold their conventions at every depth. Across all 45 deep probes each,
+        Gemma reverted to a generic default <strong>once</strong> and <strong>Qwen3.5 never did</strong>.
+        Both sit at 8&#8211;9/9 in the shallow control too, so nothing about the task set explains
+        Mellum2's collapse. Mellum2 reverted <strong>10 times</strong>, and its adherence tracks
+        depth almost monotonically.</p>
+      <p>The substitutions are the tell. At ~104K Mellum2 answered a request for July 2026 release
+        tags with <code>grep -E '^v[0-9]+\.[0-9]+\.7[0-9]{4}$'</code> &#8212; inventing a semver scheme &#8212;
+        where its own control produced <code>git tag --list 'rel/2026.07.*'</code>. On the CI probe
+        it emitted <code>runs-on: ubuntu-latest</code> and <code>actions/checkout@v3</code> after
+        being told in the first turn that <em>"ubuntu-latest does not exist in this org"</em>. On
+        the React Native probe it dropped the theme hook and hardcoded <code>marginBottom: 24</code>.
+        These are not degraded answers; they are competent answers to a different, generic
+        question.</p>
+      <p>Qwen3.5's few long-context losses look different. At its shallowest rung it wrote an SSH
+        block with <code>ap-south</code>, <code>svc-scheduler</code> and
+        <code>~/.ssh/svc_search_ed25519</code> &#8212; every value lifted from a distractor in the
+        padding rather than from the stated spec, while still getting
+        <code>ProxyJump</code>, <code>StrictHostKeyChecking</code> and <code>ForwardAgent</code>
+        right. It was not falling back on priors; it was picking the wrong nearby row.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>What the card can actually hold &#8212; measured, not claimed</h2>
+    <p class="eyebrow">KV cache tokens vLLM could allocate at load &#183; same card, same 16 GB</p>
+    <div class="chart">
+      <div class="row"><div class="rowlab">Gemma 4 QAT</div><div class="bars">
+        <div class="bar" title="372,010 KV tokens"><div class="track"><div class="fill b" style="width:100%"></div></div><div class="val" style="width:3.6rem">372,010</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Mellum2</div><div class="bars">
+        <div class="bar" title="175,126 KV tokens"><div class="track"><div class="fill a" style="width:47%"></div></div><div class="val" style="width:3.6rem">175,126</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Qwen3.5-9B</div><div class="bars">
+        <div class="bar" title="135,168 KV tokens"><div class="track"><div class="fill d" style="width:36%"></div></div><div class="val" style="width:3.6rem">135,168</div></div>
+      </div></div>
+      <div class="row diff"><div class="rowlab">Qwen2.5-Coder</div><div class="bars">
+        <div class="bar" title="84,880 KV tokens"><div class="track"><div class="fill c" style="width:23%"></div></div><div class="val" style="width:3.6rem">84,880</div></div>
+      </div></div>
+    </div>
+    <div class="prose">
+      <p><strong>Gemma gets 4.4&times; the usable context of Qwen2.5-Coder on the same card</strong>,
+        and it is architecture that buys it, not quantisation. Gemma 4 uses sliding-window attention
+        on most layers, so those layers never store a full-length KV. Qwen2.5-Coder is dense: 14B of
+        AWQ weights leave 5.02 GiB, and 118K tokens need 7.03 GiB <em>even at 4-bit TurboQuant KV</em>.
+        vLLM refused to start at 131072, 118784, 106496 and 90112, putting its hard ceiling at
+        <strong>84,880 tokens</strong>. Its two deepest rungs are not failures; they are 24 rejected
+        HTTP requests.</p>
+      <p><strong>Nominal context is not context in your code, either.</strong> The same
+        byte-identical session came to 118,069 tokens under Qwen3.5's tokenizer but
+        <strong>129,008 under Mellum2's and 129,249 under Gemma's</strong> &#8212; about 9% more
+        tokens for exactly the same text. Qwen3.5 is the efficient one here, not Mellum2 the
+        wasteful one. That margin was enough to push three Mellum2 probes and two Gemma probes past
+        a 131K window Qwen3.5 still had 13K of headroom in; all five were re-run with trimmed
+        padding, and all five came back as real answers rather than rejections.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Qwen3.5's deficit is concentrated, not general</h2>
+    <div class="prose">
+      <p>On eight of twelve categories Qwen3.5 is within 2&#8211;5 tasks of the pack. Its 46-task gap to
+        Gemma comes overwhelmingly from two places: <strong>SQL 33/50</strong> and
+        <strong>GitHub 32/50</strong>, where every other model scores 39&#8211;43. Nothing else is
+        anomalous &#8212; RAG is a perfect 50, React Native 48, JavaScript 47.</p>
+      <p>Those failures are its own, not shared difficulty. Qwen3.5 has <strong>44 solo
+        failures</strong> &#8212; tasks it alone got wrong &#8212; against 17, 19 and 22 for the others. It is
+        making mistakes the rest of the field does not make.</p>
+      <p>Spot-checking confirmed they are genuine rather than harness artifacts. Token counts sit
+        far below budget (43, 81, 21 against limits of 400 and 220), so nothing was truncated. On
+        the top-product-per-category query it emitted <code>LIMIT 1 OFFSET 0</code> instead of a
+        window function &#8212; returning one row overall rather than one per category. That is a
+        straightforward SQL error.</p>
+      <p>Worth keeping in proportion: it is a <strong>9B model against 12B and 14B rivals</strong>,
+        and it still clears 83%.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>How Qwen3.5 was configured &#8212; and why it matters</h2>
+    <div class="note alert">
+      <p><b>It was run with thinking disabled, and that is not a neutral choice.</b> Qwen3.5 reasons
+        by default. At this suite's per-task token budgets it returned
+        <code>finish_reason=length</code> with <code>content=None</code> &#8212; the entire 220-token
+        allowance spent reasoning, no answer emitted. Scored as-is it would have collapsed to near
+        zero for reasons unrelated to ability.</p>
+      <p>With <code>enable_thinking: false</code> the same prompt returns
+        <code>git reset --soft HEAD~1</code> in 8 tokens. Since the other three answer directly and
+        the budgets assume that, thinking is off for this model only. <b>This therefore measures
+        Qwen3.5 in non-thinking mode</b>; its reasoning mode is untested here and, given room to
+        think, could plausibly score higher.</p>
+    </div>
+    <div class="grid2">
+      <div class="prose">
+        <p><strong>Fitting it at all took specific tuning.</strong> A default launch put weights at
+          12.72 GiB and left <strong>0.24 GiB</strong> for KV &#8212; a ceiling of about 11.6K tokens.
+          Two flags changed the picture: <code>--max-num-batched-tokens 4096</code> caps the
+          activation peak during profiling, and <code>--limit-mm-per-prompt '{"image":0}'</code>
+          stops the profiler reserving vision-tower working memory that a text-only benchmark never
+          uses.</p>
+        <p>With those plus 0.97 utilisation: weights 11.87 GiB, <strong>2.61 GiB of KV, and the
+          full 131,072 context at 1.26&times; concurrency.</strong> Ten times the usable cache from
+          configuration alone.</p>
+        <p><strong>That 0.97 setting did not survive contact with a long prompt.</strong> It served
+          600 short tasks without complaint and then OOMed and killed the engine on the
+          <em>first</em> 118K request &#8212; the leftover 3% has to absorb the prefill activation
+          peak, which scales with the prompt. The long-context runs use 0.93 with a 2,048-token
+          prefill chunk, which still yields <strong>135,168 KV tokens at 1.03&times;</strong>. The
+          headroom cost almost nothing; not having it cost the whole run.</p>
+      </div>
+      <div class="prose">
+        <p><strong>It fits 128K because it is a hybrid-attention model.</strong> Naive
+          layer&times;head&times;dim arithmetic predicts ~64 KB per token at fp8, which would need
+          8 GiB for 128K and could never fit. Measured effective cost is about
+          <strong>18 KB/token</strong> &#8212; only some layers carry full KV.</p>
+        <p>That makes it, alongside Gemma and Mellum2, one of three models here serving the full
+          131K. Qwen2.5-Coder is the odd one out: even with YaRN rope scaling and 4-bit TurboQuant
+          KV, its dense 14B weights cap it at <strong>84,880 tokens</strong> on this card &#8212;
+          which is what put its two deepest rungs out of reach.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Where each model actually fails</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Model</th><th class="num">Solo failures</th><th>Weakest categories</th>
+          <th>Character</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">Gemma 4 QAT</td><td class="num">17</td><td>GitHub 39 &#183; SQL 42 &#183; Django 42</td>
+              <td>Failures spread thin; no weak domain</td></tr>
+          <tr><td class="mono">Qwen2.5-Coder</td><td class="num">19</td><td>Docs 43 &#183; Python 42 &#183; SQL 42</td>
+              <td>Loses on prose documentation, not code</td></tr>
+          <tr><td class="mono">Mellum2</td><td class="num">22</td><td>Django 38 &#183; Bash 39 &#183; SSH 40</td>
+              <td>Weak on operational shell and ORM work</td></tr>
+          <tr><td class="mono">Qwen3.5-9B</td><td class="num">44</td><td>GitHub 32 &#183; SQL 33 &#183; SSH 38</td>
+              <td>Two sharp holes; competitive elsewhere</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <p><b>Only 13 of 600 tasks defeated all four</b> (2.2%), spread across seven categories with
+        no cluster &#8212; the suite is not systematically unfair to any one model. Adding a fourth model
+        <em>reduced</em> the all-fail count from 15 to 13, which is what you expect when the tasks
+        are sound and the models differ.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>The harness is tested harder than the models</h2>
+    <div class="prose">
+      <p>Every task ships a reference solution; the build rejects any task whose own reference fails
+        its own grader; and the complete reference set is then graded as a synthetic model.
+        <strong>That oracle run scores 600/600</strong>, so a failure in a real run belongs to the
+        model. Across 2,400 generations there were <strong>zero empty responses and zero request
+        errors.</strong></p>
+      <p>Ten harness defects were caught this way before any result was reported &#8212; six SQL tasks
+        whose reference returned zero rows, twenty-one Git tasks with <code>true</code> checkers
+        that any command would pass, a capture file polluting the <code>git status</code> it was
+        asserting on, and an <code>ssh -G</code> boolean normalisation among them.</p>
+      <p>The most consequential was JavaScript. The first grading run reported 7/50, 0/50 and 2/50 &#8212;
+        implausible for models that had scored 4/4 on JS at smaller scale, and contradicted by the
+        oracle's 50/50. The prompt said "export with <code>module.exports</code>" without
+        specifying the shape while the tests destructured <code>{fn}</code>; 141 of 150 answers
+        used the other valid form. Grader tolerance was added, the oracle re-verified, and all runs
+        re-graded from saved output. <strong>JS became 48/49/47 and the totals moved by more than
+        40 tasks each.</strong></p>
+      <p><strong>The long-context suite needed the same treatment, and its oracle also reports
+        60/60.</strong> Eight defects were caught before any score was reported. Two would have been
+        charged to every model: a Python probe asserted <code>'itertools' not in src</code> while
+        reading a file that contained that assertion string &#8212; it could never pass &#8212; and a JavaScript
+        probe expected <code>[20000,30000,30000]</code> from a function whose stated clamp caps the
+        input at 5000. Depth calibration was wrong by up to 30%: a single chars-per-token constant
+        put the deepest Bash probe at <strong>152K against a 131K window</strong>, a hard reject.
+        Per-category correction brought all twelve to within 0.3% of each other.</p>
+      <p>Two more were only visible in real output, not in the oracle. The Django session tells the
+        model its models live in <code>aerelith/work/models.py</code>, so good answers opened with
+        that import &#8212; which raised, because the harness only provided <code>bench_app.models</code>.
+        The reference answers used the harness globals and never wrote the import, so the oracle
+        passed while every real answer failed. A documentation probe demanded a literal
+        <code>E####</code> code the prompt had never asked for; all four models failed it identically,
+        which is the signature of a bad probe rather than a hard one.</p>
+      <p><strong>The most important fix was to the control itself.</strong> The first version stripped
+        the earlier probe-and-answer exchanges out of the shallow run along with the padding &#8212; so the
+        deep run had up to four worked examples the control lacked, and deep <em>outscored</em>
+        shallow. Distance cannot do that. The control now differs from the deep run by exactly one
+        variable: filler.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>What this still does not show</h2>
+    <div class="note">
+      <p><b>The four did not run under equal conditions.</b> Qwen2.5 needed YaRN and 4-bit TurboQuant
+        KV to reach 80K; Gemma and Mellum2 ran native 131K on fp8; Qwen3.5 ran fp8 weights with fp8
+        KV at 131K but with reasoning disabled. Each of those choices costs something.</p>
+      <p><b>Single run at temperature 0, no repeats.</b> Per-task variance is unmeasured. Gemma,
+        Qwen2.5 and Mellum2 are separated by 16 tasks in 600 &#8212; close enough that a handful of
+        coin-flips could reorder them. Qwen3.5's 30-task gap to third is the only difference here
+        that is clearly outside the noise.</p>
+      <p><b>250 tasks are pattern-graded.</b> They discriminate at this scale, but a regex cannot
+        tell "correct" from "contains the right words". Treat the executed 350 as the harder
+        evidence.</p>
+      <p><b>Category scores measure different things.</b> Docs and React Native measure adherence to
+        a described shape; Python, SQL, JS, TS, Django, Bash and Git measure whether the output
+        actually runs and produces the right result.</p>
+      <p><b>The long-context suite is 60 probes, not 600.</b> One probe is 1.7 points, so a 3-probe
+        gap is not a result. Gemma's 46 and Qwen3.5's 45 are a tie. Mellum2's 16 and Qwen2.5-Coder's
+        24 rejections are not close calls.</p>
+      <p><b>It measures session-holding, not needle distance.</b> Because canonical answers go into
+        the history, the conventions are effectively restated every ~28K tokens. A suite that planted
+        each fact exactly once and never referred to it again would be harder, and the ordering could
+        differ. RAG is the only category here free of that effect.</p>
+      <p><b>Prefix caching was off for all four</b> &#8212; vLLM disables it for these configurations, so
+        every turn re-prefilled the whole conversation. That is identical across models and does not
+        affect accuracy, but the wall-clock cost of a long session in this report is the
+        worst case, not what a caching server would deliver.</p>
+      <p><b>Qwen2.5-Coder's long-context result is a hardware fact about this GPU, not the model.</b>
+        On a card with room for its KV it might hold 120K perfectly well &#8212; on the depths it could
+        reach here, it did.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Recommendation</h2>
+    <div class="prose">
+      <p><strong>Gemma 4 12B QAT is still the default, and now for a second reason.</strong> It leads
+        both suites &#8212; 546/600 short, 46/60 deep &#8212; is strongest in half the categories, has no weak
+        domain, uses the least VRAM (8.3 GiB) and holds <strong>372,010 KV tokens</strong>, 4.4&times;
+        Qwen2.5-Coder's. It reverted to a generic default once in 45 deep probes. Its cost is
+        unchanged: 18.4 tok/s, the slowest here.</p>
+      <p><strong>Qwen3.5-9B is the one to reconsider.</strong> It finished last on short tasks and
+        second on long ones, with the only perfect retention in the set and <em>zero</em> reversions
+        at any depth. If your work is long agent sessions rather than one-shot prompts, the 600-task
+        ranking is the wrong ranking to buy on. Two asterisks stand: it ran with reasoning disabled,
+        and its short-context weaknesses (SQL 33/50, GitHub 32/50) do not disappear just because it
+        holds context well.</p>
+      <p><strong>Mellum2 is the clear loser here, and it is the reversal of the whole exercise.</strong>
+        Third on short tasks and fastest at 26.1 tok/s, it keeps <strong>34%</strong> of its ability
+        at depth and is already down to 13/36 at 70K. For a model whose appeal was a long context
+        window, having the window is not the same as using it. It remains a reasonable pick for
+        short, high-volume work where its speed pays.</p>
+      <p><strong>Qwen2.5-Coder is a capability question turned into a hardware question.</strong> It
+        showed no long-context weakness on the depths it could reach &#8212; it just cannot be given more
+        than ~85K tokens on a 16 GB card. If long sessions matter to you, that settles it on this
+        machine regardless of how good the model is.</p>
+      <p><strong>Shell, git and GitHub remain the weakest area across both suites.</strong> No model
+        exceeds 46/50 on Bash or Git short, GitHub tops out at 41, and Git and SSH are also where the
+        long-session substitutions concentrate &#8212; wrong branch, wrong runner, wrong host. In an agent
+        that executes commands without review, that is where the risk sits, and depth makes it worse
+        rather than better.</p>
+    </div>
+  </section>
+
+  <p class="foot">
+    Harness at <code>/root/bench2/</code> &#8212; <code>b3*.py</code> (600 short tasks, runner, graders,
+    600/600 oracle) and <code>b4*.py</code> (60 long-context probes, session builder, 60/60 oracle,
+    <code>b4_gen.py</code> for the distractor-carrying filler). <code>conv.py</code> computes
+    convention adherence, <code>agg4.py</code> the combined view. Qwen3.5 stack at
+    <code>/root/vllm-q35/docker-compose.yaml</code>.<br>
+    Gemma = google/gemma-4-12B-it-qat-w4a16-ct &#183; Qwen2.5 = Qwen/Qwen2.5-Coder-14B-Instruct-AWQ &#183;
+    Mellum2 = voves/Mellum2-12B-A2.5B-Instruct-FP8 &#183; Qwen3.5 = RedHatAI/Qwen3.5-9B-FP8-dynamic
+    (thinking disabled). Generated 2026-07-28.
+  </p>
+
+</div>
+</div>

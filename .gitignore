@@ -1,0 +1,9 @@
+# never commit credentials -- the compose files read the HF token from here
+.env
+*.env
+!.env.example
+
+__pycache__/
+*.pyc
+tmp/
+*.tgz
