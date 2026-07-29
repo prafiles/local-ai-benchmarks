@@ -5,6 +5,7 @@
     b3.py run <model> <out.json>
     b3.py grade <out.json>
 """
+import concurrent.futures
 import json
 import os
 import re
@@ -12,6 +13,7 @@ import shutil
 import sqlite3
 import subprocess
 import sys
+import threading
 import time
 import urllib.request
 
@@ -127,22 +129,54 @@ def budget(mt):
     return max(int(mt * BUDGET_MULT), BUDGET_FLOOR) if THINK else mt
 
 
+# Measured per model by tune.py, not copied off a model card and hoped for.
+# The entry that matters is the one for thinking mode: greedy decoding sends both
+# reasoning models into a loop that eats the whole budget and returns no answer.
+PROFILES = json.loads(os.environ.get("B4_PROFILES", "{}"))
+
+DEFAULT_SAMP = {"temperature": TEMP}
+if TEMP > 0:
+    DEFAULT_SAMP["top_p"] = TOPP
+
+
+def profile_for(model):
+    m = model.lower()
+    for key, prof in PROFILES.items():
+        if key.lower() in m:
+            return prof
+    return DEFAULT_SAMP
+
+
 def sampling(payload, model):
-    payload["temperature"] = TEMP
-    if TEMP > 0:
-        payload["top_p"] = TOPP
+    prof = dict(profile_for(model))
+    tmpl_extra = prof.pop("_tmpl", {})
+    payload.update(prof)
     if can_think(model):
         # explicit either way: the flag is what separates the two arms
-        payload["chat_template_kwargs"] = {"enable_thinking": bool(THINK)}
+        tmpl = {"enable_thinking": bool(THINK)}
+        tmpl.update(tmpl_extra)
+        payload["chat_template_kwargs"] = tmpl
     return payload
 
 
 # ------------------------------------------------------------------- runner
-def ask(model, prompt, max_tokens):
+# Only ever spent on an EMPTY answer, never on a wrong one.
+RETRIES = int(os.environ.get("B4_RETRIES", "0"))
+
+
+# Temperature to use on each retry, hottest last. Only reached after an empty
+# answer, so a task that works normally never sees these.
+ESCALATE = [float(x) for x in
+            os.environ.get("B4_ESCALATE", "0.9,1.0").split(",") if x.strip()]
+
+
+def _once(model, prompt, max_tokens, temp=None):
     payload = sampling({"model": model,
                         "messages": [{"role": "user",
                                       "content": with_cot(model, prompt)}],
                         "max_tokens": budget(max_tokens)}, model)
+    if temp is not None:
+        payload["temperature"] = temp
     req = urllib.request.Request(URL, data=json.dumps(payload).encode(),
                                  headers={"Content-Type": "application/json"})
     t0 = time.time()
@@ -160,6 +194,24 @@ def ask(model, prompt, max_tokens):
             "secs": round(time.time() - t0, 2)}
 
 
+def ask(model, prompt, max_tokens):
+    """Resample -- hotter each time -- only when the trace left no answer."""
+    spent, used = 0.0, []
+    r = None
+    for attempt in range(RETRIES + 1):
+        # attempt 0 uses the profile's own temperature; retries climb ESCALATE
+        temp = None if attempt == 0 else ESCALATE[min(attempt - 1, len(ESCALATE) - 1)]
+        r = _once(model, prompt, max_tokens, temp)
+        spent += r["secs"]
+        used.append(temp)
+        if r["text"].strip():
+            break
+    r["attempts"] = len(used)
+    r["temps"] = used
+    r["secs"] = round(spent, 2)
+    return r
+
+
 def run(model, out_path):
     tasks = all_tasks()
     res = {"model": model, "items": {}}
@@ -174,28 +226,42 @@ def run(model, out_path):
                       flush=True)
         except Exception:  # noqa: BLE001
             print("  existing output unreadable, starting fresh", flush=True)
+
+    todo = [t for t in tasks if t[0] not in res["items"]]
+    workers = int(os.environ.get("B4_WORKERS", "1"))
+    print(f"  {len(todo)} to run, {workers} concurrent", flush=True)
+
+    lock = threading.Lock()
     t0 = time.time()
-    done = 0
-    for i, (tid, cat, kind, prompt, mt) in enumerate(tasks, 1):
-        if tid in res["items"]:
-            continue
+    done = [0]
+
+    def work(task):
+        tid, cat, kind, prompt, mt = task
         try:
             r = ask(model, prompt, mt)
         except Exception as e:  # noqa: BLE001
             r = {"text": "", "tok": 0, "secs": 0, "error": f"{type(e).__name__}: {e}"}
         r.update(cat=cat, kind=kind)
-        res["items"][tid] = r
-        done += 1
-        if done % 10 == 0 or i == len(tasks):
-            el = time.time() - t0
-            left = len(tasks) - len(res["items"])
-            rate = el / max(done, 1)
-            print(f"  {len(res['items'])}/{len(tasks)}  {el/60:.1f}m elapsed, "
-                  f"~{rate*left/3600:.1f}h left", flush=True)
-            with open(out_path, "w") as f:
-                json.dump(res, f)
-    with open(out_path, "w") as f:
+        with lock:
+            res["items"][tid] = r
+            done[0] += 1
+            n = done[0]
+            if n % 10 == 0 or n == len(todo):
+                el = time.time() - t0
+                rate = el / n
+                print(f"  {len(res['items'])}/{len(tasks)}  {el/60:.1f}m elapsed, "
+                      f"~{rate*(len(todo)-n)/3600:.1f}h left", flush=True)
+                with open(out_path + ".tmp", "w") as f:
+                    json.dump(res, f)
+                os.replace(out_path + ".tmp", out_path)
+
+    if todo:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
+            list(ex.map(work, todo))
+
+    with open(out_path + ".tmp", "w") as f:
         json.dump(res, f)
+    os.replace(out_path + ".tmp", out_path)
     print(f"saved -> {out_path}")
 
 
@@ -510,9 +576,24 @@ def grade_rag(items):
     return res
 
 
+MISSING_OK = True
+
+
 def grade(path):
     data = json.load(open(path))
     items = data["items"]
+    # A grader that dies on the first absent id cannot grade a partial run, and
+    # dies at the worst possible moment on a complete one. Stub the gaps and say
+    # so; they score 0 regardless, but "never ran" must not read as "got it wrong".
+    have = set(items)
+    want = [t[0] for t in all_tasks()]
+    missing = [t for t in want if t not in have]
+    if missing:
+        print("  NOTE: %d/%d tasks absent from %s -- scored 0, not graded: %s"
+              % (len(missing), len(want), os.path.basename(path),
+                 missing[:6] + (["..."] if len(missing) > 6 else [])), flush=True)
+        for tid in missing:
+            items[tid] = {"text": "", "tok": 0, "secs": 0, "absent": True}
     ok = {}
     for name, fn in (("python", lambda: grade_py(items)),
                      ("django", lambda: grade_django(items)),
@@ -533,6 +614,8 @@ def grade(path):
         it = items.get(tid, {})
         out["results"][tid] = {"ok": bool(ok.get(tid, False)), "cat": cat,
                                "secs": it.get("secs", 0), "tok": it.get("tok", 0)}
+        if it.get("absent"):
+            out["results"][tid]["absent"] = True
     gp = path.replace(".json", ".graded.json")
     json.dump(out, open(gp, "w"), indent=1)
 

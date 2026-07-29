@@ -205,9 +205,12 @@ BASH = [
  "Write the value of the shell variable HOME into home.txt.",
  "test -s home.txt",
  "echo \"$HOME\" > home.txt"),
-("sh-050", "mkdir -p arch && echo data > arch/f && tar -czf bundle.tar.gz arch",
+("sh-050", "mkdir -p arch && echo data > arch/f && tar -czf bundle.tar.gz arch "
+ "&& echo stale > arch/f && touch arch/leftover",
  "Extract the archive bundle.tar.gz into the current directory after first deleting the arch directory.",
- "test -f arch/f && test \"$(cat arch/f)\" = data",
+ # arch/f diverges from the archived copy so only extracting restores it, and
+ # arch/leftover is absent from the tarball so only deleting first removes it
+ "test -f arch/f && test \"$(cat arch/f)\" = data && ! test -e arch/leftover",
  "rm -rf arch && tar -xzf bundle.tar.gz"),
 ]
 

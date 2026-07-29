@@ -58,7 +58,10 @@
   .card.q { --dot: var(--c); } .card.n { --dot: var(--d); }
   .card h3 { font-family: var(--mono); font-size: .76rem; font-weight: 700; display: flex;
              align-items: center; gap: .45rem; line-height: 1.3; flex-wrap: wrap; }
-  .swatch { width: 10px; height: 10px; border-radius: 2px; background: var(--dot); flex: none; }
+  /* inline-block so it also renders inside a table cell, not just the flex legend,
+     where an inline <i> would drop the width/height entirely */
+  .swatch { width: 10px; height: 10px; border-radius: 2px; background: var(--dot); flex: none;
+            display: inline-block; vertical-align: baseline; }
   .score { font-family: var(--mono); font-size: clamp(2rem,5.5vw,2.5rem); font-weight: 700;
            letter-spacing: -.05em; line-height: 1; font-variant-numeric: tabular-nums; }
   .score span { font-size: .34em; color: var(--ink-3); letter-spacing: 0; }
@@ -100,6 +103,18 @@
   .val { font-family: var(--mono); font-size: .67rem; width: 1.6rem; text-align: right;
          color: var(--ink-2); font-variant-numeric: tabular-nums; }
 
+  /* zero-centred delta bars: gains right, losses left, one scale both ways */
+  .dtrack { flex: 1; height: 9px; background: var(--paper); border: 1px solid var(--rule);
+            border-radius: 2px; position: relative; }
+  .dtrack::before { content: ""; position: absolute; left: 20%; top: -2px; bottom: -2px;
+                    width: 1px; background: var(--rule-strong); }
+  .dfill { position: absolute; top: 0; bottom: 0; }
+  .dfill.pos { left: 20%; border-radius: 0 4px 4px 0; }
+  .dfill.neg { right: 80%; border-radius: 4px 0 0 4px; }
+  .dfill.b { background: var(--b); } .dfill.d { background: var(--d); }
+  .dval { font-family: var(--mono); font-size: .67rem; width: 2.2rem; text-align: right;
+          color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
   .scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 3px;
             background: var(--surface); }
   table { border-collapse: collapse; width: 100%; font-size: .85rem; min-width: 34rem; }
@@ -127,7 +142,7 @@
 <div class="col">
 
   <header class="mast">
-    <p class="eyebrow">4 models &#183; 600 short tasks + 60 long-context probes &#183; 2,856 generations &#183; RTX 4060 Ti 16 GB</p>
+    <p class="eyebrow">4 models &#183; 600 short tasks + 60 long-context probes + a 1,200-task reasoning arm &#183; RTX 4060 Ti 16 GB</p>
     <h1>The short-context ranking does not survive a 120K session</h1>
     <p class="lede">Adding multi-turn sessions that grow to ~118K tokens reorders almost everything.
       Gemma still leads. But <strong>Qwen3.5 &#8212; last on the 600-task suite &#8212; is the only model with
@@ -137,9 +152,9 @@
     <div class="specs">
       <span><b>Host</b> single self-hosted node</span>
       <span><b>Engine</b> vLLM 0.22.1 &#183; eager</span>
-      <span><b>Temp</b> 0, single run</span>
+      <span><b>Temp</b> 0 &#183; reasoning arm cannot be</span>
       <span><b>Depths</b> 10K &#183; 37K &#183; 70K &#183; 104K &#183; 120K measured</span>
-      <span><b>Oracle</b> 600/600 and 60/60</span>
+      <span><b>Oracle</b> 600/600 and 60/60 &#183; null oracle 1/600</span>
     </div>
   </header>
 
@@ -531,9 +546,14 @@
         zero for reasons unrelated to ability.</p>
       <p>With <code>enable_thinking: false</code> the same prompt returns
         <code>git reset --soft HEAD~1</code> in 8 tokens. Since the other three answer directly and
-        the budgets assume that, thinking is off for this model only. <b>This therefore measures
-        Qwen3.5 in non-thinking mode</b>; its reasoning mode is untested here and, given room to
-        think, could plausibly score higher.</p>
+        the budgets assume that, thinking is off for this model only. <b>The 600-task and 60-probe
+        numbers on this page therefore measure Qwen3.5 in non-thinking mode.</b></p>
+      <p><b>That prediction has since been tested, and it held.</b> An earlier version of this page
+        said Qwen3.5's reasoning mode was untested and &#8220;given room to think, could plausibly
+        score higher.&#8221; Given a 8,000-token budget it scores <b>546/600, up 46</b> &#8212;
+        landing exactly on Gemma's non-thinking score without overtaking it. Gemma, whose template
+        defaults thinking to <i>false</i> and which had never used it in any run here, goes to
+        <b>575/600, up 29</b>. See the reasoning section below.</p>
     </div>
     <div class="grid2">
       <div class="prose">
@@ -563,6 +583,215 @@
           KV, its dense 14B weights cap it at <strong>84,880 tokens</strong> on this card &#8212;
           which is what put its two deepest rungs out of reach.</p>
       </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Reasoning mode &#8212; measured, on the two models that have one</h2>
+    <div class="prose">
+      <p>Only two of the four can be given reasoning at all. Mellum2's template merely strips
+        <code>&lt;/think&gt;</code> out of history and Qwen2.5-Coder has no thinking in its template
+        whatsoever, so for those two there is no switch to throw. Prompting them to &#8220;think step
+        by step&#8221; is prompt engineering, not a trained mode, and is not mixed into these numbers.</p>
+      <p><strong>Both models improve, and the ranking does not change.</strong> Qwen3.5 gains the most
+        and still does not overtake Gemma &#8212; it lands exactly on Gemma's non-thinking 546.</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Model</th><th class="num">no reasoning</th><th class="num">reasoning</th>
+          <th class="num">&#916;</th><th class="num">trace/task</th><th class="num">answers lost</th></tr></thead>
+        <tbody>
+          <tr><td><i class="swatch" style="background:var(--b)"></i> Gemma 4 12B QAT</td>
+            <td class="num">546/600</td><td class="num"><b>575/600</b></td><td class="num"><b>+29</b></td>
+            <td class="num">2,841 ch</td><td class="num"><b>0</b></td></tr>
+          <tr><td><i class="swatch" style="background:var(--d)"></i> Qwen3.5-9B FP8</td>
+            <td class="num">500/600</td><td class="num"><b>546/600</b></td><td class="num"><b>+46</b></td>
+            <td class="num">10,529 ch</td><td class="num">8</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--b)"></i>Gemma 4 QAT</span>
+      <span><i class="swatch" style="background:var(--d)"></i>Qwen3.5-9B</span>
+      <span style="color:var(--ink-3)">change in tasks passed, out of 50 &#183; shaded = the two models differ by 5+</span>
+    </div>
+    <div class="chart">
+      <div class="row diff"><div class="rowlab">SQL</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; SQL 42 &#8594; 47 (+5)"><div class="dtrack"><div class="dfill b pos" style="width:33.33%"></div></div><div class="dval">+5</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; SQL 33 &#8594; 44 (+11)"><div class="dtrack"><div class="dfill d pos" style="width:73.33%"></div></div><div class="dval">+11</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Git</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; Git 46 &#8594; 48 (+2)"><div class="dtrack"><div class="dfill b pos" style="width:13.33%"></div></div><div class="dval">+2</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Git 43 &#8594; 49 (+6)"><div class="dtrack"><div class="dfill d pos" style="width:40.00%"></div></div><div class="dval">+6</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Python</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; Python 46 &#8594; 50 (+4)"><div class="dtrack"><div class="dfill b pos" style="width:26.67%"></div></div><div class="dval">+4</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Python 43 &#8594; 48 (+5)"><div class="dtrack"><div class="dfill d pos" style="width:33.33%"></div></div><div class="dval">+5</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Bash</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; Bash 46 &#8594; 49 (+3)"><div class="dtrack"><div class="dfill b pos" style="width:20.00%"></div></div><div class="dval">+3</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Bash 39 &#8594; 44 (+5)"><div class="dtrack"><div class="dfill d pos" style="width:33.33%"></div></div><div class="dval">+5</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">SSH</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; SSH 42 &#8594; 46 (+4)"><div class="dtrack"><div class="dfill b pos" style="width:26.67%"></div></div><div class="dval">+4</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; SSH 38 &#8594; 43 (+5)"><div class="dtrack"><div class="dfill d pos" style="width:33.33%"></div></div><div class="dval">+5</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Django</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; Django 42 &#8594; 47 (+5)"><div class="dtrack"><div class="dfill b pos" style="width:33.33%"></div></div><div class="dval">+5</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Django 39 &#8594; 43 (+4)"><div class="dtrack"><div class="dfill d pos" style="width:26.67%"></div></div><div class="dval">+4</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Docs</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; Docs 48 &#8594; 50 (+2)"><div class="dtrack"><div class="dfill b pos" style="width:13.33%"></div></div><div class="dval">+2</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Docs 44 &#8594; 48 (+4)"><div class="dtrack"><div class="dfill d pos" style="width:26.67%"></div></div><div class="dval">+4</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">GitHub</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; GitHub 39 &#8594; 41 (+2)"><div class="dtrack"><div class="dfill b pos" style="width:13.33%"></div></div><div class="dval">+2</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; GitHub 32 &#8594; 36 (+4)"><div class="dtrack"><div class="dfill d pos" style="width:26.67%"></div></div><div class="dval">+4</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">TypeScript</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; TypeScript 47 &#8594; 49 (+2)"><div class="dtrack"><div class="dfill b pos" style="width:13.33%"></div></div><div class="dval">+2</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; TypeScript 44 &#8594; 45 (+1)"><div class="dtrack"><div class="dfill d pos" style="width:6.67%"></div></div><div class="dval">+1</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">JavaScript</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; JavaScript 49 &#8594; 50 (+1)"><div class="dtrack"><div class="dfill b pos" style="width:6.67%"></div></div><div class="dval">+1</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; JavaScript 47 &#8594; 49 (+2)"><div class="dtrack"><div class="dfill d pos" style="width:13.33%"></div></div><div class="dval">+2</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">RAG</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; RAG 50 &#8594; 50 (0)"><div class="dtrack"></div><div class="dval">0</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; RAG 50 &#8594; 50 (0)"><div class="dtrack"></div><div class="dval">0</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">React Native</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; React Native 49 &#8594; 48 (-1)"><div class="dtrack"><div class="dfill b neg" style="width:6.67%"></div></div><div class="dval">-1</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; React Native 48 &#8594; 47 (-1)"><div class="dtrack"><div class="dfill d neg" style="width:6.67%"></div></div><div class="dval">-1</div></div>
+      </div></div>
+    </div>
+    <div class="note">
+      <p><b>React Native is the only category where reasoning hurt &#8212; and it hurt both models,
+        by exactly one task each.</b> RAG was already saturated at 50/50 for both and had nowhere to
+        go. Every other category moved up.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>The two reasoning arms are not comparable in kind</h2>
+    <div class="prose">
+      <p>The totals above hide that they were obtained under very different conditions. Gemma's
+        reasoning terminates; Qwen3.5's spirals.</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th></th><th class="num">Gemma 4</th><th class="num">Qwen3.5</th></tr></thead>
+        <tbody>
+          <tr><td>reasoning per task</td><td class="num">2,841 ch</td><td class="num"><b>10,529 ch</b></td></tr>
+          <tr><td>think : answer ratio</td><td class="num">7.0&times;</td><td class="num"><b>24.2&times;</b></td></tr>
+          <tr><td>trace median / p90 / max</td><td class="num">1,442 / 7,323 / 26,902</td>
+              <td class="num">8,908 / 22,015 / 34,697</td></tr>
+          <tr><td>completion tokens</td><td class="num">576,727</td><td class="num"><b>1,779,065</b></td></tr>
+          <tr><td>wall clock, 8 concurrent</td><td class="num"><b>1.2 h</b></td><td class="num">3.9 h</td></tr>
+          <tr><td>tasks needing a resample</td><td class="num">7</td><td class="num"><b>53</b></td></tr>
+          <tr><td>answers never produced</td><td class="num"><b>0</b></td><td class="num">8</td></tr>
+          <tr><td>truncated</td><td class="num"><b>0</b></td><td class="num">9</td></tr>
+          <tr><td>first-attempt sampling</td><td class="num">t=0.6 (coolest tested)</td>
+              <td class="num">t=1.0 (forced)</td></tr>
+          <tr><td>tasks flipped</td><td class="num">+38 / &#8722;9</td><td class="num">+69 / &#8722;23</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid2">
+      <div class="prose">
+        <p><strong>Gemma terminated at every temperature tested</strong> &#8212; 12/12 on the hard
+          probes at 0.6, 0.8 and 1.0 alike &#8212; in a third of the tokens, losing nothing to
+          truncation. Qwen3.5 needed hot sampling to terminate at all, still lost 8 answers outright,
+          and churned three times as many tasks in both directions for its larger net gain.</p>
+        <p><strong>That makes Gemma's +29 the more trustworthy number.</strong> Because it terminates
+          at 0.6 it sits near the baseline's temperature 0, so less of its gain can be sampling.
+          Qwen3.5 had to run at 1.0.</p>
+      </div>
+      <div class="prose">
+        <p><strong>Of Qwen3.5's 23 regressions, only 3 were empty answers.</strong> The other 20 are
+          real: reasoning talked the model out of answers it got right without it. A net gain is not
+          a uniform gain.</p>
+        <p><strong>GitHub is the least reliable improvement.</strong> Qwen3.5 gained 9 tasks there and
+          lost 5, for a net of +4 &#8212; against SQL's +11 from 11 clean gains. Same direction, very
+          different consistency.</p>
+      </div>
+    </div>
+    <div class="note alert">
+      <p><b>Two variables changed, not one.</b> The no-reasoning runs are greedy at temperature 0.
+        Thinking mode cannot run that way on Qwen3.5 &#8212; its traces grow to fill any budget you
+        give them &#8212; so sampling moved with reasoning. Its +46 is the gap between the best
+        available non-reasoning configuration and the best available reasoning one, not the isolated
+        effect of reasoning. No rerun can separate them; it is a property of the model. Gemma is far
+        less exposed, having been run at the coolest setting tested.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>What it took to make reasoning run at all</h2>
+    <div class="prose">
+      <p>Three findings, each measured on this GPU rather than taken from a model card. Two of them
+        contradicted the obvious fix.</p>
+    </div>
+    <div class="grid2">
+      <div class="prose">
+        <p><strong>No trace cap exists.</strong> vLLM 0.22 accepts <code>reasoning_effort</code>,
+          <code>max_thinking_tokens</code> and the template's <code>thinking_budget</code> without
+          complaint, and honours none of them. The proof is not a median: <code>sh-001</code> emitted a
+          <b>6,538-token trace under a &#8220;1,500-token cap&#8221;</b> while emitting 3,041 uncapped.
+          Ranking configurations by median trace length made all three caps look effective &#8212; the
+          median had moved only because a different probe happened to spiral that round.</p>
+        <p><strong>Budget is not the lever.</strong> Doubling the cap did not let traces finish. It
+          doubled them.</p>
+      </div>
+      <div>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>probe</th><th class="num">trace @8,000</th><th class="num">@16,000</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">sh-001</td><td class="num">6,025</td><td class="num">12,432</td></tr>
+              <tr><td class="mono">sql-001</td><td class="num">7,068</td><td class="num">13,834</td></tr>
+              <tr><td class="mono">ts-001</td><td class="num">6,571</td><td class="num">14,976</td></tr>
+              <tr><td class="mono">dj-001</td><td class="num">7,204</td><td class="num">15,336</td></tr>
+              <tr><td class="mono">doc-001</td><td class="num">7,336</td><td class="num">13,529</td></tr>
+              <tr><td class="mono">py-001</td><td class="num">4,836</td><td class="num">4,836</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="prose" style="margin-top:.8rem"><code>py-001</code> stopped at the same point both
+          times &#8212; greedy is deterministic, and a trace that terminates does so at a fixed length.
+          The other five never terminate; they fill whatever they are given.</p>
+      </div>
+    </div>
+    <div class="prose">
+      <p><strong>Temperature is the lever &#8212; and only Qwen3.5 needs it.</strong> On the six probes
+        that actually spiral, two passes each:</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>first-attempt sampling</th><th class="num">Qwen3.5 answered</th><th class="num">tokens</th>
+          <th class="num">Gemma answered</th><th class="num">tokens</th></tr></thead>
+        <tbody>
+          <tr><td>t=0.6, top_p .95, top_k 20 &#8212; <i>Qwen's own recommendation</i></td>
+            <td class="num">4/12</td><td class="num">78,066</td><td class="num"><b>12/12</b></td><td class="num">18,780</td></tr>
+          <tr><td>t=0.8, top_p .95, top_k 20</td>
+            <td class="num">7/12</td><td class="num">79,952</td><td class="num"><b>12/12</b></td><td class="num">19,975</td></tr>
+          <tr><td>t=1.0, top_p .95, top_k 64</td>
+            <td class="num"><b>10/12</b></td><td class="num">64,379</td><td class="num"><b>12/12</b></td><td class="num">19,378</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <p><b>For Qwen3.5 reliability and cost move together</b> &#8212; a spiral burns the whole budget
+        and returns nothing, so the hotter setting is both more reliable and cheaper. For Gemma the
+        question never arises; all three tie, so the coolest was taken as the one nearest the
+        baseline's temperature 0.</p>
+      <p><b>Measured on an easy probe set, this ranks backwards.</b> <code>git</code>, <code>rag</code>
+        and <code>rn</code> finish in ~300 tokens and terminate at any temperature. Six probes chosen
+        for being easy would have said greedy was fine.</p>
+      <p><b>Empty answers are resampled; wrong answers are not.</b> A truncated trace means the harness
+        cut the model off mid-thought, and scoring that as a wrong answer would invent a capability
+        failure. Retries are triggered only by an empty response and recorded per task, so the cost
+        stays visible &#8212; and a resampled task can still fail on its merits.</p>
     </div>
   </section>
 
@@ -640,7 +869,14 @@
       <p><b>The four did not run under equal conditions.</b> Qwen2.5 needed YaRN and 4-bit TurboQuant
         KV to reach 80K; Gemma and Mellum2 ran native 131K on fp8; Qwen3.5 ran fp8 weights with fp8
         KV at 131K but with reasoning disabled. Each of those choices costs something.</p>
-      <p><b>Single run at temperature 0, no repeats.</b> Per-task variance is unmeasured. Gemma,
+      <p><b>The reasoning arm is two models, not four.</b> Mellum2 and Qwen2.5-Coder have no thinking
+        mode to enable, so &#8220;does reasoning reorder the ranking&#8221; is untested for half the
+        field. It did not reorder the half that could be measured.</p>
+      <p><b>Reasoning was measured once per model, not repeated.</b> At temperature &gt; 0 a repeat
+        lands differently, and several per-category deltas are &#177;1&#8211;2 &#8212; only the large
+        movers (SQL +11) and the totals are clearly outside the noise.</p>
+      <p><b>Single run, no repeats.</b> The no-reasoning runs are temperature 0; the reasoning runs
+        are not, and cannot be. Per-task variance is unmeasured. Gemma,
         Qwen2.5 and Mellum2 are separated by 16 tasks in 600 &#8212; close enough that a handful of
         coin-flips could reorder them. Qwen3.5's 30-task gap to third is the only difference here
         that is clearly outside the noise.</p>
@@ -670,17 +906,23 @@
   <section>
     <h2>Recommendation</h2>
     <div class="prose">
-      <p><strong>Gemma 4 12B QAT is still the default, and now for a second reason.</strong> It leads
+      <p><strong>Gemma 4 12B QAT is still the default, and now for a third reason.</strong> It leads
         both suites &#8212; 546/600 short, 46/60 deep &#8212; is strongest in half the categories, has no weak
         domain, uses the least VRAM (8.3 GiB) and holds <strong>372,010 KV tokens</strong>, 4.4&times;
         Qwen2.5-Coder's. It reverted to a generic default once in 45 deep probes. Its cost is
         unchanged: 18.4 tok/s, the slowest here.</p>
+      <p><strong>It also has the only well-behaved reasoning mode here &#8212; and it wins again with it
+        on: 575/600.</strong> Its traces terminate at every temperature tested, cost a third of
+        Qwen3.5's tokens, and lost not one answer to truncation across 600 tasks. If you turn thinking
+        on anywhere, turn it on here: it is the cheapest +29 in this report, and unlike Qwen3.5's gain
+        it was measured at near-baseline sampling.</p>
       <p><strong>Qwen3.5-9B is the one to reconsider.</strong> It finished last on short tasks and
         second on long ones, with the only perfect retention in the set and <em>zero</em> reversions
         at any depth. If your work is long agent sessions rather than one-shot prompts, the 600-task
-        ranking is the wrong ranking to buy on. Two asterisks stand: it ran with reasoning disabled,
-        and its short-context weaknesses (SQL 33/50, GitHub 32/50) do not disappear just because it
-        holds context well.</p>
+        ranking is the wrong ranking to buy on. One of its two asterisks has since been settled:
+        <b>given reasoning it scores 546/600, up 46</b>, which erases most of the short-context gap
+        &#8212; SQL 33&#8594;44, GitHub 32&#8594;36. The other stands: that gain costs a 24&times;
+        think-to-answer ratio and 8 tasks where no answer ever arrived.</p>
       <p><strong>Mellum2 is the clear loser here, and it is the reversal of the whole exercise.</strong>
         Third on short tasks and fastest at 26.1 tok/s, it keeps <strong>34%</strong> of its ability
         at depth and is already down to 13/36 at 70K. For a model whose appeal was a long context
@@ -706,7 +948,10 @@
     <code>/root/vllm-q35/docker-compose.yaml</code>.<br>
     Gemma = google/gemma-4-12B-it-qat-w4a16-ct &#183; Qwen2.5 = Qwen/Qwen2.5-Coder-14B-Instruct-AWQ &#183;
     Mellum2 = voves/Mellum2-12B-A2.5B-Instruct-FP8 &#183; Qwen3.5 = RedHatAI/Qwen3.5-9B-FP8-dynamic
-    (thinking disabled). Generated 2026-07-28.
+    (thinking disabled for the 600-task and 60-probe runs; the reasoning arm is reported separately).
+    Reasoning arm: <code>serving/runthink2.sh</code>, <code>harness/hardtemp.py</code>,
+    <code>harness/agg_think.py</code>; sampling decisions and their evidence in
+    <code>results/reasoning/chosen_*.json</code>. Generated 2026-07-29.
   </p>
 
 </div>

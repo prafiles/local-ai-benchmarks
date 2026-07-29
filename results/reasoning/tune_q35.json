@@ -1,0 +1,813 @@
+{
+ "model": "RedHatAI/Qwen3.5-9B-FP8-dynamic",
+ "budget": 8000,
+ "family": "qwen",
+ "base": {
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "top_k": 20
+ },
+ "sweeps": [
+  {
+   "name": "cap-none",
+   "samp": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20
+   },
+   "cap": {},
+   "workers": 4,
+   "probes": [
+    "sh-001",
+    "git-001",
+    "rag-001",
+    "sql-001",
+    "py-001",
+    "rn-001"
+   ],
+   "answered": 5,
+   "truncated": 1,
+   "errors": 0,
+   "tokens": 18998,
+   "think_med": 3041,
+   "think_max": 7119,
+   "wall": 379.9,
+   "rows": [
+    {
+     "tid": "sh-001",
+     "cat": "Bash",
+     "cap": 220,
+     "ans": 49,
+     "think": 12166,
+     "tok": 3740,
+     "finish": "stop",
+     "secs": 181.9
+    },
+    {
+     "tid": "git-001",
+     "cat": "Git",
+     "cap": 220,
+     "ans": 23,
+     "think": 1256,
+     "tok": 372,
+     "finish": "stop",
+     "secs": 18.5
+    },
+    {
+     "tid": "rag-001",
+     "cat": "RAG",
+     "cap": 250,
+     "ans": 31,
+     "think": 1819,
+     "tok": 553,
+     "finish": "stop",
+     "secs": 27.3
+    },
+    {
+     "tid": "sql-001",
+     "cat": "SQL",
+     "cap": 400,
+     "ans": 0,
+     "think": 28479,
+     "tok": 8000,
+     "finish": "length",
+     "secs": 379.9
+    },
+    {
+     "tid": "py-001",
+     "cat": "Python",
+     "cap": 900,
+     "ans": 600,
+     "think": 18303,
+     "tok": 4847,
+     "finish": "stop",
+     "secs": 234.4
+    },
+    {
+     "tid": "rn-001",
+     "cat": "ReactNative",
+     "cap": 800,
+     "ans": 397,
+     "think": 5346,
+     "tok": 1486,
+     "finish": "stop",
+     "secs": 72.0
+    }
+   ]
+  },
+  {
+   "name": "cap-effort-low",
+   "samp": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20
+   },
+   "cap": {
+    "reasoning_effort": "low"
+   },
+   "workers": 4,
+   "probes": [
+    "sh-001",
+    "git-001",
+    "rag-001",
+    "sql-001",
+    "py-001",
+    "rn-001"
+   ],
+   "answered": 5,
+   "truncated": 1,
+   "errors": 0,
+   "tokens": 18653,
+   "think_med": 2835,
+   "think_max": 6963,
+   "wall": 378.7,
+   "rows": [
+    {
+     "tid": "sh-001",
+     "cat": "Bash",
+     "cap": 220,
+     "ans": 49,
+     "think": 4689,
+     "tok": 1437,
+     "finish": "stop",
+     "secs": 69.4
+    },
+    {
+     "tid": "git-001",
+     "cat": "Git",
+     "cap": 220,
+     "ans": 23,
+     "think": 4705,
+     "tok": 1284,
+     "finish": "stop",
+     "secs": 61.9
+    },
+    {
+     "tid": "rag-001",
+     "cat": "RAG",
+     "cap": 250,
+     "ans": 31,
+     "think": 1260,
+     "tok": 389,
+     "finish": "stop",
+     "secs": 18.8
+    },
+    {
+     "tid": "sql-001",
+     "cat": "SQL",
+     "cap": 400,
+     "ans": 0,
+     "think": 27852,
+     "tok": 8000,
+     "finish": "length",
+     "secs": 378.7
+    },
+    {
+     "tid": "py-001",
+     "cat": "Python",
+     "cap": 900,
+     "ans": 1526,
+     "think": 17074,
+     "tok": 4604,
+     "finish": "stop",
+     "secs": 220.5
+    },
+    {
+     "tid": "rn-001",
+     "cat": "ReactNative",
+     "cap": 800,
+     "ans": 401,
+     "think": 11343,
+     "tok": 2939,
+     "finish": "stop",
+     "secs": 140.4
+    }
+   ]
+  },
+  {
+   "name": "cap-maxthink-1500",
+   "samp": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20
+   },
+   "cap": {
+    "max_thinking_tokens": 1500
+   },
+   "workers": 4,
+   "probes": [
+    "sh-001",
+    "git-001",
+    "rag-001",
+    "sql-001",
+    "py-001",
+    "rn-001"
+   ],
+   "answered": 5,
+   "truncated": 1,
+   "errors": 0,
+   "tokens": 17367,
+   "think_med": 1430,
+   "think_max": 6538,
+   "wall": 383.5,
+   "rows": [
+    {
+     "tid": "sh-001",
+     "cat": "Bash",
+     "cap": 220,
+     "ans": 0,
+     "think": 26154,
+     "tok": 8000,
+     "finish": "length",
+     "secs": 383.5
+    },
+    {
+     "tid": "git-001",
+     "cat": "Git",
+     "cap": 220,
+     "ans": 23,
+     "think": 1366,
+     "tok": 401,
+     "finish": "stop",
+     "secs": 19.4
+    },
+    {
+     "tid": "rag-001",
+     "cat": "RAG",
+     "cap": 250,
+     "ans": 31,
+     "think": 1415,
+     "tok": 430,
+     "finish": "stop",
+     "secs": 20.9
+    },
+    {
+     "tid": "sql-001",
+     "cat": "SQL",
+     "cap": 400,
+     "ans": 167,
+     "think": 1886,
+     "tok": 510,
+     "finish": "stop",
+     "secs": 24.7
+    },
+    {
+     "tid": "py-001",
+     "cat": "Python",
+     "cap": 900,
+     "ans": 627,
+     "think": 24445,
+     "tok": 6462,
+     "finish": "stop",
+     "secs": 311.1
+    },
+    {
+     "tid": "rn-001",
+     "cat": "ReactNative",
+     "cap": 800,
+     "ans": 397,
+     "think": 5722,
+     "tok": 1564,
+     "finish": "stop",
+     "secs": 75.6
+    }
+   ]
+  },
+  {
+   "name": "cap-tmplbudget-1500",
+   "samp": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20
+   },
+   "cap": {
+    "_tmpl": {
+     "thinking_budget": 1500
+    }
+   },
+   "workers": 4,
+   "probes": [
+    "sh-001",
+    "git-001",
+    "rag-001",
+    "sql-001",
+    "py-001",
+    "rn-001"
+   ],
+   "answered": 5,
+   "truncated": 1,
+   "errors": 0,
+   "tokens": 15989,
+   "think_med": 1161,
+   "think_max": 5869,
+   "wall": 375.7,
+   "rows": [
+    {
+     "tid": "sh-001",
+     "cat": "Bash",
+     "cap": 220,
+     "ans": 0,
+     "think": 23476,
+     "tok": 8000,
+     "finish": "length",
+     "secs": 375.7
+    },
+    {
+     "tid": "git-001",
+     "cat": "Git",
+     "cap": 220,
+     "ans": 23,
+     "think": 1094,
+     "tok": 311,
+     "finish": "stop",
+     "secs": 15.0
+    },
+    {
+     "tid": "rag-001",
+     "cat": "RAG",
+     "cap": 250,
+     "ans": 31,
+     "think": 1354,
+     "tok": 413,
+     "finish": "stop",
+     "secs": 19.9
+    },
+    {
+     "tid": "sql-001",
+     "cat": "SQL",
+     "cap": 400,
+     "ans": 175,
+     "think": 3948,
+     "tok": 988,
+     "finish": "stop",
+     "secs": 47.8
+    },
+    {
+     "tid": "py-001",
+     "cat": "Python",
+     "cap": 900,
+     "ans": 1440,
+     "think": 18444,
+     "tok": 4919,
+     "finish": "stop",
+     "secs": 233.4
+    },
+    {
+     "tid": "rn-001",
+     "cat": "ReactNative",
+     "cap": 800,
+     "ans": 383,
+     "think": 4645,
+     "tok": 1358,
+     "finish": "stop",
+     "secs": 65.6
+    }
+   ]
+  },
+  {
+   "name": "qwen-rec",
+   "samp": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20
+   },
+   "cap": {
+    "max_thinking_tokens": 1500
+   },
+   "workers": 4,
+   "probes": [
+    "sh-001",
+    "git-001",
+    "rag-001",
+    "sql-001",
+    "py-001",
+    "rn-001"
+   ],
+   "answered": 4,
+   "truncated": 2,
+   "errors": 0,
+   "tokens": 21502,
+   "think_med": 2712,
+   "think_max": 7450,
+   "wall": 383.4,
+   "rows": [
+    {
+     "tid": "sh-001",
+     "cat": "Bash",
+     "cap": 220,
+     "ans": 0,
+     "think": 23436,
+     "tok": 8000,
+     "finish": "length",
+     "secs": 383.4
+    },
+    {
+     "tid": "git-001",
+     "cat": "Git",
+     "cap": 220,
+     "ans": 23,
+     "think": 1002,
+     "tok": 292,
+     "finish": "stop",
+     "secs": 14.5
+    },
+    {
+     "tid": "rag-001",
+     "cat": "RAG",
+     "cap": 250,
+     "ans": 31,
+     "think": 1936,
+     "tok": 585,
+     "finish": "stop",
+     "secs": 28.9
+    },
+    {
+     "tid": "sql-001",
+     "cat": "SQL",
+     "cap": 400,
+     "ans": 0,
+     "think": 29800,
+     "tok": 8000,
+     "finish": "length",
+     "secs": 383.4
+    },
+    {
+     "tid": "py-001",
+     "cat": "Python",
+     "cap": 900,
+     "ans": 1476,
+     "think": 10848,
+     "tok": 3132,
+     "finish": "stop",
+     "secs": 151.0
+    },
+    {
+     "tid": "rn-001",
+     "cat": "ReactNative",
+     "cap": 800,
+     "ans": 401,
+     "think": 5475,
+     "tok": 1493,
+     "finish": "stop",
+     "secs": 71.8
+    }
+   ]
+  },
+  {
+   "name": "qwen-pen",
+   "samp": {
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "presence_penalty": 1.0
+   },
+   "cap": {
+    "max_thinking_tokens": 1500
+   },
+   "workers": 4,
+   "probes": [
+    "sh-001",
+    "git-001",
+    "rag-001",
+    "sql-001",
+    "py-001",
+    "rn-001"
+   ],
+   "answered": 4,
+   "truncated": 2,
+   "errors": 0,
+   "tokens": 23120,
+   "think_med": 4348,
+   "think_max": 7151,
+   "wall": 392.2,
+   "rows": [
+    {
+     "tid": "sh-001",
+     "cat": "Bash",
+     "cap": 220,
+     "ans": 0,
+     "think": 24201,
+     "tok": 8000,
+     "finish": "length",
+     "secs": 392.2
+    },
+    {
+     "tid": "git-001",
+     "cat": "Git",
+     "cap": 220,
+     "ans": 23,
+     "think": 2081,
+     "tok": 546,
+     "finish": "stop",
+     "secs": 26.5
+    },
+    {
+     "tid": "rag-001",
+     "cat": "RAG",
+     "cap": 250,
+     "ans": 31,
+     "think": 1174,
+     "tok": 346,
+     "finish": "stop",
+     "secs": 17.0
+    },
+    {
+     "tid": "sql-001",
+     "cat": "SQL",
+     "cap": 400,
+     "ans": 0,
+     "think": 28604,
+     "tok": 8000,
+     "finish": "length",
+     "secs": 392.2
+    },
+    {
+     "tid": "py-001",
+     "cat": "Python",
+     "cap": 900,
+     "ans": 1487,
+     "think": 17394,
+     "tok": 4883,
+     "finish": "stop",
+     "secs": 239.6
+    },
+    {
+     "tid": "rn-001",
+     "cat": "ReactNative",
+     "cap": 800,
+     "ans": 394,
+     "think": 4883,
+     "tok": 1345,
+     "finish": "stop",
+     "secs": 65.4
+    }
+   ]
+  },
+  {
+   "name": "gemma-rec",
+   "samp": {
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 64
+   },
+   "cap": {
+    "max_thinking_tokens": 1500
+   },
+   "workers": 4,
+   "probes": [
+    "sh-001",
+    "git-001",
+    "rag-001",
+    "sql-001",
+    "py-001",
+    "rn-001"
+   ],
+   "answered": 6,
+   "truncated": 0,
+   "errors": 0,
+   "tokens": 16534,
+   "think_med": 3104,
+   "think_max": 6386,
+   "wall": 283.4,
+   "rows": [
+    {
+     "tid": "sh-001",
+     "cat": "Bash",
+     "cap": 220,
+     "ans": 49,
+     "think": 12418,
+     "tok": 3888,
+     "finish": "stop",
+     "secs": 187.0
+    },
+    {
+     "tid": "git-001",
+     "cat": "Git",
+     "cap": 220,
+     "ans": 23,
+     "think": 927,
+     "tok": 269,
+     "finish": "stop",
+     "secs": 13.0
+    },
+    {
+     "tid": "rag-001",
+     "cat": "RAG",
+     "cap": 250,
+     "ans": 31,
+     "think": 1925,
+     "tok": 603,
+     "finish": "stop",
+     "secs": 29.0
+    },
+    {
+     "tid": "sql-001",
+     "cat": "SQL",
+     "cap": 400,
+     "ans": 202,
+     "think": 25545,
+     "tok": 5986,
+     "finish": "stop",
+     "secs": 283.4
+    },
+    {
+     "tid": "py-001",
+     "cat": "Python",
+     "cap": 900,
+     "ans": 595,
+     "think": 15737,
+     "tok": 4105,
+     "finish": "stop",
+     "secs": 196.9
+    },
+    {
+     "tid": "rn-001",
+     "cat": "ReactNative",
+     "cap": 800,
+     "ans": 407,
+     "think": 6134,
+     "tok": 1683,
+     "finish": "stop",
+     "secs": 81.4
+    }
+   ]
+  },
+  {
+   "name": "gemma-pen",
+   "samp": {
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 64,
+    "presence_penalty": 1.0
+   },
+   "cap": {
+    "max_thinking_tokens": 1500
+   },
+   "workers": 4,
+   "probes": [
+    "sh-001",
+    "git-001",
+    "rag-001",
+    "sql-001",
+    "py-001",
+    "rn-001"
+   ],
+   "answered": 5,
+   "truncated": 1,
+   "errors": 0,
+   "tokens": 20357,
+   "think_med": 2946,
+   "think_max": 7757,
+   "wall": 405.4,
+   "rows": [
+    {
+     "tid": "sh-001",
+     "cat": "Bash",
+     "cap": 220,
+     "ans": 49,
+     "think": 4227,
+     "tok": 1306,
+     "finish": "stop",
+     "secs": 63.8
+    },
+    {
+     "tid": "git-001",
+     "cat": "Git",
+     "cap": 220,
+     "ans": 23,
+     "think": 3226,
+     "tok": 863,
+     "finish": "stop",
+     "secs": 42.2
+    },
+    {
+     "tid": "rag-001",
+     "cat": "RAG",
+     "cap": 250,
+     "ans": 31,
+     "think": 1034,
+     "tok": 316,
+     "finish": "stop",
+     "secs": 15.6
+    },
+    {
+     "tid": "sql-001",
+     "cat": "SQL",
+     "cap": 400,
+     "ans": 231,
+     "think": 26876,
+     "tok": 6799,
+     "finish": "stop",
+     "secs": 333.4
+    },
+    {
+     "tid": "py-001",
+     "cat": "Python",
+     "cap": 900,
+     "ans": 0,
+     "think": 31030,
+     "tok": 8000,
+     "finish": "length",
+     "secs": 389.7
+    },
+    {
+     "tid": "rn-001",
+     "cat": "ReactNative",
+     "cap": 800,
+     "ans": 401,
+     "think": 11787,
+     "tok": 3073,
+     "finish": "stop",
+     "secs": 150.7
+    }
+   ]
+  },
+  {
+   "name": "greedy",
+   "samp": {
+    "temperature": 0
+   },
+   "cap": {
+    "max_thinking_tokens": 1500
+   },
+   "workers": 4,
+   "probes": [
+    "sh-001",
+    "git-001",
+    "rag-001",
+    "sql-001",
+    "py-001",
+    "rn-001"
+   ],
+   "answered": 5,
+   "truncated": 1,
+   "errors": 0,
+   "tokens": 16871,
+   "think_med": 1484,
+   "think_max": 6669,
+   "wall": 376.6,
+   "rows": [
+    {
+     "tid": "sh-001",
+     "cat": "Bash",
+     "cap": 220,
+     "ans": 49,
+     "think": 5863,
+     "tok": 1764,
+     "finish": "stop",
+     "secs": 84.8
+    },
+    {
+     "tid": "git-001",
+     "cat": "Git",
+     "cap": 220,
+     "ans": 23,
+     "think": 1019,
+     "tok": 294,
+     "finish": "stop",
+     "secs": 14.4
+    },
+    {
+     "tid": "rag-001",
+     "cat": "RAG",
+     "cap": 250,
+     "ans": 31,
+     "think": 1252,
+     "tok": 387,
+     "finish": "stop",
+     "secs": 18.8
+    },
+    {
+     "tid": "sql-001",
+     "cat": "SQL",
+     "cap": 400,
+     "ans": 0,
+     "think": 26676,
+     "tok": 8000,
+     "finish": "length",
+     "secs": 376.6
+    },
+    {
+     "tid": "py-001",
+     "cat": "Python",
+     "cap": 900,
+     "ans": 1502,
+     "think": 15819,
+     "tok": 4762,
+     "finish": "stop",
+     "secs": 228.8
+    },
+    {
+     "tid": "rn-001",
+     "cat": "ReactNative",
+     "cap": 800,
+     "ans": 401,
+     "think": 5936,
+     "tok": 1664,
+     "finish": "stop",
+     "secs": 79.9
+    }
+   ]
+  }
+ ]
+}

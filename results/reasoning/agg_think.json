@@ -1,0 +1,327 @@
+{
+ "models": {
+  "gemma": {
+   "label": "Gemma 4 12B QAT",
+   "n": 600,
+   "base": 546,
+   "think": 575,
+   "delta": 29,
+   "percat": {
+    "Python": {
+     "n": 50,
+     "base": 46,
+     "think": 50,
+     "delta": 4
+    },
+    "Django": {
+     "n": 50,
+     "base": 42,
+     "think": 47,
+     "delta": 5
+    },
+    "SQL": {
+     "n": 50,
+     "base": 42,
+     "think": 47,
+     "delta": 5
+    },
+    "JS": {
+     "n": 50,
+     "base": 49,
+     "think": 50,
+     "delta": 1
+    },
+    "TS": {
+     "n": 50,
+     "base": 47,
+     "think": 49,
+     "delta": 2
+    },
+    "Bash": {
+     "n": 50,
+     "base": 46,
+     "think": 49,
+     "delta": 3
+    },
+    "Git": {
+     "n": 50,
+     "base": 46,
+     "think": 48,
+     "delta": 2
+    },
+    "SSH": {
+     "n": 50,
+     "base": 42,
+     "think": 46,
+     "delta": 4
+    },
+    "GitHub": {
+     "n": 50,
+     "base": 39,
+     "think": 41,
+     "delta": 2
+    },
+    "Docs": {
+     "n": 50,
+     "base": 48,
+     "think": 50,
+     "delta": 2
+    },
+    "ReactNative": {
+     "n": 50,
+     "base": 49,
+     "think": 48,
+     "delta": -1
+    },
+    "RAG": {
+     "n": 50,
+     "base": 50,
+     "think": 50,
+     "delta": 0
+    }
+   },
+   "gained": [
+    "dj-008",
+    "dj-015",
+    "dj-033",
+    "dj-034",
+    "dj-044",
+    "dj-046",
+    "doc-007",
+    "doc-043",
+    "gh-007",
+    "gh-027",
+    "gh-035",
+    "gh-036",
+    "gh-038",
+    "gh-047",
+    "git-003",
+    "git-035",
+    "git-039",
+    "git-045",
+    "js-044",
+    "py-002",
+    "py-012",
+    "py-032",
+    "py-044",
+    "sh-013",
+    "sh-018",
+    "sh-047",
+    "sql-001",
+    "sql-004",
+    "sql-011",
+    "sql-020",
+    "sql-048",
+    "ssh-001",
+    "ssh-011",
+    "ssh-042",
+    "ssh-044",
+    "ssh-050",
+    "ts-015",
+    "ts-041"
+   ],
+   "lost": [
+    "dj-047",
+    "gh-020",
+    "gh-021",
+    "gh-037",
+    "gh-042",
+    "git-026",
+    "git-033",
+    "rn-030",
+    "ssh-006"
+   ],
+   "empty": 0,
+   "truncated": 0,
+   "errors": 0,
+   "traced": 600,
+   "tokens": 576727,
+   "think_chars": 1704617,
+   "secs": 34537.1
+  },
+  "q35": {
+   "label": "Qwen3.5-9B FP8",
+   "n": 600,
+   "base": 500,
+   "think": 546,
+   "delta": 46,
+   "percat": {
+    "Python": {
+     "n": 50,
+     "base": 43,
+     "think": 48,
+     "delta": 5
+    },
+    "Django": {
+     "n": 50,
+     "base": 39,
+     "think": 43,
+     "delta": 4
+    },
+    "SQL": {
+     "n": 50,
+     "base": 33,
+     "think": 44,
+     "delta": 11
+    },
+    "JS": {
+     "n": 50,
+     "base": 47,
+     "think": 49,
+     "delta": 2
+    },
+    "TS": {
+     "n": 50,
+     "base": 44,
+     "think": 45,
+     "delta": 1
+    },
+    "Bash": {
+     "n": 50,
+     "base": 39,
+     "think": 44,
+     "delta": 5
+    },
+    "Git": {
+     "n": 50,
+     "base": 43,
+     "think": 49,
+     "delta": 6
+    },
+    "SSH": {
+     "n": 50,
+     "base": 38,
+     "think": 43,
+     "delta": 5
+    },
+    "GitHub": {
+     "n": 50,
+     "base": 32,
+     "think": 36,
+     "delta": 4
+    },
+    "Docs": {
+     "n": 50,
+     "base": 44,
+     "think": 48,
+     "delta": 4
+    },
+    "ReactNative": {
+     "n": 50,
+     "base": 48,
+     "think": 47,
+     "delta": -1
+    },
+    "RAG": {
+     "n": 50,
+     "base": 50,
+     "think": 50,
+     "delta": 0
+    }
+   },
+   "gained": [
+    "dj-007",
+    "dj-012",
+    "dj-023",
+    "dj-029",
+    "dj-045",
+    "dj-046",
+    "doc-003",
+    "doc-034",
+    "doc-040",
+    "doc-041",
+    "doc-042",
+    "gh-006",
+    "gh-010",
+    "gh-026",
+    "gh-033",
+    "gh-035",
+    "gh-037",
+    "gh-039",
+    "gh-046",
+    "gh-049",
+    "git-001",
+    "git-010",
+    "git-019",
+    "git-020",
+    "git-021",
+    "git-033",
+    "git-035",
+    "js-038",
+    "js-044",
+    "js-046",
+    "py-001",
+    "py-004",
+    "py-017",
+    "py-025",
+    "py-032",
+    "py-046",
+    "rn-032",
+    "rn-042",
+    "sh-002",
+    "sh-012",
+    "sh-021",
+    "sh-031",
+    "sh-038",
+    "sh-041",
+    "sh-042",
+    "sql-001",
+    "sql-012",
+    "sql-016",
+    "sql-023",
+    "sql-027",
+    "sql-030",
+    "sql-031",
+    "sql-034",
+    "sql-039",
+    "sql-040",
+    "sql-048",
+    "ssh-001",
+    "ssh-011",
+    "ssh-015",
+    "ssh-018",
+    "ssh-021",
+    "ssh-029",
+    "ssh-047",
+    "ssh-049",
+    "ts-002",
+    "ts-017",
+    "ts-027",
+    "ts-039",
+    "ts-042"
+   ],
+   "lost": [
+    "dj-032",
+    "dj-040",
+    "doc-022",
+    "gh-022",
+    "gh-027",
+    "gh-040",
+    "gh-048",
+    "gh-050",
+    "git-040",
+    "js-001",
+    "py-044",
+    "rn-008",
+    "rn-045",
+    "rn-050",
+    "sh-009",
+    "sh-028",
+    "ssh-003",
+    "ssh-030",
+    "ssh-048",
+    "ts-013",
+    "ts-035",
+    "ts-049",
+    "ts-050"
+   ],
+   "empty": 8,
+   "truncated": 9,
+   "errors": 0,
+   "traced": 600,
+   "tokens": 1779065,
+   "think_chars": 6317430,
+   "secs": 113130.4
+  }
+ }
+}

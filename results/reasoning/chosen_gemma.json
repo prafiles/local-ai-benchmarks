@@ -1,0 +1,10 @@
+{
+ "model": "google/gemma-4-12B-it-qat-w4a16-ct",
+ "sampling": {
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "top_k": 20
+ },
+ "name": "t0.6/k20",
+ "why": "Measured on the 6 probes that spiral, 2 passes each, budget 8000: t0.6/k20 12/12 for 18780 tok; t0.8/k20 12/12 for 19975 tok; t1.0/k64 12/12 for 19378 tok. Picked on answered count, not median trace length -- ranking by median is what wrongly 'confirmed' a trace cap on Qwen3.5."
+}

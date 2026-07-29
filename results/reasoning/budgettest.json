@@ -1,0 +1,110 @@
+[
+ {
+  "tid": "sh-001",
+  "bud": 8000,
+  "think": 6025,
+  "ans": 0,
+  "tok": 8000,
+  "finish": "length",
+  "secs": 382.8
+ },
+ {
+  "tid": "sql-001",
+  "bud": 8000,
+  "think": 7068,
+  "ans": 0,
+  "tok": 8000,
+  "finish": "length",
+  "secs": 382.8
+ },
+ {
+  "tid": "py-001",
+  "bud": 8000,
+  "think": 4836,
+  "ans": 1485,
+  "tok": 5190,
+  "finish": "stop",
+  "secs": 248.5
+ },
+ {
+  "tid": "ts-001",
+  "bud": 8000,
+  "think": 6571,
+  "ans": 0,
+  "tok": 8000,
+  "finish": "length",
+  "secs": 382.8
+ },
+ {
+  "tid": "dj-001",
+  "bud": 8000,
+  "think": 7204,
+  "ans": 0,
+  "tok": 8000,
+  "finish": "length",
+  "secs": 381.3
+ },
+ {
+  "tid": "doc-001",
+  "bud": 8000,
+  "think": 7336,
+  "ans": 0,
+  "tok": 8000,
+  "finish": "length",
+  "secs": 376.9
+ },
+ {
+  "tid": "sh-001",
+  "bud": 16000,
+  "think": 12432,
+  "ans": 0,
+  "tok": 16000,
+  "finish": "length",
+  "secs": 765.9
+ },
+ {
+  "tid": "sql-001",
+  "bud": 16000,
+  "think": 13834,
+  "ans": 0,
+  "tok": 16000,
+  "finish": "length",
+  "secs": 766.0
+ },
+ {
+  "tid": "py-001",
+  "bud": 16000,
+  "think": 4836,
+  "ans": 1485,
+  "tok": 5190,
+  "finish": "stop",
+  "secs": 247.0
+ },
+ {
+  "tid": "ts-001",
+  "bud": 16000,
+  "think": 14976,
+  "ans": 0,
+  "tok": 16000,
+  "finish": "length",
+  "secs": 766.0
+ },
+ {
+  "tid": "dj-001",
+  "bud": 16000,
+  "think": 15336,
+  "ans": 0,
+  "tok": 16000,
+  "finish": "length",
+  "secs": 763.1
+ },
+ {
+  "tid": "doc-001",
+  "bud": 16000,
+  "think": 13529,
+  "ans": 0,
+  "tok": 16000,
+  "finish": "length",
+  "secs": 740.4
+ }
+]
