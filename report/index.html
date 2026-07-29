@@ -126,9 +126,19 @@
 
   .scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 3px;
             background: var(--surface); }
-  table { border-collapse: collapse; width: 100%; font-size: .85rem; min-width: 34rem; }
+  /* Colour is set explicitly on the table and its cells rather than inherited.
+     This file carries no doctype on purpose -- the artifact wrapper supplies one
+     -- but it is also opened directly as report/index.html, and a browser with no
+     doctype renders in quirks mode, where a table does NOT inherit colour from its
+     ancestors. That left every data cell at the UA default black on the dark
+     surface: unreadable in dark mode, and invisible only there, since black on the
+     light surface looks intentional. th escaped it just because it already had an
+     explicit colour. */
+  table { border-collapse: collapse; width: 100%; font-size: .85rem; min-width: 34rem;
+          color: var(--ink); font-family: var(--sans); }
   th, td { text-align: left; padding: .55rem .8rem; border-bottom: 1px solid var(--rule);
-           vertical-align: top; }
+           vertical-align: top; color: var(--ink); }
+  td b, td strong { color: var(--ink); }
   th { font-family: var(--mono); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase;
        color: var(--ink-3); font-weight: 600; background: var(--paper); }
   tbody tr:last-child td { border-bottom: 0; }

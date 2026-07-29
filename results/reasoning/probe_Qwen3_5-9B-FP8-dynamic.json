@@ -1,0 +1,1 @@
+{"model": "RedHatAI/Qwen3.5-9B-FP8-dynamic", "probes": [{"target": 8000, "ok": false, "err": "HTTPError: HTTP Error 500: Internal Server Error"}]}

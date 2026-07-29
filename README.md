@@ -217,12 +217,32 @@ Key files:
 | `harness/tune2.py` | trace-cap / sampling / concurrency sweep |
 | `harness/agg_think.py` | reasoning arm vs its own no-reasoning baseline |
 | `harness/mkprofiles.py` | feeds `chosen_*.json` sampling into the runner, so params cannot drift |
+| `harness/agg8.py` | the full eight-entry dataset, both suites, four models × off/on |
+| `harness/cotprompt.py`, `cotfmt.py` | the CoT-instruction sweeps — a `<think>`-tag prompt reasoned on **0 of 8** probes |
+| `harness/cotcheck.py` | proves batching perturbs greedy output, which is why the CoT arms get replica baselines |
+| `harness/patch_*.py` | every harness change, each carrying the measurement that motivated it |
 | `serving/runthink2.sh` | the reasoning run, with the reasoning for each parameter |
 | `serving/chain_gemma.sh` | Gemma tune-and-run, gated on thinking actually engaging |
+| `serving/runcot.sh`, `recot.sh` | prompted-CoT arms, each paired with a fresh matched baseline |
+| `serving/runctx.sh` | long-context reasoning arm, all four models |
+| `serving/docker-compose.gemma4.yaml` | everyday serving config for the leading model — not a benchmark script |
 
 `results/reasoning/` also carries `chosen_q35.json` and `chosen_gemma.json` — the sampling
 decision for each model together with the measurement that justified it, so the params in the
-results are the params that were measured rather than ones retyped into a script.
+results are the params that were measured rather than ones retyped into a script. It also keeps
+`t_*.oldinstr.json`: the CoT runs under the **rejected** instruction, which scored 529 and 506
+against the accepted wording's 518 and 536. Prompted CoT is that sensitive to phrasing, and the
+discarded arm is kept so the claim is checkable rather than asserted.
+
+`harness/b2*.py` is the superseded first iteration of the suite, kept only for provenance —
+nothing in these results comes from it.
+
+**One knob deliberately absent.** A per-attempt wall-clock timeout was written and then reverted
+mid-arm, so it is not in this repo. Two models had already completed at the original 3600s ceiling,
+and shipping a patch that silently changes the serving configuration would make later runs
+incomparable to them for no measurable benefit — the two models still to run averaged ~960 and
+~174 completion tokens, nowhere near the ceiling. The runaway case it targeted is real but rare
+(worst observed: 604s, and that was three escalating attempts stacked, not one generation).
 
 ---
 

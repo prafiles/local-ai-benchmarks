@@ -1,0 +1,97 @@
+name: gemma4-vllm-aio
+
+services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    container_name: gemma4-vllm
+    restart: unless-stopped
+
+    # vLLM official Docker usage requires NVIDIA GPU access and ipc=host.
+    # Docs show: --gpus all, HF token env, HF cache mount, -p 8000:8000, --ipc=host.
+    ipc: host
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      # Put this in .env:
+      # HF_TOKEN=hf_xxxxxxxxxxxxxxxxx
+      HF_TOKEN: ${HF_TOKEN}
+      HUGGING_FACE_HUB_TOKEN: ${HF_TOKEN}
+
+      # Safer cache locations inside mounted volume
+      HF_HOME: /root/.cache/huggingface
+      HUGGINGFACE_HUB_CACHE: /root/.cache/huggingface/hub
+
+      # Avoid tokenizer fork warnings
+      TOKENIZERS_PARALLELISM: "false"
+      VLLM_MARLIN_USE_ATOMIC_ADD: "0"
+
+      VLLM_DISABLE_MARLIN: "1"
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - hf-cache:/root/.cache/huggingface
+      - vllm-cache:/root/.cache/vllm
+      - ./patches/gemma4_mm.py:/usr/local/lib/python3.12/dist-packages/vllm/model_executor/models/gemma4_mm.py
+
+    command:
+      - --model
+      - ${MODEL_ID:-google/gemma-4-12B-it-qat-q4_0-compressed-tensors}
+
+      # Expose OpenAI-compatible API
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+
+      # 4060 Ti 16 GB conservative defaults
+      - --max-model-len
+      - ${MAX_MODEL_LEN:-4096}
+      - --gpu-memory-utilization
+      - ${GPU_MEMORY_UTILIZATION:-0.90}
+      - --max-num-seqs
+      - ${MAX_NUM_SEQS:-2}
+
+      # Often helps small/local cards avoid graph capture memory issues
+      - --enforce-eager
+
+      # Let vLLM choose proper dtype/quantization path from model config
+      - --dtype
+      - auto
+
+      # Needed by some model repos
+      - --trust-remote-code
+
+      # Gemma 4 tool/reasoning support, remove if your vLLM build errors on these flags
+      - --reasoning-parser
+      - gemma4
+      - --tool-call-parser
+      - gemma4
+      - --enable-auto-tool-choice
+      - --kv-cache-dtype
+      - fp8
+
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python3 - <<'PY'\nimport urllib.request\nurllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)\nPY"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+
+volumes:
+  hf-cache:
+  vllm-cache:
+
