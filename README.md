@@ -27,33 +27,19 @@ the resulting state; SSH configs go through **`ssh -G`**; TypeScript must surviv
 | Mellum2-12B-A2.5B FP8 | 530/600 | 88.3% | 26.1 tok/s | Django 38/50 |
 | Qwen3.5-9B FP8 | 500/600 | 83.3% | 21.3 tok/s | GitHub 32/50 |
 
-With **reasoning enabled** — only two of the four models have the mode, so this is a separate
-table, not a column above. Full detail in [Reasoning mode](#reasoning-mode):
+With **reasoning enabled** — two models have a real thinking mode, two get a chain-of-thought
+prompt instead. Full detail in [Reasoning mode](#reasoning-mode):
 
-| Model | no reasoning | reasoning | Δ | cost of the gain |
+| Model | kind | off | on | Δ |
 |---|---|---|---|---|
-| Gemma 4 12B QAT | 546/600 | **575/600** | **+29** | 2,841 trace chars/task, 0 answers lost |
-| Qwen3.5-9B FP8 | 500/600 | **546/600** | **+46** | 10,529 trace chars/task, 8 answers lost |
+| Gemma 4 12B QAT | native | 546/600 | **575/600** | **+29** |
+| Qwen3.5-9B FP8 | native | 500/600 | **546/600** | **+46** |
+| Qwen2.5-Coder-14B | prompted CoT | 539/600 | **536/600** | **-3** |
+| Mellum2-12B-A2.5B | prompted CoT | 527/600 | **518/600** | **-9** |
 
-Reasoning does not reorder the ranking: Qwen3.5 gains most and lands exactly on Gemma's
-*non-reasoning* score, while Gemma extends its lead.
-
-Per category, each out of 50:
-
-| | Gemma | Qwen2.5 | Mellum2 | Qwen3.5 |
-|---|---|---|---|---|
-| Python | **46** | 42 | 45 | 43 |
-| Django | 42 | **43** | 38 | 39 |
-| SQL | 42 | 42 | **43** | 33 |
-| JS | **49** | 47 | 48 | 47 |
-| TS | 47 | **49** | **49** | 44 |
-| Bash | **46** | 44 | 39 | 39 |
-| Git | **46** | 45 | 41 | 43 |
-| SSH | 42 | **44** | 40 | 38 |
-| GitHub | 39 | **41** | **41** | 32 |
-| Docs | **48** | 43 | **48** | 44 |
-| ReactNative | **49** | **49** | **49** | 48 |
-| RAG | **50** | **50** | 49 | **50** |
+A trained thinking mode gains; a prompt asking for one does not. Reasoning does not reorder the
+ranking: Qwen3.5 gains most and lands exactly on Gemma's *non-reasoning* score, while Gemma
+extends its lead.
 
 ### Long context — 60 probes, at depth vs. control
 
@@ -61,12 +47,20 @@ Each probe is asked twice: once inside a session grown to its target depth, and 
 the filler removed and **nothing else changed**. The control is what separates "can't do the
 task" from "couldn't reach the fact any more".
 
-| Model | At depth | Control | Kept | Rejected | Reading |
+| Model | reasoning | At depth | Control | Kept | Reading |
 |---|---|---|---|---|---|
-| Qwen3.5-9B FP8 | 45/60 | 44/60 | **102%** | 0 | No measurable degradation at any depth |
-| Gemma 4 12B QAT | **46/60** | 49/60 | 94% | 0 | Best absolute; mild loss at the deepest rung |
-| Qwen2.5-Coder-14B | 28/60 | 48/60 | 58% | **24** | Not degradation — 24 requests were *refused* |
-| Mellum2-12B-A2.5B | 16/60 | 47/60 | **34%** | 0 | Loses two thirds; already halved by 65K |
+| Qwen3.5-9B FP8 | off | 45/60 | 44/60 | 102% | No measurable degradation at any depth |
+| &nbsp;&nbsp;&bull; with reasoning (native) | on | 49/60 | 51/60 | 96% | &mdash; |
+| Gemma 4 12B QAT | off | 46/60 | 49/60 | 94% | Best absolute; mild loss at the deepest rung |
+| &nbsp;&nbsp;&bull; with reasoning (native) | on | 46/60 | 54/60 | 85% | 7 could not run; tightest 1817 tok to think in |
+| Qwen2.5-Coder-14B | off | 28/60 | 48/60 | 58% | Not degradation &mdash; 24 requests were *refused* |
+| &nbsp;&nbsp;&bull; with reasoning (CoT) | on | 24/60 | 45/60 | 53% | 24 could not run |
+| Mellum2-12B-A2.5B | off | 16/60 | 47/60 | 34% | Loses two thirds; already halved by 65K |
+| &nbsp;&nbsp;&bull; with reasoning (CoT) | on | 13/60 | 35/60 | 37% | 2 could not run; tightest 161 tok to think in |
+
+Comparing raw 60-probe totals charges a window limit to the model: a probe the reasoning arm
+could not attempt scores 0. On the **matched subset** — probes both arms actually ran — the split
+is clean: **Qwen3.5-9B 45&rarr;49 (+4)**, **Gemma 43&rarr;46 (+3)**, **Qwen2.5-Coder-14B 28&rarr;24 (-4)**, **Mellum2-12B-A2.5B 16&rarr;13 (-3)**.
 
 **The short-context ranking does not survive.** Qwen3.5 finishes last on 600 tasks and ties
 for first at depth. Mellum2 finishes third and collapses.
@@ -279,93 +273,73 @@ python3 harness/b4.py oracle b4_oracle.json && python3 harness/b4.py grade b4_or
 
 ## Reasoning mode
 
-Reasoning is not something all four models can be given. A capability audit of the four chat
-templates:
+Only two of the four models have a reasoning mode. Gemma 4's template defaults `enable_thinking`
+to **false**; Qwen3.5 thinks unless told not to. Mellum2's template only strips `</think>` out of
+history, and Qwen2.5-Coder has no thinking in its template at all — for those two there is no
+switch to throw, so they get a **chain-of-thought prompt** instead. That is reported as a
+different thing, not blended in, and the distinction turns out to be the whole result.
 
-| Model | Thinking mode | |
-|---|---|---|
-| Gemma 4 12B QAT | yes | `enable_thinking` defaults to **false** — it had never used it in any run here |
-| Qwen3.5-9B | yes | thinks by default; the original runs explicitly suppressed it |
-| Mellum2-12B | **no** | template only strips `</think>` from history; no switch exists |
-| Qwen2.5-Coder-14B | **no** | no `thinking`/`reasoning`/`<think>` in the template at all |
+### Short context — 600 tasks
 
-So this arm covers the two models that have the mode. Prompting the other two to "think step by
-step" is prompt engineering, not a trained mode, and is not mixed into these numbers.
+| Model | kind | off | on | Δ | think:answer | flips |
+|---|---|---|---|---|---|---|
+| Gemma 4 12B QAT | native | 546/600 | **575/600** | **+29** | 7.0&times; | +38 / &minus;9 |
+| Qwen3.5-9B FP8 | native | 500/600 | **546/600** | **+46** | 24.2&times; | +69 / &minus;23 |
+| Qwen2.5-Coder-14B | prompted CoT | 539/600 | **536/600** | **-3** | 2.5&times; | +27 / &minus;30 |
+| Mellum2-12B-A2.5B | prompted CoT | 527/600 | **518/600** | **-9** | 1.2&times; | +31 / &minus;40 |
 
-### Results — both improve, and the ranking does not change
+**A trained thinking mode gains; a prompt asking for one does not.** +29 and +46 against −3 and
+−9. The think-to-answer ratios say why: the native models produce 7× and 24× as much deliberation
+as answer, the prompted ones 2.5× and 1.2×. Asking for reasoning buys a sentence or two; a
+trained mode produces pages.
 
-| Model | no reasoning | reasoning | Δ |
-|---|---|---|---|
-| **Gemma 4 12B QAT** | 546/600 | **575/600** | **+29** |
-| **Qwen3.5-9B FP8** | 500/600 | **546/600** | **+46** |
+**The CoT deltas sit inside a measured noise floor.** Both prompted arms churn heavily while
+barely moving the total — Mellum2 flipped 71 tasks for a net of −9. For scale, re-running
+Mellum2's *own baseline* at a different concurrency flipped **25 tasks** for a net of −3. Greedy
+decoding is not reproducible across batch sizes, which is why the prompted arms are differenced
+against a fresh baseline captured at the same concurrency and temperature: the prompt is then the
+only variable. See `results/reasoning/b_*.json`.
 
-Qwen3.5 gains the most and still does not overtake Gemma — it lands exactly on Gemma's
-*non-reasoning* score. The earlier version of this report predicted that Qwen3.5, "given room to
-think, could plausibly score higher." That is now measured, and it was right.
+### Long context — 60 probes
 
-| category | Gemma base → think | Qwen3.5 base → think |
-|---|---|---|
-| Python | 46 → 50 **+4** | 43 → 48 **+5** |
-| Django | 42 → 47 **+5** | 39 → 43 **+4** |
-| SQL | 42 → 47 **+5** | 33 → 44 **+11** |
-| JS | 49 → 50 +1 | 47 → 49 +2 |
-| TS | 47 → 49 +2 | 44 → 45 +1 |
-| Bash | 46 → 49 +3 | 39 → 44 **+5** |
-| Git | 46 → 48 +2 | 43 → 49 **+6** |
-| SSH | 42 → 46 **+4** | 38 → 43 **+5** |
-| GitHub | 39 → 41 +2 | 32 → 36 **+4** |
-| Docs | 48 → 50 +2 | 44 → 48 **+4** |
-| ReactNative | 49 → 48 **−1** | 48 → 47 **−1** |
-| RAG | 50 → 50 — | 50 → 50 — |
+| Model | deep | shallow | matched deep subset | constraint |
+|---|---|---|---|---|
+| Qwen3.5-9B FP8 | 45 &rarr; 49 | 44 &rarr; 51 | 45 &rarr; 49 (**+4**) | &mdash; |
+| Gemma 4 12B QAT | 46 &rarr; 46 | 49 &rarr; 54 | 43 &rarr; 46 (**+3**) | 7 could not run; tightest 1817 tok to think in |
+| Qwen2.5-Coder-14B | 28 &rarr; 24 | 48 &rarr; 45 | 28 &rarr; 24 (**-4**) | 24 could not run |
+| Mellum2-12B-A2.5B | 16 &rarr; 13 | 47 &rarr; 35 | 16 &rarr; 13 (**-3**) | 2 could not run; tightest 161 tok to think in |
 
-**ReactNative is the only category where reasoning hurt, and it hurt both models.** RAG was
-already saturated at 50/50 for both, so it could not move.
+**The reasoning budget competes with the session for the same window.** A probe whose prompt
+fills the context has nowhere to put a chain of thought. Gemma lost **7 of its 12 deepest probes**
+outright and got 1,817 tokens to think in on the one that fit; Mellum2 was squeezed to **161
+tokens** at its tightest. Those are not wrong answers and are not scored as any. This is a third
+distinct failure mode, separate from Qwen2.5-Coder's ceiling (its server refuses a 95K prompt, so
+24 probes never ran in either arm) and separate from a model simply getting a probe wrong.
 
-### The two arms are not comparable in kind
+**The matched subset is the only apples-to-apples deep comparison.** Counting a probe the
+reasoning arm could not attempt as a failure charges a window limit to the model: Gemma's raw
+deep line reads 46 → 46, which looks like reasoning did nothing, while across the 53 probes it
+could actually run it is **43 → 46**. On that basis the split is clean — native thinking gains at
+depth (+4, +3), prompted CoT loses (−4, −3).
 
-The headline numbers hide that these were obtained under very different conditions.
-
-| | Gemma 4 | Qwen3.5 |
-|---|---|---|
-| reasoning per task | 2,841 chars | **10,529 chars** |
-| think:answer ratio | 7.0× | **24.2×** |
-| trace median / p90 / max | 1,442 / 7,323 / 26,902 | 8,908 / 22,015 / 34,697 |
-| completion tokens | 576,727 | **1,779,065** |
-| wall clock (8 concurrent) | **1.2 h** | 3.9 h |
-| tasks needing a retry | 7 | **53** |
-| answers never produced | **0** | 8 |
-| truncated | **0** | 9 |
-| first-attempt sampling | t=0.6 (coolest tested) | t=1.0 (forced) |
-| flips | +38 / −9 | +69 / −23 |
-
-Gemma's reasoning terminates. It did so at every temperature tested (12/12 at t=0.6, 0.8 and
-1.0 alike), in a third of the tokens, with nothing lost to truncation. Qwen3.5's spirals: it
-needed hot sampling to terminate at all, still lost 8 answers outright, and churned three times
-as many tasks in both directions for its larger net gain.
-
-That asymmetry makes **Gemma's +29 the more trustworthy of the two numbers.** Because Gemma
-terminates at t=0.6 it sits close to the baseline's t=0, so less of its gain can be sampling.
-Qwen3.5 had to be run at t=1.0, so its +46 is the more confounded figure — see the confound note
-below.
-
-Also worth separating: of Qwen3.5's 23 regressions only **3** were empty answers. The other 20
-are real — reasoning talked the model out of answers it got right without it.
+**Qwen3.5 is the only model unconstrained at depth**, and the only one that gains in both buckets
+(+4 deep, +7 shallow). Its tokenizer is the most efficient of the four, so the same session costs
+it ~118K tokens where Gemma's costs ~129K — which is exactly the headroom a chain of thought needs.
 
 ### Getting it to run at all
 
-Three things had to be established before any score meant anything. Each is a measurement on
-this GPU, not a model-card claim.
+Three findings, each measured on this GPU rather than taken from a model card. Two contradicted
+the obvious fix.
 
-**No trace cap exists.** vLLM 0.22 accepts `reasoning_effort`, `max_thinking_tokens`, and the
-chat template's `thinking_budget` without complaint, and honours none of them. The proof is not
-a median — it is that `sh-001` emitted a **6,538-token trace under a "1,500-token cap"** while
-emitting 3,041 uncapped. Ranking configurations by median trace length made all three caps look
-effective; the paired per-probe view showed the median had moved only because a different probe
-happened to spiral that round. Aggregates cannot see this, which is why
-[`harness/hardtemp.py`](harness/hardtemp.py) reports per probe.
+**No trace cap exists.** vLLM 0.22 accepts `reasoning_effort`, `max_thinking_tokens` and the chat
+template's `thinking_budget`, and honours none of them. The proof is not a median: `sh-001`
+emitted a **6,538-token trace under a "1,500-token cap"** while emitting 3,041 uncapped. Ranking
+configurations by median trace length made all three caps look effective — the median had moved
+only because a different probe happened to spiral that round. Aggregates cannot see this, which is
+why [`harness/hardtemp.py`](harness/hardtemp.py) reports per probe.
 
 **Budget is not the lever.** Doubling the cap 8,000 → 16,000 at temperature 0 did not let traces
-finish — it doubled them:
+finish; it doubled them:
 
 | probe | trace @8,000 | trace @16,000 |
 |---|---|---|
@@ -376,49 +350,53 @@ finish — it doubled them:
 | doc-001 | 7,336 | 13,529 |
 | py-001 | 4,836 | 4,836 ✓ |
 
-`py-001` stopped at exactly the same point both times, which confirms greedy decoding is
-deterministic here and that a trace which terminates does so at a fixed length. The other five
-never terminate; they fill whatever they are given.
+`py-001` stopped at the same point both times — greedy is deterministic, and a trace that
+terminates does so at a fixed length. The other five never terminate; they fill whatever they are
+given.
 
-**Temperature is the lever — for Qwen3.5.** On the six probes that actually spiral, two passes
-each:
+**Temperature is the lever — and only Qwen3.5 needs it.** On the six probes that actually spiral,
+two passes each:
 
-| first-attempt sampling | Qwen3.5 answered | tokens | Gemma answered | tokens |
+| first-attempt sampling | Qwen3.5 | tokens | Gemma | tokens |
 |---|---|---|---|---|
-| t=0.6, top_p .95, top_k 20 — *Qwen's own thinking recommendation* | 4/12 | 78,066 | **12/12** | 18,780 |
+| t=0.6, top_p .95, top_k 20 — *Qwen's own recommendation* | 4/12 | 78,066 | **12/12** | 18,780 |
 | t=0.8, top_p .95, top_k 20 | 7/12 | 79,952 | **12/12** | 19,975 |
 | t=1.0, top_p .95, top_k 64 | **10/12** | 64,379 | **12/12** | 19,378 |
 
-For Qwen3.5, reliability and cost move together — a spiral burns the entire budget and returns
-nothing, so the hotter setting is both more reliable *and* cheaper. For Gemma the question does
-not arise; all three tie, so the coolest was taken as the one nearest the baseline's t=0.
+For Qwen3.5 reliability and cost move together — a spiral burns the whole budget and returns
+nothing, so hotter is both more reliable and cheaper. For Gemma the question never arises; all
+three tie, so the coolest was taken as the one nearest the baseline's temperature 0. Measured on
+an *easy* probe set this ranks backwards: `git`, `rag` and `rn` finish in ~300 tokens and
+terminate at any temperature.
 
-Measuring this on an easy probe set gives the opposite answer for Qwen3.5 — `git`, `rag` and
-`rn` finish in ~300 tokens and terminate at any temperature, so they rank noise.
+**The CoT instruction had to be measured too.** Every `<think>`-tag phrasing produced reasoning on
+**0 of 8** Mellum2 probes, including in a system role — these models will not emit a format they
+were not trained on. What works is a suffix that forbids answering immediately and sets a floor on
+the reasoning. It is also fragile: an earlier wording cost Qwen2.5-Coder 30 tasks purely because
+"exactly the requested output and nothing else" made it drop the `export` keyword its TypeScript
+tasks asked for (27 of 50 answers, against 0 of 50 at baseline). A trained thinking mode has no
+such knob to get wrong.
 
 ### How the arm is run
 
 - **Empty answers are resampled, wrong answers are not.** A truncated trace means the harness cut
-  the model off mid-thought; scoring it as a wrong answer would invent a capability failure.
-  Retries are triggered only by an empty response, climb `B4_ESCALATE`, and are recorded per task
-  as `attempts` so the cost stays visible. A retried task can still fail on its merits.
-- **Concurrency.** Decode is memory-bandwidth-bound, so the weights are re-read per token no
-  matter how many sequences are in flight. Measured: **22 tok/s at 1, 83 at 4, 166 at 8** — still
-  linear, so the card was never saturated. This is what makes the arm feasible; sequentially it
-  projected to ~46 h per model.
+  the model off mid-thought; scoring that as a wrong answer would invent a capability failure.
+  Retries fire only on an empty response, climb `B4_ESCALATE`, and are recorded per task as
+  `attempts`. A resampled task can still fail on its merits.
+- **Concurrency.** Decode is memory-bandwidth-bound, so weights are re-read per token regardless of
+  how many sequences are in flight. Measured: **22 tok/s at 1, 83 at 4, 166 at 8** — still linear,
+  so the card was never saturated. Sequentially this arm projected to ~46 h per model.
 
-> Note on the harness's own cost output: `b3.py grade` prints a "wall" figure and a tok/s that sum
-> per-task time across concurrent workers. At 8 workers those are ~8× the truth. The wall-clock
-> figures in this section are real elapsed time.
+> The harness's own cost output sums per-task time across concurrent workers, so its "wall" and
+> tok/s figures are ~8× the truth at 8 workers. Wall-clock figures here are real elapsed time.
 
 ### The confound, stated plainly
 
 The no-reasoning baseline runs at temperature 0. Thinking mode **cannot** run at temperature 0 on
-Qwen3.5 — its traces grow to fill any budget. So for that model reasoning and sampling changed
-together, and no rerun can separate them. Its +46 is the difference between *the best available
-non-reasoning configuration* and *the best available reasoning configuration*, not the isolated
-effect of reasoning. Gemma is less exposed to this: it terminates at t=0.6, the coolest setting
-tested, so its +29 is measured much nearer the baseline's sampling.
+Qwen3.5 — its traces grow to fill any budget — so for the native arms reasoning and sampling
+changed together, and no rerun separates them. The prompted-CoT arms do not have this problem:
+they run greedy on both sides against a concurrency-matched baseline, making them the only
+genuinely single-variable comparison in this repository.
 
 ---
 

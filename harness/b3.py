@@ -105,18 +105,40 @@ THINK_CAPABLE = ("gemma-4", "qwen3.5")
 # same thing as a trained thinking mode, so this arm is reported separately.
 COT = os.environ.get("B4_COT") == "1"
 
-COT_PREFIX = (
-    "Work through this carefully, step by step, inside <think> and </think> tags.\n"
-    "After the closing </think> tag, give ONLY the final answer in exactly the "
-    "format requested below, with no commentary before or after it.\n\n"
+# Measured, not guessed -- see cotprompt.py. A <think>-tag instruction produced
+# reasoning on 0 of 8 probes; this produced it on 8 of 8 with every answer intact.
+COT_MARK = "ANSWER:"
+COT_SUFFIX = (
+    "\n\nDo not answer immediately. First write at least two sentences explaining "
+    "your approach and any edge cases. Then write " + COT_MARK + " on its own line, "
+    "followed by the answer in exactly the format the task asked for -- keeping "
+    "every keyword it specified, such as export or module.exports -- and nothing "
+    "else."
 )
+# kept so older result files stay readable
+COT_PREFIX = COT_SUFFIX
 
 
 def with_cot(model, prompt):
-    """Prepend the reasoning instruction only where the model has no native mode."""
+    """Append the reasoning instruction where the model has no native mode.
+
+    Appended, not prefixed: the task prompts end with "Output only the code, no
+    explanation", and a prefix loses to that.
+    """
     if COT and not can_think(model):
-        return COT_PREFIX + prompt
+        return prompt + COT_SUFFIX
     return prompt
+
+
+# Set by grade() from the run's own metadata. Off by default so the baseline and
+# native arms are untouched -- an answer may legitimately contain "ANSWER:".
+COT_SPLIT = False
+
+
+def after_mark(t):
+    """Text after the last CoT marker; unchanged if the model did not use one."""
+    i = t.rfind(COT_MARK)
+    return t[i + len(COT_MARK):] if i >= 0 else t
 
 
 
@@ -162,6 +184,10 @@ def sampling(payload, model):
 # ------------------------------------------------------------------- runner
 # Only ever spent on an EMPTY answer, never on a wrong one.
 RETRIES = int(os.environ.get("B4_RETRIES", "0"))
+# Wall-clock ceiling for ONE generation attempt. Not a token budget: see
+# patch_timeout.py for why those are different knobs.
+REQ_TIMEOUT = int(os.environ.get("B4_TIMEOUT", "1800"))
+
 
 
 # Temperature to use on each retry, hottest last. Only reached after an empty
@@ -180,7 +206,7 @@ def _once(model, prompt, max_tokens, temp=None):
     req = urllib.request.Request(URL, data=json.dumps(payload).encode(),
                                  headers={"Content-Type": "application/json"})
     t0 = time.time()
-    with urllib.request.urlopen(req, timeout=1800) as r:
+    with urllib.request.urlopen(req, timeout=REQ_TIMEOUT) as r:
         d = json.loads(r.read())
     ch = d["choices"][0]
     msg = ch["message"]
@@ -214,7 +240,9 @@ def ask(model, prompt, max_tokens):
 
 def run(model, out_path):
     tasks = all_tasks()
-    res = {"model": model, "items": {}}
+    res = {"model": model, "items": {},
+           "arm": ("native" if (THINK and can_think(model))
+                   else "cot" if (COT and not can_think(model)) else "plain")}
     if os.path.exists(out_path):
         try:
             prev = json.load(open(out_path))
@@ -270,7 +298,13 @@ FENCE = re.compile(r"```[a-zA-Z]*\s*\n(.*?)```", re.S)
 
 
 def strip_think(t):
-    return re.sub(r"<think>.*?</think>", "", t, flags=re.S)
+    if COT_SPLIT:
+        t = after_mark(t)
+    t = re.sub(r"<think>.*?</think>", "", t, flags=re.S)
+    # An unclosed <think> means the cap landed mid-thought: everything after it is
+    # deliberation, never an answer. Left in, it would be graded AS the answer, and
+    # a rubric can match a model reasoning aloud in the task's own vocabulary.
+    return re.sub(r"<think>.*\Z", "", t, flags=re.S)
 
 
 def code_of(t):
@@ -580,7 +614,13 @@ MISSING_OK = True
 
 
 def grade(path):
+    global COT_SPLIT
     data = json.load(open(path))
+    COT_SPLIT = data.get("arm") == "cot"
+    if COT_SPLIT:
+        used = sum(1 for v in data["items"].values() if COT_MARK in (v.get("text") or ""))
+        print("  CoT arm: %d/%d answers used the %s marker"
+              % (used, len(data["items"]), COT_MARK), flush=True)
     items = data["items"]
     # A grader that dies on the first absent id cannot grade a partial run, and
     # dies at the worst possible moment on a complete one. Stub the gaps and say

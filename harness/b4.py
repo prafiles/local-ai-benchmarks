@@ -12,6 +12,7 @@ session (`deep`), and once with only the convention-setting turns in front of it
 this task" from "the model couldn't reach the fact any more". Without it a low
 deep score is unattributable.
 """
+import concurrent.futures
 import json
 import os
 import re
@@ -19,7 +20,9 @@ import shutil
 import sqlite3
 import subprocess
 import sys
+import threading
 import time
+import urllib.error
 import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -135,25 +138,139 @@ def budget(mt):
     return max(int(mt * BUDGET_MULT), BUDGET_FLOOR) if THINK else mt
 
 
+PROFILES = json.loads(os.environ.get("B4_PROFILES", "{}"))
+
+DEFAULT_SAMP = {"temperature": TEMP}
+if TEMP > 0:
+    DEFAULT_SAMP["top_p"] = TOPP
+
+
+def profile_for(model):
+    m = model.lower()
+    for key, prof in PROFILES.items():
+        if key.lower() in m:
+            return prof
+    return DEFAULT_SAMP
+
+
 def sampling(payload, model):
-    payload["temperature"] = TEMP
-    if TEMP > 0:
-        payload["top_p"] = TOPP
+    prof = dict(profile_for(model))
+    tmpl_extra = prof.pop("_tmpl", {})
+    payload.update(prof)
     if can_think(model):
         # explicit either way: the flag is what separates the two arms
-        payload["chat_template_kwargs"] = {"enable_thinking": bool(THINK)}
+        tmpl = {"enable_thinking": bool(THINK)}
+        tmpl.update(tmpl_extra)
+        payload["chat_template_kwargs"] = tmpl
     return payload
 
 
+# --------------------------------------------------------------- CoT arm
+COT = os.environ.get("B4_COT") == "1"
+COT_MARK = "ANSWER:"
+COT_SUFFIX = (
+    "\n\nDo not answer immediately. First write at least two sentences explaining "
+    "your approach and any edge cases. Then write " + COT_MARK + " on its own line, "
+    "followed by the answer in exactly the format the task asked for -- keeping "
+    "every keyword it specified, such as export or module.exports -- and nothing "
+    "else."
+)
+COT_SPLIT = False
+
+
+def after_mark(t):
+    i = t.rfind(COT_MARK)
+    return t[i + len(COT_MARK):] if i >= 0 else t
+
+
+def with_cot(model, msgs):
+    """Append the reasoning instruction to the final user turn only.
+
+    The session's earlier turns are context, not the question being asked; putting
+    the instruction anywhere but last would ask the model to reason about history
+    it has already been given the answers to.
+    """
+    if not (COT and not can_think(model)):
+        return msgs
+    out = [dict(m) for m in msgs]
+    for m in reversed(out):
+        if m.get("role") == "user":
+            m["content"] = m["content"] + COT_SUFFIX
+            break
+    return out
+
+
+class NoRoom(Exception):
+    """The prompt alone exceeds the context window."""
+
+
+RETRIES = int(os.environ.get("B4_RETRIES", "0"))
+# Wall-clock ceiling for ONE generation attempt. Not a token budget: see
+# patch_timeout.py for why those are different knobs.
+REQ_TIMEOUT = int(os.environ.get("B4_TIMEOUT", "3600"))
+
+ESCALATE = [float(x) for x in
+            os.environ.get("B4_ESCALATE", "0.9,1.0").split(",") if x.strip()]
+
+# "maximum context length is N tokens. However, you requested M tokens (P in the
+# messages, C in the completion)" -- the server has already done the arithmetic,
+# so take its numbers rather than guessing at a tokenizer.
+CTXMAX = re.compile(r"maximum context length is (\d+) tokens", re.S)
+# two wordings in the wild: "N in the messages" (older) and "your prompt contains
+# at least N input tokens" (this build)
+CTXPROMPT = re.compile(r"(?:(\d+) in the messages"
+                       r"|prompt contains at least (\d+) input tokens)", re.S)
+
+
+def ctx_overflow(body):
+    """(window, prompt_tokens) if this is a context-length refusal, else None."""
+    m, n = CTXMAX.search(body), CTXPROMPT.search(body)
+    if not (m and n):
+        return None
+    return int(m.group(1)), int(n.group(1) or n.group(2))
+
+
 # ------------------------------------------------------------------- runner
-def ask(model, msgs, max_tokens):
-    payload = sampling({"model": model, "messages": msgs,
-                        "max_tokens": budget(max_tokens)}, model)
+def _post(model, msgs, cap):
+    payload = sampling({"model": model, "messages": with_cot(model, msgs),
+                        "max_tokens": cap}, model)
     req = urllib.request.Request(URL, data=json.dumps(payload).encode(),
                                  headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=REQ_TIMEOUT) as r:
+        return json.loads(r.read())
+
+
+def _once(model, msgs, max_tokens, temp=None):
+    cap = budget(max_tokens)
+    squeezed = 0
     t0 = time.time()
-    with urllib.request.urlopen(req, timeout=3600) as r:
-        d = json.loads(r.read())
+    # A real squeeze resolves on the first retry. More than a couple of rounds
+    # means the prompt itself does not fit, and the loop would otherwise crawl
+    # toward that conclusion 9 tokens at a time.
+    SQUEEZE_MAX = 3
+    for _ in range(SQUEEZE_MAX + 1):
+        try:
+            d = _post(model, msgs, cap)
+            break
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", "replace")
+            hit = ctx_overflow(body)
+            # The session plus a full reasoning budget does not fit the window.
+            # Shrink the budget to exactly what is left instead of failing: the
+            # probe is measuring the session, and how little room is left to think
+            # in at this depth is the interesting part.
+            if not hit:
+                raise
+            window, ptok = hit
+            room = window - ptok - 8
+            if room <= 64 or room >= cap:
+                raise NoRoom("prompt does not fit the window: %d in a %d window"
+                             % (ptok, window))
+            cap = room
+            squeezed += 1
+    else:
+        raise NoRoom("prompt does not fit the window after %d squeezes (cap %d)"
+                     % (SQUEEZE_MAX, cap))
     ch = d["choices"][0]
     msg = ch["message"]
     think = msg.get("reasoning") or msg.get("reasoning_content") or ""
@@ -162,32 +279,92 @@ def ask(model, msgs, max_tokens):
             "ptok": d["usage"]["prompt_tokens"],
             "think_chars": len(think),
             "finish": ch.get("finish_reason", ""),
+            "cap": cap, "squeezed": squeezed,
             "secs": round(time.time() - t0, 2)}
 
 
+def ask(model, msgs, max_tokens):
+    """Resample -- hotter each time -- only when the answer came back empty."""
+    spent, used = 0.0, []
+    r = None
+    for attempt in range(RETRIES + 1):
+        temp = None if attempt == 0 else ESCALATE[min(attempt - 1, len(ESCALATE) - 1)]
+        r = _once(model, msgs, max_tokens, temp)
+        spent += r["secs"]
+        used.append(temp)
+        if r["text"].strip():
+            break
+    r["attempts"] = len(used)
+    r["secs"] = round(spent, 2)
+    return r
+
+
 def run(model, out_path, mode="both"):
-    res = {"model": model, "deep": {}, "shallow": {}}
+    res = {"model": model, "deep": {}, "shallow": {},
+           "arm": ("native" if (THINK and can_think(model))
+                   else "cot" if (COT and not can_think(model)) else "plain")}
+    if os.path.exists(out_path):
+        try:
+            prev = json.load(open(out_path))
+            if prev.get("model") == model and prev.get("arm") == res["arm"]:
+                for b in ("deep", "shallow"):
+                    res[b] = {k: v for k, v in prev.get(b, {}).items()
+                              if not v.get("error")}
+                print("  resuming: deep %d, shallow %d already done"
+                      % (len(res["deep"]), len(res["shallow"])), flush=True)
+        except Exception:  # noqa: BLE001
+            print("  existing output unreadable, starting fresh", flush=True)
+
     plan = []
     for cat in ORDER:
         if mode in ("both", "deep"):
             plan += [("deep", cat, m, p) for m, p in build_deep(cat)]
         if mode in ("both", "shallow"):
             plan += [("shallow", cat, m, p) for m, p in build_shallow(cat)]
+    plan = [x for x in plan if x[3]["id"] not in res[x[0]]]
+
+    # Deep probes carry ~118K-token prompts, so only one or two fit the KV pool at
+    # once; shallow ones are small and parallelise freely. One worker count for
+    # both would either crawl through the shallow half or thrash the deep one.
+    wd = int(os.environ.get("B4_WORKERS_DEEP", "1"))
+    ws = int(os.environ.get("B4_WORKERS_SHALLOW", "4"))
+    print("  %d to run (deep x%d, shallow x%d)" % (len(plan), wd, ws), flush=True)
+
+    lock = threading.Lock()
     t0 = time.time()
-    for i, (bucket, cat, msgs, p) in enumerate(plan, 1):
+    done = [0]
+
+    def work(item):
+        bucket, cat, msgs, p = item
         try:
             r = ask(model, msgs, p["max_tokens"])
         except Exception as e:  # noqa: BLE001
             r = {"text": "", "tok": 0, "ptok": 0, "secs": 0, "finish": "error",
                  "error": f"{type(e).__name__}: {str(e)[:200]}"}
         r["cat"] = cat
-        res[bucket][p["id"]] = r
-        el = time.time() - t0
-        print(f"  {i}/{len(plan)} {bucket:<7} {p['id']:<10} "
-              f"ptok={r.get('ptok', 0):>6} {r['secs']:>6.1f}s  "
-              f"[{el/60:.1f}m elapsed, ~{el/i*(len(plan)-i)/60:.0f}m left]", flush=True)
-        with open(out_path, "w") as f:
-            json.dump(res, f)
+        with lock:
+            res[bucket][p["id"]] = r
+            done[0] += 1
+            n = done[0]
+            el = time.time() - t0
+            sq = (" squeezed->%d" % r.get("cap")) if r.get("squeezed") else ""
+            print(f"  {n}/{len(plan)} {bucket:<7} {p['id']:<10} "
+                  f"ptok={r.get('ptok', 0):>6} {r['secs']:>6.1f}s{sq}  "
+                  f"[{el/60:.1f}m, ~{el/n*(len(plan)-n)/60:.0f}m left]", flush=True)
+            with open(out_path + ".tmp", "w") as f:
+                json.dump(res, f)
+            os.replace(out_path + ".tmp", out_path)
+
+    for bucket, workers in (("shallow", ws), ("deep", wd)):
+        items = [x for x in plan if x[0] == bucket]
+        if not items:
+            continue
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
+            list(ex.map(work, items))
+
+    with open(out_path + ".tmp", "w") as f:
+        json.dump(res, f)
+    os.replace(out_path + ".tmp", out_path)
     print(f"saved -> {out_path}")
 
 
@@ -196,7 +373,12 @@ FENCE = re.compile(r"```[a-zA-Z]*\s*\n(.*?)```", re.S)
 
 
 def strip_think(t):
-    return re.sub(r"<think>.*?</think>", "", t, flags=re.S)
+    if COT_SPLIT:
+        t = after_mark(t)
+    t = re.sub(r"<think>.*?</think>", "", t, flags=re.S)
+    # unclosed <think> means the cap landed mid-thought; everything after it is
+    # deliberation and must not be graded as if it were the answer
+    return re.sub(r"<think>.*\Z", "", t, flags=re.S)
 
 
 def code_of(t):
@@ -523,7 +705,16 @@ def grade_bucket(items, tag):
 
 
 def grade(path):
+    global COT_SPLIT
     data = json.load(open(path))
+    COT_SPLIT = data.get("arm") == "cot"
+    if COT_SPLIT:
+        n = sum(1 for b in ("deep", "shallow")
+                for v in data.get(b, {}).values()
+                if COT_MARK in (v.get("text") or ""))
+        tot = sum(len(data.get(b, {})) for b in ("deep", "shallow"))
+        print("  CoT arm: %d/%d answers used the %s marker" % (n, tot, COT_MARK),
+              flush=True)
     out = {"model": data["model"], "results": {}}
     deep_ok = grade_bucket(data.get("deep", {}), "deep")
     shal_ok = grade_bucket(data.get("shallow", {}), "shal")

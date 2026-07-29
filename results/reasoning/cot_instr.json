@@ -1,0 +1,5 @@
+{
+ "name": "B suffix, scoped",
+ "kind": "suffix",
+ "instr": "\n\nBefore answering, reason step by step inside <think> and </think> tags.\nThe \"output only\" instruction above applies to what comes AFTER </think>: everything following the closing tag must be exactly the requested output and nothing else."
+}

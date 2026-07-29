@@ -100,6 +100,15 @@
   .bar:hover .fill { filter: brightness(1.18); }
   .fill.a { background: var(--a); } .fill.b { background: var(--b); }
   .fill.c { background: var(--c); } .fill.d { background: var(--d); }
+  /* "reasoning off" bar. Colour keeps meaning MODEL -- the same four hues used
+     everywhere else in this report -- and on/off rides on fill vs outline, so a
+     model's pair reads as a pair instead of as two unrelated series. */
+  .fill.a.hollow { background: transparent; box-shadow: inset 0 0 0 1.5px var(--a); }
+  .fill.b.hollow { background: transparent; box-shadow: inset 0 0 0 1.5px var(--b); }
+  .fill.c.hollow { background: transparent; box-shadow: inset 0 0 0 1.5px var(--c); }
+  .fill.d.hollow { background: transparent; box-shadow: inset 0 0 0 1.5px var(--d); }
+  .bars .bar + .bar { margin-top: 1px; }
+  .bars .bar:nth-child(even) { margin-bottom: 4px; }
   .val { font-family: var(--mono); font-size: .67rem; width: 1.6rem; text-align: right;
          color: var(--ink-2); font-variant-numeric: tabular-nums; }
 
@@ -142,7 +151,7 @@
 <div class="col">
 
   <header class="mast">
-    <p class="eyebrow">4 models &#183; 600 short tasks + 60 long-context probes + a 1,200-task reasoning arm &#183; RTX 4060 Ti 16 GB</p>
+    <p class="eyebrow">4 models &#215; reasoning off/on &#183; 600 short tasks + 60 long-context probes, both arms &#183; RTX 4060 Ti 16 GB</p>
     <h1>The short-context ranking does not survive a 120K session</h1>
     <p class="lede">Adding multi-turn sessions that grow to ~118K tokens reorders almost everything.
       Gemma still leads. But <strong>Qwen3.5 &#8212; last on the 600-task suite &#8212; is the only model with
@@ -152,7 +161,7 @@
     <div class="specs">
       <span><b>Host</b> single self-hosted node</span>
       <span><b>Engine</b> vLLM 0.22.1 &#183; eager</span>
-      <span><b>Temp</b> 0 &#183; reasoning arm cannot be</span>
+      <span><b>Temp</b> 0 &#183; native reasoning cannot be</span>
       <span><b>Depths</b> 10K &#183; 37K &#183; 70K &#183; 104K &#183; 120K measured</span>
       <span><b>Oracle</b> 600/600 and 60/60 &#183; null oracle 1/600</span>
     </div>
@@ -176,6 +185,7 @@
         <dt>Weights</dt><dd>8.3 GiB</dd>
         <dt>Context</dt><dd>131K &#183; 3.47&times;</dd>
         <dt>Long ctx</dt><dd><b>46/60</b> &#183; 94% kept</dd>
+        <dt>Reasoning</dt><dd><b>575</b> &#183; +29 &#183; native</dd>
       </dl>
     </article>
     <article class="card q">
@@ -189,6 +199,7 @@
         <dt>Weights</dt><dd>9.4 GiB</dd>
         <dt>Context</dt><dd>82K &#183; hard ceiling</dd>
         <dt>Long ctx</dt><dd><b>28/60</b> &#183; 24 rejected</dd>
+        <dt>Reasoning</dt><dd>536 &#183; &#8722;3 &#183; CoT only</dd>
       </dl>
     </article>
     <article class="card m">
@@ -202,6 +213,7 @@
         <dt>Weights</dt><dd>11.9 GiB</dd>
         <dt>Context</dt><dd>131K &#183; 1.34&times;</dd>
         <dt>Long ctx</dt><dd><b>16/60</b> &#183; 34% kept</dd>
+        <dt>Reasoning</dt><dd>518 &#183; &#8722;9 &#183; CoT only</dd>
       </dl>
     </article>
     <article class="card n">
@@ -215,92 +227,150 @@
         <dt>Weights</dt><dd>11.9 GiB</dd>
         <dt>Context</dt><dd>131K &#183; 1.03&times;</dd>
         <dt>Long ctx</dt><dd><b>45/60</b> &#183; 102% kept</dd>
+        <dt>Reasoning</dt><dd><b>546</b> &#183; +46 &#183; native</dd>
       </dl>
     </article>
   </div>
 
   <section>
-    <h2>Pass rate by category &#8212; every category is out of 50</h2>
+    <h2>Pass rate by category &#8212; reasoning off and on, every category out of 50</h2>
     <div class="legend">
       <span><i class="swatch" style="background:var(--b)"></i>Gemma 4 QAT</span>
+      <span><i class="swatch" style="background:var(--d)"></i>Qwen3.5-9B</span>
       <span><i class="swatch" style="background:var(--c)"></i>Qwen2.5-Coder</span>
       <span><i class="swatch" style="background:var(--a)"></i>Mellum2</span>
-      <span><i class="swatch" style="background:var(--d)"></i>Qwen3.5-9B</span>
-      <span style="color:var(--ink-3)">shaded = spread of 5+</span>
+      <span style="color:var(--ink-3)">hollow = reasoning off &#183; solid = on &#183; shaded = native gained where prompted CoT lost</span>
     </div>
     <div class="chart">
-      <div class="row"><div class="rowlab">RAG</div><div class="bars">
-        <div class="bar" title="Gemma &#8212; RAG 50/50"><div class="track"><div class="fill b" style="width:100%"></div></div><div class="val">50</div></div>
-        <div class="bar" title="Qwen2.5 &#8212; RAG 50/50"><div class="track"><div class="fill c" style="width:100%"></div></div><div class="val">50</div></div>
-        <div class="bar" title="Mellum2 &#8212; RAG 49/50"><div class="track"><div class="fill a" style="width:98%"></div></div><div class="val">49</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; RAG 50/50"><div class="track"><div class="fill d" style="width:100%"></div></div><div class="val">50</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">React Native</div><div class="bars">
-        <div class="bar" title="Gemma 49"><div class="track"><div class="fill b" style="width:98%"></div></div><div class="val">49</div></div>
-        <div class="bar" title="Qwen2.5 49"><div class="track"><div class="fill c" style="width:98%"></div></div><div class="val">49</div></div>
-        <div class="bar" title="Mellum2 49"><div class="track"><div class="fill a" style="width:98%"></div></div><div class="val">49</div></div>
-        <div class="bar" title="Qwen3.5 48"><div class="track"><div class="fill d" style="width:96%"></div></div><div class="val">48</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">JavaScript</div><div class="bars">
-        <div class="bar" title="Gemma 49"><div class="track"><div class="fill b" style="width:98%"></div></div><div class="val">49</div></div>
-        <div class="bar" title="Qwen2.5 47"><div class="track"><div class="fill c" style="width:94%"></div></div><div class="val">47</div></div>
-        <div class="bar" title="Mellum2 48"><div class="track"><div class="fill a" style="width:96%"></div></div><div class="val">48</div></div>
-        <div class="bar" title="Qwen3.5 47"><div class="track"><div class="fill d" style="width:94%"></div></div><div class="val">47</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">TypeScript</div><div class="bars">
-        <div class="bar" title="Gemma 47"><div class="track"><div class="fill b" style="width:94%"></div></div><div class="val">47</div></div>
-        <div class="bar" title="Qwen2.5 49"><div class="track"><div class="fill c" style="width:98%"></div></div><div class="val">49</div></div>
-        <div class="bar" title="Mellum2 49"><div class="track"><div class="fill a" style="width:98%"></div></div><div class="val">49</div></div>
-        <div class="bar" title="Qwen3.5 44"><div class="track"><div class="fill d" style="width:88%"></div></div><div class="val">44</div></div>
-      </div></div>
-      <div class="row diff"><div class="rowlab">Docs</div><div class="bars">
-        <div class="bar" title="Gemma 48"><div class="track"><div class="fill b" style="width:96%"></div></div><div class="val">48</div></div>
-        <div class="bar" title="Qwen2.5 43"><div class="track"><div class="fill c" style="width:86%"></div></div><div class="val">43</div></div>
-        <div class="bar" title="Mellum2 48"><div class="track"><div class="fill a" style="width:96%"></div></div><div class="val">48</div></div>
-        <div class="bar" title="Qwen3.5 44"><div class="track"><div class="fill d" style="width:88%"></div></div><div class="val">44</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">Python</div><div class="bars">
-        <div class="bar" title="Gemma 46"><div class="track"><div class="fill b" style="width:92%"></div></div><div class="val">46</div></div>
-        <div class="bar" title="Qwen2.5 42"><div class="track"><div class="fill c" style="width:84%"></div></div><div class="val">42</div></div>
-        <div class="bar" title="Mellum2 45"><div class="track"><div class="fill a" style="width:90%"></div></div><div class="val">45</div></div>
-        <div class="bar" title="Qwen3.5 43"><div class="track"><div class="fill d" style="width:86%"></div></div><div class="val">43</div></div>
-      </div></div>
-      <div class="row diff"><div class="rowlab">Bash</div><div class="bars">
-        <div class="bar" title="Gemma 46"><div class="track"><div class="fill b" style="width:92%"></div></div><div class="val">46</div></div>
-        <div class="bar" title="Qwen2.5 44"><div class="track"><div class="fill c" style="width:88%"></div></div><div class="val">44</div></div>
-        <div class="bar" title="Mellum2 39"><div class="track"><div class="fill a" style="width:78%"></div></div><div class="val">39</div></div>
-        <div class="bar" title="Qwen3.5 39"><div class="track"><div class="fill d" style="width:78%"></div></div><div class="val">39</div></div>
+      <div class="row diff"><div class="rowlab">SQL</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; SQL without reasoning: 42/50"><div class="track"><div class="fill b hollow" style="width:84%"></div></div><div class="val">42</div></div>
+        <div class="bar" title="Gemma 4 &#8212; SQL with reasoning: 47/50"><div class="track"><div class="fill b" style="width:94%"></div></div><div class="val">47</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; SQL without reasoning: 33/50"><div class="track"><div class="fill d hollow" style="width:66%"></div></div><div class="val">33</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; SQL with reasoning: 44/50"><div class="track"><div class="fill d" style="width:88%"></div></div><div class="val">44</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; SQL without reasoning: 41/50"><div class="track"><div class="fill c hollow" style="width:82%"></div></div><div class="val">41</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; SQL with reasoning: 38/50"><div class="track"><div class="fill c" style="width:76%"></div></div><div class="val">38</div></div>
+        <div class="bar" title="Mellum2 &#8212; SQL without reasoning: 42/50"><div class="track"><div class="fill a hollow" style="width:84%"></div></div><div class="val">42</div></div>
+        <div class="bar" title="Mellum2 &#8212; SQL with reasoning: 40/50"><div class="track"><div class="fill a" style="width:80%"></div></div><div class="val">40</div></div>
       </div></div>
       <div class="row"><div class="rowlab">Git</div><div class="bars">
-        <div class="bar" title="Gemma 46"><div class="track"><div class="fill b" style="width:92%"></div></div><div class="val">46</div></div>
-        <div class="bar" title="Qwen2.5 45"><div class="track"><div class="fill c" style="width:90%"></div></div><div class="val">45</div></div>
-        <div class="bar" title="Mellum2 41"><div class="track"><div class="fill a" style="width:82%"></div></div><div class="val">41</div></div>
-        <div class="bar" title="Qwen3.5 43"><div class="track"><div class="fill d" style="width:86%"></div></div><div class="val">43</div></div>
+        <div class="bar" title="Gemma 4 &#8212; Git without reasoning: 46/50"><div class="track"><div class="fill b hollow" style="width:92%"></div></div><div class="val">46</div></div>
+        <div class="bar" title="Gemma 4 &#8212; Git with reasoning: 48/50"><div class="track"><div class="fill b" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Git without reasoning: 43/50"><div class="track"><div class="fill d hollow" style="width:86%"></div></div><div class="val">43</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Git with reasoning: 49/50"><div class="track"><div class="fill d" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; Git without reasoning: 45/50"><div class="track"><div class="fill c hollow" style="width:90%"></div></div><div class="val">45</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; Git with reasoning: 49/50"><div class="track"><div class="fill c" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Mellum2 &#8212; Git without reasoning: 42/50"><div class="track"><div class="fill a hollow" style="width:84%"></div></div><div class="val">42</div></div>
+        <div class="bar" title="Mellum2 &#8212; Git with reasoning: 44/50"><div class="track"><div class="fill a" style="width:88%"></div></div><div class="val">44</div></div>
       </div></div>
       <div class="row"><div class="rowlab">SSH</div><div class="bars">
-        <div class="bar" title="Gemma 42"><div class="track"><div class="fill b" style="width:84%"></div></div><div class="val">42</div></div>
-        <div class="bar" title="Qwen2.5 44"><div class="track"><div class="fill c" style="width:88%"></div></div><div class="val">44</div></div>
-        <div class="bar" title="Mellum2 40"><div class="track"><div class="fill a" style="width:80%"></div></div><div class="val">40</div></div>
-        <div class="bar" title="Qwen3.5 38"><div class="track"><div class="fill d" style="width:76%"></div></div><div class="val">38</div></div>
+        <div class="bar" title="Gemma 4 &#8212; SSH without reasoning: 42/50"><div class="track"><div class="fill b hollow" style="width:84%"></div></div><div class="val">42</div></div>
+        <div class="bar" title="Gemma 4 &#8212; SSH with reasoning: 46/50"><div class="track"><div class="fill b" style="width:92%"></div></div><div class="val">46</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; SSH without reasoning: 38/50"><div class="track"><div class="fill d hollow" style="width:76%"></div></div><div class="val">38</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; SSH with reasoning: 43/50"><div class="track"><div class="fill d" style="width:86%"></div></div><div class="val">43</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; SSH without reasoning: 44/50"><div class="track"><div class="fill c hollow" style="width:88%"></div></div><div class="val">44</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; SSH with reasoning: 43/50"><div class="track"><div class="fill c" style="width:86%"></div></div><div class="val">43</div></div>
+        <div class="bar" title="Mellum2 &#8212; SSH without reasoning: 41/50"><div class="track"><div class="fill a hollow" style="width:82%"></div></div><div class="val">41</div></div>
+        <div class="bar" title="Mellum2 &#8212; SSH with reasoning: 43/50"><div class="track"><div class="fill a" style="width:86%"></div></div><div class="val">43</div></div>
       </div></div>
-      <div class="row diff"><div class="rowlab">Django</div><div class="bars">
-        <div class="bar" title="Gemma 42"><div class="track"><div class="fill b" style="width:84%"></div></div><div class="val">42</div></div>
-        <div class="bar" title="Qwen2.5 43"><div class="track"><div class="fill c" style="width:86%"></div></div><div class="val">43</div></div>
-        <div class="bar" title="Mellum2 38"><div class="track"><div class="fill a" style="width:76%"></div></div><div class="val">38</div></div>
-        <div class="bar" title="Qwen3.5 39"><div class="track"><div class="fill d" style="width:78%"></div></div><div class="val">39</div></div>
+      <div class="row diff"><div class="rowlab">Docs</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; Docs without reasoning: 48/50"><div class="track"><div class="fill b hollow" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Gemma 4 &#8212; Docs with reasoning: 50/50"><div class="track"><div class="fill b" style="width:100%"></div></div><div class="val">50</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Docs without reasoning: 44/50"><div class="track"><div class="fill d hollow" style="width:88%"></div></div><div class="val">44</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Docs with reasoning: 48/50"><div class="track"><div class="fill d" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; Docs without reasoning: 44/50"><div class="track"><div class="fill c hollow" style="width:88%"></div></div><div class="val">44</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; Docs with reasoning: 44/50"><div class="track"><div class="fill c" style="width:88%"></div></div><div class="val">44</div></div>
+        <div class="bar" title="Mellum2 &#8212; Docs without reasoning: 46/50"><div class="track"><div class="fill a hollow" style="width:92%"></div></div><div class="val">46</div></div>
+        <div class="bar" title="Mellum2 &#8212; Docs with reasoning: 40/50"><div class="track"><div class="fill a" style="width:80%"></div></div><div class="val">40</div></div>
       </div></div>
-      <div class="row diff"><div class="rowlab">SQL</div><div class="bars">
-        <div class="bar" title="Gemma 42"><div class="track"><div class="fill b" style="width:84%"></div></div><div class="val">42</div></div>
-        <div class="bar" title="Qwen2.5 42"><div class="track"><div class="fill c" style="width:84%"></div></div><div class="val">42</div></div>
-        <div class="bar" title="Mellum2 43"><div class="track"><div class="fill a" style="width:86%"></div></div><div class="val">43</div></div>
-        <div class="bar" title="Qwen3.5 33"><div class="track"><div class="fill d" style="width:66%"></div></div><div class="val">33</div></div>
+      <div class="row diff"><div class="rowlab">Python</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; Python without reasoning: 46/50"><div class="track"><div class="fill b hollow" style="width:92%"></div></div><div class="val">46</div></div>
+        <div class="bar" title="Gemma 4 &#8212; Python with reasoning: 50/50"><div class="track"><div class="fill b" style="width:100%"></div></div><div class="val">50</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Python without reasoning: 43/50"><div class="track"><div class="fill d hollow" style="width:86%"></div></div><div class="val">43</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Python with reasoning: 48/50"><div class="track"><div class="fill d" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; Python without reasoning: 42/50"><div class="track"><div class="fill c hollow" style="width:84%"></div></div><div class="val">42</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; Python with reasoning: 41/50"><div class="track"><div class="fill c" style="width:82%"></div></div><div class="val">41</div></div>
+        <div class="bar" title="Mellum2 &#8212; Python without reasoning: 45/50"><div class="track"><div class="fill a hollow" style="width:90%"></div></div><div class="val">45</div></div>
+        <div class="bar" title="Mellum2 &#8212; Python with reasoning: 44/50"><div class="track"><div class="fill a" style="width:88%"></div></div><div class="val">44</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Django</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; Django without reasoning: 42/50"><div class="track"><div class="fill b hollow" style="width:84%"></div></div><div class="val">42</div></div>
+        <div class="bar" title="Gemma 4 &#8212; Django with reasoning: 47/50"><div class="track"><div class="fill b" style="width:94%"></div></div><div class="val">47</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Django without reasoning: 39/50"><div class="track"><div class="fill d hollow" style="width:78%"></div></div><div class="val">39</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Django with reasoning: 43/50"><div class="track"><div class="fill d" style="width:86%"></div></div><div class="val">43</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; Django without reasoning: 43/50"><div class="track"><div class="fill c hollow" style="width:86%"></div></div><div class="val">43</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; Django with reasoning: 42/50"><div class="track"><div class="fill c" style="width:84%"></div></div><div class="val">42</div></div>
+        <div class="bar" title="Mellum2 &#8212; Django without reasoning: 37/50"><div class="track"><div class="fill a hollow" style="width:74%"></div></div><div class="val">37</div></div>
+        <div class="bar" title="Mellum2 &#8212; Django with reasoning: 38/50"><div class="track"><div class="fill a" style="width:76%"></div></div><div class="val">38</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Bash</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; Bash without reasoning: 46/50"><div class="track"><div class="fill b hollow" style="width:92%"></div></div><div class="val">46</div></div>
+        <div class="bar" title="Gemma 4 &#8212; Bash with reasoning: 49/50"><div class="track"><div class="fill b" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Bash without reasoning: 39/50"><div class="track"><div class="fill d hollow" style="width:78%"></div></div><div class="val">39</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; Bash with reasoning: 44/50"><div class="track"><div class="fill d" style="width:88%"></div></div><div class="val">44</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; Bash without reasoning: 44/50"><div class="track"><div class="fill c hollow" style="width:88%"></div></div><div class="val">44</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; Bash with reasoning: 44/50"><div class="track"><div class="fill c" style="width:88%"></div></div><div class="val">44</div></div>
+        <div class="bar" title="Mellum2 &#8212; Bash without reasoning: 39/50"><div class="track"><div class="fill a hollow" style="width:78%"></div></div><div class="val">39</div></div>
+        <div class="bar" title="Mellum2 &#8212; Bash with reasoning: 42/50"><div class="track"><div class="fill a" style="width:84%"></div></div><div class="val">42</div></div>
       </div></div>
       <div class="row diff"><div class="rowlab">GitHub</div><div class="bars">
-        <div class="bar" title="Gemma 39"><div class="track"><div class="fill b" style="width:78%"></div></div><div class="val">39</div></div>
-        <div class="bar" title="Qwen2.5 41"><div class="track"><div class="fill c" style="width:82%"></div></div><div class="val">41</div></div>
-        <div class="bar" title="Mellum2 41"><div class="track"><div class="fill a" style="width:82%"></div></div><div class="val">41</div></div>
-        <div class="bar" title="Qwen3.5 32"><div class="track"><div class="fill d" style="width:64%"></div></div><div class="val">32</div></div>
+        <div class="bar" title="Gemma 4 &#8212; GitHub without reasoning: 39/50"><div class="track"><div class="fill b hollow" style="width:78%"></div></div><div class="val">39</div></div>
+        <div class="bar" title="Gemma 4 &#8212; GitHub with reasoning: 41/50"><div class="track"><div class="fill b" style="width:82%"></div></div><div class="val">41</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; GitHub without reasoning: 32/50"><div class="track"><div class="fill d hollow" style="width:64%"></div></div><div class="val">32</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; GitHub with reasoning: 36/50"><div class="track"><div class="fill d" style="width:72%"></div></div><div class="val">36</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; GitHub without reasoning: 41/50"><div class="track"><div class="fill c hollow" style="width:82%"></div></div><div class="val">41</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; GitHub with reasoning: 38/50"><div class="track"><div class="fill c" style="width:76%"></div></div><div class="val">38</div></div>
+        <div class="bar" title="Mellum2 &#8212; GitHub without reasoning: 41/50"><div class="track"><div class="fill a hollow" style="width:82%"></div></div><div class="val">41</div></div>
+        <div class="bar" title="Mellum2 &#8212; GitHub with reasoning: 42/50"><div class="track"><div class="fill a" style="width:84%"></div></div><div class="val">42</div></div>
       </div></div>
+      <div class="row"><div class="rowlab">RAG</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; RAG without reasoning: 50/50"><div class="track"><div class="fill b hollow" style="width:100%"></div></div><div class="val">50</div></div>
+        <div class="bar" title="Gemma 4 &#8212; RAG with reasoning: 50/50"><div class="track"><div class="fill b" style="width:100%"></div></div><div class="val">50</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; RAG without reasoning: 50/50"><div class="track"><div class="fill d hollow" style="width:100%"></div></div><div class="val">50</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; RAG with reasoning: 50/50"><div class="track"><div class="fill d" style="width:100%"></div></div><div class="val">50</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; RAG without reasoning: 50/50"><div class="track"><div class="fill c hollow" style="width:100%"></div></div><div class="val">50</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; RAG with reasoning: 49/50"><div class="track"><div class="fill c" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Mellum2 &#8212; RAG without reasoning: 49/50"><div class="track"><div class="fill a hollow" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Mellum2 &#8212; RAG with reasoning: 43/50"><div class="track"><div class="fill a" style="width:86%"></div></div><div class="val">43</div></div>
+      </div></div>
+      <div class="row diff"><div class="rowlab">TypeScript</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; TypeScript without reasoning: 47/50"><div class="track"><div class="fill b hollow" style="width:94%"></div></div><div class="val">47</div></div>
+        <div class="bar" title="Gemma 4 &#8212; TypeScript with reasoning: 49/50"><div class="track"><div class="fill b" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; TypeScript without reasoning: 44/50"><div class="track"><div class="fill d hollow" style="width:88%"></div></div><div class="val">44</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; TypeScript with reasoning: 45/50"><div class="track"><div class="fill d" style="width:90%"></div></div><div class="val">45</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; TypeScript without reasoning: 48/50"><div class="track"><div class="fill c hollow" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; TypeScript with reasoning: 49/50"><div class="track"><div class="fill c" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Mellum2 &#8212; TypeScript without reasoning: 48/50"><div class="track"><div class="fill a hollow" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Mellum2 &#8212; TypeScript with reasoning: 46/50"><div class="track"><div class="fill a" style="width:92%"></div></div><div class="val">46</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">JavaScript</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; JavaScript without reasoning: 49/50"><div class="track"><div class="fill b hollow" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Gemma 4 &#8212; JavaScript with reasoning: 50/50"><div class="track"><div class="fill b" style="width:100%"></div></div><div class="val">50</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; JavaScript without reasoning: 47/50"><div class="track"><div class="fill d hollow" style="width:94%"></div></div><div class="val">47</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; JavaScript with reasoning: 49/50"><div class="track"><div class="fill d" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; JavaScript without reasoning: 48/50"><div class="track"><div class="fill c hollow" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; JavaScript with reasoning: 49/50"><div class="track"><div class="fill c" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Mellum2 &#8212; JavaScript without reasoning: 48/50"><div class="track"><div class="fill a hollow" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Mellum2 &#8212; JavaScript with reasoning: 47/50"><div class="track"><div class="fill a" style="width:94%"></div></div><div class="val">47</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">React Native</div><div class="bars">
+        <div class="bar" title="Gemma 4 &#8212; React Native without reasoning: 49/50"><div class="track"><div class="fill b hollow" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Gemma 4 &#8212; React Native with reasoning: 48/50"><div class="track"><div class="fill b" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; React Native without reasoning: 48/50"><div class="track"><div class="fill d hollow" style="width:96%"></div></div><div class="val">48</div></div>
+        <div class="bar" title="Qwen3.5 &#8212; React Native with reasoning: 47/50"><div class="track"><div class="fill d" style="width:94%"></div></div><div class="val">47</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; React Native without reasoning: 49/50"><div class="track"><div class="fill c hollow" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Qwen2.5-Coder &#8212; React Native with reasoning: 50/50"><div class="track"><div class="fill c" style="width:100%"></div></div><div class="val">50</div></div>
+        <div class="bar" title="Mellum2 &#8212; React Native without reasoning: 49/50"><div class="track"><div class="fill a hollow" style="width:98%"></div></div><div class="val">49</div></div>
+        <div class="bar" title="Mellum2 &#8212; React Native with reasoning: 49/50"><div class="track"><div class="fill a" style="width:98%"></div></div><div class="val">49</div></div>
+      </div></div>
+    </div>
+    <div class="note">
+      <p><b>Ordered by how much reasoning moved each category</b>, not alphabetically.
+        SQL moved most &#8212; 21 tasks across the four models &#8212; then Git, SSH and
+        Docs. RAG sits last because it was already saturated at 50/50 for three of the
+        four and had nowhere to go.</p>
+      <p><b>The shaded rows are where the two kinds of reasoning disagree:</b> the models
+        with a real thinking mode gained, while the two given a chain-of-thought prompt
+        lost. That split, rather than any single total, is what this section is for.</p>
     </div>
   </section>
 
@@ -403,33 +473,86 @@
   </section>
 
   <section>
-    <h2>Deep versus its own control &#8212; the number that matters</h2>
+    <h2>Reasoning at depth &#8212; and whether there is room for it</h2>
+    <div class="prose">
+      <p>The same four models, the same 60 probes, with reasoning off and on. Deep is the
+        probe at depth; control is the identical probe with the padding removed.</p>
+    </div>
     <div class="scroll">
       <table>
-        <thead><tr><th>Model</th><th class="num">At depth</th><th class="num">Control</th>
-          <th class="num">Kept</th><th class="num">Rejected</th><th>What it means</th></tr></thead>
+        <thead><tr><th>Model</th><th class="num">at depth</th><th class="num">control</th>
+          <th class="num">kept</th><th>note</th></tr></thead>
         <tbody>
-          <tr><td class="mono">Qwen3.5-9B FP8</td><td class="num">45/60</td><td class="num">44/60</td>
-              <td class="num"><b>102%</b></td><td class="num">0</td>
-              <td>No measurable degradation at any depth</td></tr>
-          <tr><td class="mono">Gemma 4 QAT</td><td class="num">46/60</td><td class="num">49/60</td>
-              <td class="num"><b>94%</b></td><td class="num">0</td>
-              <td>Highest absolute score; mild loss, all at the deepest rung</td></tr>
-          <tr><td class="mono">Qwen2.5-Coder</td><td class="num">28/60</td><td class="num">48/60</td>
-              <td class="num">58%</td><td class="num"><b>24</b></td>
-              <td>Not degradation &#8212; 24 probes were refused by the server</td></tr>
-          <tr><td class="mono">Mellum2-12B</td><td class="num">16/60</td><td class="num">47/60</td>
-              <td class="num"><b>34%</b></td><td class="num">0</td>
-              <td>Loses two thirds of its ability; already halved by 65K</td></tr>
+          <tr><td><i class="swatch" style="background:var(--d)"></i> Qwen3.5-9B FP8</td><td class="num">45/60</td><td class="num">44/60</td><td class="num"><b>102%</b></td><td class="mono">native thinking</td></tr>
+          <tr class="diff"><td><span style="color:var(--ink-3)">&#8226; with reasoning</span></td><td class="num">49/60</td><td class="num">51/60</td><td class="num"><b>96%</b></td><td class="mono"></td></tr>
+          <tr><td><i class="swatch" style="background:var(--b)"></i> Gemma 4 12B QAT</td><td class="num">46/60</td><td class="num">49/60</td><td class="num"><b>94%</b></td><td class="mono">native thinking</td></tr>
+          <tr class="diff"><td><span style="color:var(--ink-3)">&#8226; with reasoning</span></td><td class="num">46/60</td><td class="num">54/60</td><td class="num"><b>85%</b></td><td class="mono">7 could not run; tightest 1817 tok to think in</td></tr>
+          <tr><td><i class="swatch" style="background:var(--c)"></i> Qwen2.5-Coder-14B</td><td class="num">28/60</td><td class="num">48/60</td><td class="num"><b>58%</b></td><td class="mono">prompted CoT</td></tr>
+          <tr class="diff"><td><span style="color:var(--ink-3)">&#8226; with reasoning</span></td><td class="num">24/60</td><td class="num">45/60</td><td class="num"><b>53%</b></td><td class="mono">24 could not run</td></tr>
+          <tr><td><i class="swatch" style="background:var(--a)"></i> Mellum2-12B-A2.5B</td><td class="num">16/60</td><td class="num">47/60</td><td class="num"><b>34%</b></td><td class="mono">prompted CoT</td></tr>
+          <tr class="diff"><td><span style="color:var(--ink-3)">&#8226; with reasoning</span></td><td class="num">13/60</td><td class="num">35/60</td><td class="num"><b>37%</b></td><td class="mono">2 could not run; tightest 161 tok to think in</td></tr>
         </tbody>
       </table>
     </div>
     <div class="prose">
+      <p><strong>Reading the no-reasoning rows:</strong> Qwen3.5 keeps 102% of its control &#8212; no
+        measurable degradation at any depth. Gemma keeps 94%, its whole loss at the deepest rung.
+        Mellum2 keeps 34%, having already lost half its ability by 65K. Qwen2.5-Coder's 58% is not
+        degradation at all: 24 of its probes were refused by the server.</p>
       <p>Restricting to the three depths <em>every</em> model could physically attempt
         (~10K / 37K / 70K, 36 probes) removes the ceiling effect entirely and separates the field
-        cleanly: <strong>Gemma 28/36 (&#8722;1 vs control), Qwen2.5-Coder 28/36 (+1), Qwen3.5 24/36
-        (&#8722;3), Mellum2 13/36 (&#8722;14)</strong>. On depths it can actually run, Qwen2.5-Coder shows no
-        long-context weakness at all. Mellum2 has already lost half its ability at 70K.</p>
+        cleanly without reasoning: <strong>Gemma 28/36 (&#8722;1 vs control), Qwen2.5-Coder 28/36
+        (+1), Qwen3.5 24/36 (&#8722;3), Mellum2 13/36 (&#8722;14)</strong>. On depths it can actually
+        run, Qwen2.5-Coder shows no long-context weakness at all.</p>
+    </div>
+    <div class="note alert">
+      <p><b>The reasoning budget competes with the session for the same window.</b> A probe whose
+        prompt fills the context has nowhere to put a chain of thought. Gemma lost
+        <b>7 of its 12 deepest probes</b> outright and got 1,817 tokens to think in on the one that
+        fit; Mellum2 was squeezed to <b>161 tokens</b> at its tightest. Those are not wrong answers
+        and are not counted as any &#8212; they are the window refusing to hold both things at once.</p>
+      <p>This is a third distinct failure, separate from Qwen2.5-Coder's ceiling (its server will
+        not accept a 95K prompt at all, so 24 probes never ran in either arm) and separate from a
+        model simply getting a probe wrong.</p>
+    </div>
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--d)"></i>Qwen3.5-9B</span>
+      <span><i class="swatch" style="background:var(--b)"></i>Gemma 4 QAT</span>
+      <span><i class="swatch" style="background:var(--c)"></i>Qwen2.5-Coder</span>
+      <span><i class="swatch" style="background:var(--a)"></i>Mellum2</span>
+      <span style="color:var(--ink-3)">hollow = reasoning off &#183; solid = on</span>
+    </div>
+    <div class="chart">
+      <div class="row"><div class="rowlab">Qwen3.5-9B<br><span style="color:var(--ink-3);font-size:.9em">n=60 &#183; +4</span></div><div class="bars">
+        <div class="bar" title="Qwen3.5-9B FP8 &#8212; without reasoning: 45 of 60 comparable deep probes"><div class="track"><div class="fill d hollow" style="width:75%"></div></div><div class="val">45</div></div>
+        <div class="bar" title="Qwen3.5-9B FP8 &#8212; with reasoning: 49 of 60 comparable deep probes"><div class="track"><div class="fill d" style="width:82%"></div></div><div class="val">49</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Gemma<br><span style="color:var(--ink-3);font-size:.9em">n=53 &#183; +3</span></div><div class="bars">
+        <div class="bar" title="Gemma 4 12B QAT &#8212; without reasoning: 43 of 53 comparable deep probes"><div class="track"><div class="fill b hollow" style="width:81%"></div></div><div class="val">43</div></div>
+        <div class="bar" title="Gemma 4 12B QAT &#8212; with reasoning: 46 of 53 comparable deep probes"><div class="track"><div class="fill b" style="width:87%"></div></div><div class="val">46</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Qwen2.5-Coder-14B<br><span style="color:var(--ink-3);font-size:.9em">n=36 &#183; -4</span></div><div class="bars">
+        <div class="bar" title="Qwen2.5-Coder-14B &#8212; without reasoning: 28 of 36 comparable deep probes"><div class="track"><div class="fill c hollow" style="width:78%"></div></div><div class="val">28</div></div>
+        <div class="bar" title="Qwen2.5-Coder-14B &#8212; with reasoning: 24 of 36 comparable deep probes"><div class="track"><div class="fill c" style="width:67%"></div></div><div class="val">24</div></div>
+      </div></div>
+      <div class="row"><div class="rowlab">Mellum2-12B-A2.5B<br><span style="color:var(--ink-3);font-size:.9em">n=58 &#183; -3</span></div><div class="bars">
+        <div class="bar" title="Mellum2-12B-A2.5B &#8212; without reasoning: 16 of 58 comparable deep probes"><div class="track"><div class="fill a hollow" style="width:28%"></div></div><div class="val">16</div></div>
+        <div class="bar" title="Mellum2-12B-A2.5B &#8212; with reasoning: 13 of 58 comparable deep probes"><div class="track"><div class="fill a" style="width:22%"></div></div><div class="val">13</div></div>
+      </div></div>
+    </div>
+    <div class="note">
+      <p><b>Only the probes both arms could actually run.</b> Counting a probe the reasoning arm
+        could not attempt as a failure charges a window limit to the model. Gemma's raw deep line
+        reads 46 &#8594; 46, which looks like reasoning did nothing; across the 53 probes it could
+        run it is <b>43 &#8594; 46</b>.</p>
+      <p><b>On that basis the split is clean.</b> The two models with a trained thinking mode gain
+        at depth (+4 and +3). The two given a chain-of-thought prompt lose (&#8722;4 and &#8722;3).
+        Reasoning helps at depth only where the model was trained to do it &#8212; and only where the
+        window leaves room.</p>
+      <p><b>Qwen3.5 is the only model unconstrained here</b>, and the only one that gains on both
+        buckets (+4 deep, +7 shallow). Its tokenizer is the most efficient of the four, so the same
+        session costs it ~118K tokens where Gemma's costs ~129K &#8212; which is precisely the
+        headroom the chain of thought needs.</p>
     </div>
   </section>
 
@@ -587,96 +710,53 @@
   </section>
 
   <section>
-    <h2>Reasoning mode &#8212; measured, on the two models that have one</h2>
+    <h2>Reasoning mode &#8212; all four models, two different things</h2>
     <div class="prose">
-      <p>Only two of the four can be given reasoning at all. Mellum2's template merely strips
-        <code>&lt;/think&gt;</code> out of history and Qwen2.5-Coder has no thinking in its template
-        whatsoever, so for those two there is no switch to throw. Prompting them to &#8220;think step
-        by step&#8221; is prompt engineering, not a trained mode, and is not mixed into these numbers.</p>
-      <p><strong>Both models improve, and the ranking does not change.</strong> Qwen3.5 gains the most
-        and still does not overtake Gemma &#8212; it lands exactly on Gemma's non-thinking 546.</p>
+      <p>Only two of the four have a reasoning mode at all. Gemma 4's template defaults
+        <code>enable_thinking</code> to <i>false</i>; Qwen3.5 thinks unless told not to. Mellum2's
+        template merely strips <code>&lt;/think&gt;</code> out of history and Qwen2.5-Coder has no
+        thinking in its template whatsoever, so for those two there is no switch to throw.</p>
+      <p>They get a <b>chain-of-thought prompt</b> instead, and that is reported as a different
+        thing rather than blended in &#8212; asking a model to reason is not the same as one trained
+        to. The distinction turns out to be the entire result.</p>
     </div>
     <div class="scroll">
       <table>
-        <thead><tr><th>Model</th><th class="num">no reasoning</th><th class="num">reasoning</th>
-          <th class="num">&#916;</th><th class="num">trace/task</th><th class="num">answers lost</th></tr></thead>
+        <thead><tr><th>Model</th><th>kind</th><th class="num">off</th><th class="num">on</th>
+          <th class="num">&#916;</th><th class="num">think:answer</th><th class="num">flips</th></tr></thead>
         <tbody>
-          <tr><td><i class="swatch" style="background:var(--b)"></i> Gemma 4 12B QAT</td>
-            <td class="num">546/600</td><td class="num"><b>575/600</b></td><td class="num"><b>+29</b></td>
-            <td class="num">2,841 ch</td><td class="num"><b>0</b></td></tr>
-          <tr><td><i class="swatch" style="background:var(--d)"></i> Qwen3.5-9B FP8</td>
-            <td class="num">500/600</td><td class="num"><b>546/600</b></td><td class="num"><b>+46</b></td>
-            <td class="num">10,529 ch</td><td class="num">8</td></tr>
+          <tr><td><i class="swatch" style="background:var(--b)"></i> Gemma 4 12B QAT</td><td class="mono">native</td><td class="num">546/600</td><td class="num"><b>575/600</b></td><td class="num"><b>+29</b></td><td class="num">7.0&times;</td><td class="num">+38 / &#8722;9</td></tr>
+          <tr><td><i class="swatch" style="background:var(--d)"></i> Qwen3.5-9B FP8</td><td class="mono">native</td><td class="num">500/600</td><td class="num"><b>546/600</b></td><td class="num"><b>+46</b></td><td class="num">24.2&times;</td><td class="num">+69 / &#8722;23</td></tr>
+          <tr><td><i class="swatch" style="background:var(--c)"></i> Qwen2.5-Coder-14B</td><td class="mono">prompted CoT</td><td class="num">539/600</td><td class="num"><b>536/600</b></td><td class="num"><b>-3</b></td><td class="num">2.5&times;</td><td class="num">+27 / &#8722;30</td></tr>
+          <tr><td><i class="swatch" style="background:var(--a)"></i> Mellum2-12B-A2.5B</td><td class="mono">prompted CoT</td><td class="num">527/600</td><td class="num"><b>518/600</b></td><td class="num"><b>-9</b></td><td class="num">1.2&times;</td><td class="num">+31 / &#8722;40</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="legend">
-      <span><i class="swatch" style="background:var(--b)"></i>Gemma 4 QAT</span>
-      <span><i class="swatch" style="background:var(--d)"></i>Qwen3.5-9B</span>
-      <span style="color:var(--ink-3)">change in tasks passed, out of 50 &#183; shaded = the two models differ by 5+</span>
-    </div>
-    <div class="chart">
-      <div class="row diff"><div class="rowlab">SQL</div><div class="bars">
-        <div class="bar" title="Gemma 4 &#8212; SQL 42 &#8594; 47 (+5)"><div class="dtrack"><div class="dfill b pos" style="width:33.33%"></div></div><div class="dval">+5</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; SQL 33 &#8594; 44 (+11)"><div class="dtrack"><div class="dfill d pos" style="width:73.33%"></div></div><div class="dval">+11</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">Git</div><div class="bars">
-        <div class="bar" title="Gemma 4 &#8212; Git 46 &#8594; 48 (+2)"><div class="dtrack"><div class="dfill b pos" style="width:13.33%"></div></div><div class="dval">+2</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; Git 43 &#8594; 49 (+6)"><div class="dtrack"><div class="dfill d pos" style="width:40.00%"></div></div><div class="dval">+6</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">Python</div><div class="bars">
-        <div class="bar" title="Gemma 4 &#8212; Python 46 &#8594; 50 (+4)"><div class="dtrack"><div class="dfill b pos" style="width:26.67%"></div></div><div class="dval">+4</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; Python 43 &#8594; 48 (+5)"><div class="dtrack"><div class="dfill d pos" style="width:33.33%"></div></div><div class="dval">+5</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">Bash</div><div class="bars">
-        <div class="bar" title="Gemma 4 &#8212; Bash 46 &#8594; 49 (+3)"><div class="dtrack"><div class="dfill b pos" style="width:20.00%"></div></div><div class="dval">+3</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; Bash 39 &#8594; 44 (+5)"><div class="dtrack"><div class="dfill d pos" style="width:33.33%"></div></div><div class="dval">+5</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">SSH</div><div class="bars">
-        <div class="bar" title="Gemma 4 &#8212; SSH 42 &#8594; 46 (+4)"><div class="dtrack"><div class="dfill b pos" style="width:26.67%"></div></div><div class="dval">+4</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; SSH 38 &#8594; 43 (+5)"><div class="dtrack"><div class="dfill d pos" style="width:33.33%"></div></div><div class="dval">+5</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">Django</div><div class="bars">
-        <div class="bar" title="Gemma 4 &#8212; Django 42 &#8594; 47 (+5)"><div class="dtrack"><div class="dfill b pos" style="width:33.33%"></div></div><div class="dval">+5</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; Django 39 &#8594; 43 (+4)"><div class="dtrack"><div class="dfill d pos" style="width:26.67%"></div></div><div class="dval">+4</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">Docs</div><div class="bars">
-        <div class="bar" title="Gemma 4 &#8212; Docs 48 &#8594; 50 (+2)"><div class="dtrack"><div class="dfill b pos" style="width:13.33%"></div></div><div class="dval">+2</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; Docs 44 &#8594; 48 (+4)"><div class="dtrack"><div class="dfill d pos" style="width:26.67%"></div></div><div class="dval">+4</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">GitHub</div><div class="bars">
-        <div class="bar" title="Gemma 4 &#8212; GitHub 39 &#8594; 41 (+2)"><div class="dtrack"><div class="dfill b pos" style="width:13.33%"></div></div><div class="dval">+2</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; GitHub 32 &#8594; 36 (+4)"><div class="dtrack"><div class="dfill d pos" style="width:26.67%"></div></div><div class="dval">+4</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">TypeScript</div><div class="bars">
-        <div class="bar" title="Gemma 4 &#8212; TypeScript 47 &#8594; 49 (+2)"><div class="dtrack"><div class="dfill b pos" style="width:13.33%"></div></div><div class="dval">+2</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; TypeScript 44 &#8594; 45 (+1)"><div class="dtrack"><div class="dfill d pos" style="width:6.67%"></div></div><div class="dval">+1</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">JavaScript</div><div class="bars">
-        <div class="bar" title="Gemma 4 &#8212; JavaScript 49 &#8594; 50 (+1)"><div class="dtrack"><div class="dfill b pos" style="width:6.67%"></div></div><div class="dval">+1</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; JavaScript 47 &#8594; 49 (+2)"><div class="dtrack"><div class="dfill d pos" style="width:13.33%"></div></div><div class="dval">+2</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">RAG</div><div class="bars">
-        <div class="bar" title="Gemma 4 &#8212; RAG 50 &#8594; 50 (0)"><div class="dtrack"></div><div class="dval">0</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; RAG 50 &#8594; 50 (0)"><div class="dtrack"></div><div class="dval">0</div></div>
-      </div></div>
-      <div class="row"><div class="rowlab">React Native</div><div class="bars">
-        <div class="bar" title="Gemma 4 &#8212; React Native 49 &#8594; 48 (-1)"><div class="dtrack"><div class="dfill b neg" style="width:6.67%"></div></div><div class="dval">-1</div></div>
-        <div class="bar" title="Qwen3.5 &#8212; React Native 48 &#8594; 47 (-1)"><div class="dtrack"><div class="dfill d neg" style="width:6.67%"></div></div><div class="dval">-1</div></div>
-      </div></div>
-    </div>
     <div class="note">
-      <p><b>React Native is the only category where reasoning hurt &#8212; and it hurt both models,
-        by exactly one task each.</b> RAG was already saturated at 50/50 for both and had nowhere to
-        go. Every other category moved up.</p>
+      <p><b>A trained thinking mode gains; a prompt asking for one does not.</b> +29 and +46 against
+        &#8722;3 and &#8722;9. And the think-to-answer ratios say why: the native models produce
+        7&times; and 24&times; as much deliberation as answer, the prompted ones 2.5&times; and
+        1.2&times;. Asking for reasoning gets you a sentence or two; a trained mode produces pages.</p>
+      <p><b>The CoT deltas are inside the noise, and the noise is measured, not assumed.</b> Both
+        prompted arms churn heavily while moving the total barely &#8212; Mellum2 flipped 71 tasks
+        for a net of &#8722;9. For scale: re-running Mellum2's <i>own baseline</i> at a different
+        concurrency flipped <b>25 tasks</b> for a net of &#8722;3. Behaviour changes a lot; the score
+        does not.</p>
+      <p><b>Every arm here is compared against the right baseline.</b> The prompted arms are
+        differenced against a fresh baseline captured at the same concurrency and temperature, so the
+        prompt is the only variable. The native arms cannot have that &#8212; thinking mode does not
+        terminate at temperature 0 &#8212; so they are compared to the published run and the
+        confound is stated rather than hidden.</p>
     </div>
   </section>
 
   <section>
-    <h2>The two reasoning arms are not comparable in kind</h2>
+    <h2>The two <i>native</i> reasoning arms are not comparable in kind</h2>
     <div class="prose">
-      <p>The totals above hide that they were obtained under very different conditions. Gemma's
-        reasoning terminates; Qwen3.5's spirals.</p>
+      <p>Narrowing to the two models with a trained thinking mode: the totals hide that they were
+        obtained under very different conditions. Gemma's reasoning terminates; Qwen3.5's spirals.
+        (The two prompted-CoT arms are a separate matter &#8212; they barely reason at all, at
+        1.2&times; and 2.5&times; think-to-answer.)</p>
     </div>
     <div class="scroll">
       <table>
@@ -869,9 +949,13 @@
       <p><b>The four did not run under equal conditions.</b> Qwen2.5 needed YaRN and 4-bit TurboQuant
         KV to reach 80K; Gemma and Mellum2 ran native 131K on fp8; Qwen3.5 ran fp8 weights with fp8
         KV at 131K but with reasoning disabled. Each of those choices costs something.</p>
-      <p><b>The reasoning arm is two models, not four.</b> Mellum2 and Qwen2.5-Coder have no thinking
-        mode to enable, so &#8220;does reasoning reorder the ranking&#8221; is untested for half the
-        field. It did not reorder the half that could be measured.</p>
+      <p><b>Half the reasoning arm is a prompt, not a mode.</b> Mellum2 and Qwen2.5-Coder have no
+        thinking mode to enable, so they were given a chain-of-thought instruction instead. That is
+        prompt engineering, and it is sensitive to wording: an earlier phrasing of the same
+        instruction moved Qwen2.5-Coder by 30 tasks, because &#8220;exactly the requested output and
+        nothing else&#8221; made it drop the <code>export</code> keyword its tasks asked for. The
+        published wording names the format requirements explicitly. A trained thinking mode has no
+        such knob to get wrong.</p>
       <p><b>Reasoning was measured once per model, not repeated.</b> At temperature &gt; 0 a repeat
         lands differently, and several per-category deltas are &#177;1&#8211;2 &#8212; only the large
         movers (SQL +11) and the totals are clearly outside the noise.</p>

@@ -1,0 +1,378 @@
+{
+ "short": {
+  "gemma": {
+   "label": "Gemma 4 12B QAT",
+   "kind": "native",
+   "published": 546,
+   "off": 546,
+   "on": 575,
+   "delta": 29,
+   "percat": {
+    "Python": {
+     "off": 46,
+     "on": 50,
+     "n": 50
+    },
+    "Django": {
+     "off": 42,
+     "on": 47,
+     "n": 50
+    },
+    "SQL": {
+     "off": 42,
+     "on": 47,
+     "n": 50
+    },
+    "JS": {
+     "off": 49,
+     "on": 50,
+     "n": 50
+    },
+    "TS": {
+     "off": 47,
+     "on": 49,
+     "n": 50
+    },
+    "Bash": {
+     "off": 46,
+     "on": 49,
+     "n": 50
+    },
+    "Git": {
+     "off": 46,
+     "on": 48,
+     "n": 50
+    },
+    "SSH": {
+     "off": 42,
+     "on": 46,
+     "n": 50
+    },
+    "GitHub": {
+     "off": 39,
+     "on": 41,
+     "n": 50
+    },
+    "Docs": {
+     "off": 48,
+     "on": 50,
+     "n": 50
+    },
+    "ReactNative": {
+     "off": 49,
+     "on": 48,
+     "n": 50
+    },
+    "RAG": {
+     "off": 50,
+     "on": 50,
+     "n": 50
+    }
+   },
+   "gained": 38,
+   "lost": 9,
+   "baseline_used": "replica",
+   "batching_churn": 0,
+   "tokens": 576727,
+   "think_chars": 1704617,
+   "answer_chars": 241964,
+   "empty": 0,
+   "retried": 7
+  },
+  "qwen": {
+   "label": "Qwen2.5-Coder-14B",
+   "kind": "cot",
+   "published": 539,
+   "off": 539,
+   "on": 536,
+   "delta": -3,
+   "percat": {
+    "Python": {
+     "off": 42,
+     "on": 41,
+     "n": 50
+    },
+    "Django": {
+     "off": 43,
+     "on": 42,
+     "n": 50
+    },
+    "SQL": {
+     "off": 41,
+     "on": 38,
+     "n": 50
+    },
+    "JS": {
+     "off": 48,
+     "on": 49,
+     "n": 50
+    },
+    "TS": {
+     "off": 48,
+     "on": 49,
+     "n": 50
+    },
+    "Bash": {
+     "off": 44,
+     "on": 44,
+     "n": 50
+    },
+    "Git": {
+     "off": 45,
+     "on": 49,
+     "n": 50
+    },
+    "SSH": {
+     "off": 44,
+     "on": 43,
+     "n": 50
+    },
+    "GitHub": {
+     "off": 41,
+     "on": 38,
+     "n": 50
+    },
+    "Docs": {
+     "off": 44,
+     "on": 44,
+     "n": 50
+    },
+    "ReactNative": {
+     "off": 49,
+     "on": 50,
+     "n": 50
+    },
+    "RAG": {
+     "off": 50,
+     "on": 49,
+     "n": 50
+    }
+   },
+   "gained": 27,
+   "lost": 30,
+   "baseline_used": "replica",
+   "batching_churn": 8,
+   "tokens": 104665,
+   "think_chars": 340109,
+   "answer_chars": 134571,
+   "empty": 0,
+   "retried": 0
+  },
+  "mellum": {
+   "label": "Mellum2-12B-A2.5B",
+   "kind": "cot",
+   "published": 530,
+   "off": 527,
+   "on": 518,
+   "delta": -9,
+   "percat": {
+    "Python": {
+     "off": 45,
+     "on": 44,
+     "n": 50
+    },
+    "Django": {
+     "off": 37,
+     "on": 38,
+     "n": 50
+    },
+    "SQL": {
+     "off": 42,
+     "on": 40,
+     "n": 50
+    },
+    "JS": {
+     "off": 48,
+     "on": 47,
+     "n": 50
+    },
+    "TS": {
+     "off": 48,
+     "on": 46,
+     "n": 50
+    },
+    "Bash": {
+     "off": 39,
+     "on": 42,
+     "n": 50
+    },
+    "Git": {
+     "off": 42,
+     "on": 44,
+     "n": 50
+    },
+    "SSH": {
+     "off": 41,
+     "on": 43,
+     "n": 50
+    },
+    "GitHub": {
+     "off": 41,
+     "on": 42,
+     "n": 50
+    },
+    "Docs": {
+     "off": 46,
+     "on": 40,
+     "n": 50
+    },
+    "ReactNative": {
+     "off": 49,
+     "on": 49,
+     "n": 50
+    },
+    "RAG": {
+     "off": 49,
+     "on": 43,
+     "n": 50
+    }
+   },
+   "gained": 31,
+   "lost": 40,
+   "baseline_used": "replica",
+   "batching_churn": 25,
+   "tokens": 96183,
+   "think_chars": 205075,
+   "answer_chars": 169474,
+   "empty": 0,
+   "retried": 0
+  },
+  "q35": {
+   "label": "Qwen3.5-9B FP8",
+   "kind": "native",
+   "published": 500,
+   "off": 500,
+   "on": 546,
+   "delta": 46,
+   "percat": {
+    "Python": {
+     "off": 43,
+     "on": 48,
+     "n": 50
+    },
+    "Django": {
+     "off": 39,
+     "on": 43,
+     "n": 50
+    },
+    "SQL": {
+     "off": 33,
+     "on": 44,
+     "n": 50
+    },
+    "JS": {
+     "off": 47,
+     "on": 49,
+     "n": 50
+    },
+    "TS": {
+     "off": 44,
+     "on": 45,
+     "n": 50
+    },
+    "Bash": {
+     "off": 39,
+     "on": 44,
+     "n": 50
+    },
+    "Git": {
+     "off": 43,
+     "on": 49,
+     "n": 50
+    },
+    "SSH": {
+     "off": 38,
+     "on": 43,
+     "n": 50
+    },
+    "GitHub": {
+     "off": 32,
+     "on": 36,
+     "n": 50
+    },
+    "Docs": {
+     "off": 44,
+     "on": 48,
+     "n": 50
+    },
+    "ReactNative": {
+     "off": 48,
+     "on": 47,
+     "n": 50
+    },
+    "RAG": {
+     "off": 50,
+     "on": 50,
+     "n": 50
+    }
+   },
+   "gained": 69,
+   "lost": 23,
+   "baseline_used": "replica",
+   "batching_churn": 0,
+   "tokens": 1779065,
+   "think_chars": 6317430,
+   "answer_chars": 261404,
+   "empty": 8,
+   "retried": 53
+  }
+ },
+ "long": {
+  "gemma": {
+   "label": "Gemma 4 12B QAT",
+   "kind": "native",
+   "deep_off": 46,
+   "deep_on": 46,
+   "shal_off": 49,
+   "shal_on": 54,
+   "matched_n": 53,
+   "matched_off": 43,
+   "matched_on": 46,
+   "rejected": 7,
+   "squeezed": 1,
+   "tightest": 1817
+  },
+  "qwen": {
+   "label": "Qwen2.5-Coder-14B",
+   "kind": "cot",
+   "deep_off": 28,
+   "deep_on": 24,
+   "shal_off": 48,
+   "shal_on": 45,
+   "matched_n": 36,
+   "matched_off": 28,
+   "matched_on": 24,
+   "rejected": 24,
+   "squeezed": 0,
+   "tightest": null
+  },
+  "mellum": {
+   "label": "Mellum2-12B-A2.5B",
+   "kind": "cot",
+   "deep_off": 16,
+   "deep_on": 13,
+   "shal_off": 47,
+   "shal_on": 35,
+   "matched_n": 58,
+   "matched_off": 16,
+   "matched_on": 13,
+   "rejected": 2,
+   "squeezed": 6,
+   "tightest": 161
+  },
+  "q35": {
+   "label": "Qwen3.5-9B FP8",
+   "kind": "native",
+   "deep_off": 45,
+   "deep_on": 49,
+   "shal_off": 44,
+   "shal_on": 51,
+   "matched_n": 60,
+   "matched_off": 45,
+   "matched_on": 49,
+   "rejected": 0,
+   "squeezed": 0,
+   "tightest": null
+  }
+ }
+}
