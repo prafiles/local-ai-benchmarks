@@ -1,4 +1,4 @@
-<title>Does reasoning mode help? Nine runs, two stacks</title>
+<title>How nine local coding models compare</title>
 <style>
   :root {
     --bg:#F7F5F1; --panel:#FFFFFF; --ink:#1C1F26; --ink-2:#4A515E; --ink-3:#7A8290;
@@ -59,6 +59,28 @@
   .axis .marks { position:relative; height:1rem; }
   .axis .marks span { position:absolute; transform:translateX(-50%); }
 
+  /* ---------- ranked dumbbell: each row spans one model's two runs ---------- */
+  .dumb { display:grid; grid-template-columns:13rem 1fr 3.2rem; gap:.5rem .8rem;
+          align-items:center; font-size:.83rem; }
+  .dtrack2 { position:relative; height:16px; }
+  /* the full 0-600 scale, drawn as a recessive rail so the axis is never truncated */
+  .dtrack2::before { content:""; position:absolute; left:0; right:0; top:7px; height:2px;
+                     background:var(--rule-2); border-radius:1px; }
+  .rng { position:absolute; top:7px; height:2px; background:var(--off); opacity:.55;
+         border-radius:1px; }
+  .pt { position:absolute; top:2px; width:12px; height:12px; border-radius:50%;
+        transform:translateX(-50%); box-sizing:border-box;
+        /* 2px surface ring so the two markers stay legible where they nearly overlap */
+        box-shadow:0 0 0 2px var(--panel); }
+  .pt.off { background:var(--panel); border:2px solid var(--off); }
+  .pt.on  { background:var(--on); }
+  .legend-pt { position:static; transform:none; display:inline-block; vertical-align:-2px;
+               margin-right:.34rem; box-shadow:none; }
+  .axis2 { display:grid; grid-template-columns:13rem 1fr 3.2rem; gap:.8rem;
+           font-family:var(--mono); font-size:.66rem; color:var(--ink-3); margin-top:.5rem; }
+  .axis2 .marks { position:relative; height:1rem; }
+  .axis2 .marks span { position:absolute; transform:translateX(-50%); }
+
   /* ---------- tables ---------- */
   .scroll { overflow-x:auto; }
   table { border-collapse:collapse; width:100%; min-width:36rem; font-size:.83rem;
@@ -92,15 +114,51 @@
 
   <header>
     <p class="eyebrow">600 execution-graded tasks · 12 categories · nine models, eighteen runs</p>
-    <h1>Does reasoning mode actually help?</h1>
-    <p class="lede">Nine local models, two serving stacks, one task set. Each model runs the
-      suite twice — reasoning off, then on — so the question is answered by a difference rather
-      than by a leaderboard position.</p>
+    <h1>How nine local coding models compare</h1>
+    <p class="lede">Every model runs the same 600 execution-graded tasks twice — reasoning off,
+      then on — across two GPUs and two serving stacks. Nothing is judged by another model:
+      answers are executed, typechecked, or run against fixture repositories.</p>
   </header>
+
+  <!-- =================================================== ranking -->
+  <section class="card">
+    <h2>Tasks passed, out of 600</h2>
+    <p class="sub">Each row spans a model's two runs. Hollow marker is reasoning off, solid is on;
+      the model is ranked by whichever is better.</p>
+    <div class="legend">
+      <span><i class="pt off legend-pt"></i>reasoning off</span>
+      <span><i class="pt on legend-pt"></i>reasoning on</span>
+      <span>CUDA = RTX 4060 Ti / vLLM · M2 Max = Apple M2 Max / MLX</span>
+    </div>
+    <div class="dumb">
+      <div class="dname">Gemma 4 26B A4B QAT <small>M2 Max</small></div><div class="dtrack2"><span class="rng" style="left:92.2%; width:4.3%"></span><span class="pt off" style="left:92.2%"></span><span class="pt on" style="left:96.5%"></span></div><div class="dnum">579</div>
+      <div class="dname">Gemma 4 12B QAT <small>CUDA</small></div><div class="dtrack2"><span class="rng" style="left:91.0%; width:4.8%"></span><span class="pt off" style="left:91.0%"></span><span class="pt on" style="left:95.8%"></span></div><div class="dnum">575</div>
+      <div class="dname">Qwen3.6 27B <small>M2 Max</small></div><div class="dtrack2"><span class="rng" style="left:92.8%; width:2.5%"></span><span class="pt off" style="left:92.8%"></span><span class="pt on" style="left:95.3%"></span></div><div class="dnum">572</div>
+      <div class="dname">Qwen3.6 35B A3B <small>M2 Max</small></div><div class="dtrack2"><span class="rng" style="left:92.7%; width:2.0%"></span><span class="pt off" style="left:92.7%"></span><span class="pt on" style="left:94.7%"></span></div><div class="dnum">568</div>
+      <div class="dname">Qwen3.5 9B FP8 <small>CUDA</small></div><div class="dtrack2"><span class="rng" style="left:83.3%; width:7.7%"></span><span class="pt off" style="left:83.3%"></span><span class="pt on" style="left:91.0%"></span></div><div class="dnum">546</div>
+      <div class="dname">Qwen2.5-Coder 14B <small>CUDA</small></div><div class="dtrack2"><span class="rng" style="left:89.3%; width:0.5%"></span><span class="pt off" style="left:89.8%"></span><span class="pt on" style="left:89.3%"></span></div><div class="dnum">539</div>
+      <div class="dname">Mellum2 12B A2.5B <small>CUDA</small></div><div class="dtrack2"><span class="rng" style="left:86.3%; width:1.5%"></span><span class="pt off" style="left:87.8%"></span><span class="pt on" style="left:86.3%"></span></div><div class="dnum">527</div>
+      <div class="dname">GLM 4.7 Flash <small>M2 Max</small></div><div class="dtrack2"><span class="rng" style="left:85.8%; width:1.0%"></span><span class="pt off" style="left:86.8%"></span><span class="pt on" style="left:85.8%"></span></div><div class="dnum">521</div>
+      <div class="dname">DeepSeek VL2 <small>M2 Max</small></div><div class="dtrack2"><span class="rng" style="left:27.8%; width:0"></span><span class="pt off" style="left:27.8%"></span></div><div class="dnum">167</div>
+    </div>
+    <div class="axis2"><span></span><span class="marks">
+      <span style="left:0%">0</span><span style="left:25%">150</span>
+      <span style="left:50%">300</span><span style="left:75%">450</span>
+      <span style="left:100%">600</span></span><span></span></div>
+
+    <p class="note key"><b>The top four are separated by 11 tasks out of 600.</b> Gemma 4 26B,
+      Gemma 4 12B, Qwen3.6 27B and Qwen3.6 35B land within 2% of each other, so treating this as
+      a ranking overstates what the numbers support — the measured noise floor alone is ~6 tasks.
+      The honest reading is one leading cluster, then a gap.</p>
+    <p class="note"><b>Doubling the parameters bought four tasks.</b> Gemma 4 12B on a 16 GB
+      consumer GPU scores 575; Gemma 4 26B on a 64 GB Mac scores 579. Same family, 2× the
+      parameters, 4 tasks apart — and the 12B did it while the 26B was the better of the two
+      only after both were allowed to think.</p>
+  </section>
 
   <!-- =================================================== headline -->
   <section class="card">
-    <h2>The answer depends on which kind of reasoning</h2>
+    <h2>Does reasoning mode help? It depends which kind</h2>
     <p class="sub">Change in tasks passed out of 600 when reasoning is enabled.</p>
 
     <h3>Native thinking mode</h3>
