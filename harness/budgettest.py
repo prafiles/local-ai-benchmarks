@@ -14,15 +14,17 @@ at temperature 0, so keeping it makes thinking the only variable that changed.
     budgettest.py <model> [budgets]
 """
 import json
+import os
 import sys
 import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-sys.path.insert(0, "/root/bench2")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import b3  # noqa: E402
 
-URL = "http://localhost:8000/v1/chat/completions"
+URL = os.environ.get("B4_URL",
+                     "http://localhost:8000/v1/chat/completions")
 MODEL = sys.argv[1]
 BUDGETS = [int(x) for x in (sys.argv[2].split(",") if len(sys.argv) > 2
                             else ["8000", "16000"])]
@@ -68,5 +70,6 @@ for bud in BUDGETS:
             print("   %-9s think %5d  ans %5d  tok %5d  %s"
                   % (r["tid"], r["think"], r["ans"], r["tok"],
                      "TRUNCATED" if r["finish"] == "length" else "ok"), flush=True)
-json.dump(out, open("/root/bench2/budgettest.json", "w"), indent=1)
-print("\nsaved -> /root/bench2/budgettest.json", flush=True)
+json.dump(out, open(os.path.join(os.environ.get("B4_OUT", "/root/bench2"), "budgettest.json"), "w"), indent=1)
+print("\nsaved -> %s" % os.path.join(os.environ.get("B4_OUT", "/root/bench2"),
+                                     "budgettest.json"), flush=True)

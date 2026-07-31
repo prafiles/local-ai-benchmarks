@@ -1,0 +1,10 @@
+{
+ "model": "qwen/qwen3.6-35b-a3b",
+ "sampling": {
+  "temperature": 1.0,
+  "top_p": 0.95,
+  "top_k": 64
+ },
+ "name": "t1.0/k64",
+ "why": "Measured on the 6 probes that spiral, 2 passes each, budget 8000 (hardtemp_q36moe.json): t0/greedy 10/12 for 49544 tok; t0.6/k20 9/12 for 46511; t0.8/k20 10/12 for 36912; t1.0/k64 11/12 for 34293. Hotter is both more reliable and cheaper, which is the same pattern Qwen3.5-9B showed on the node and the opposite of its own dense sibling qwen3.6-27b, where greedy won outright -- so the sampling choice does not follow the model family, and reusing one profile across it would have been wrong. The cost ordering is the tell: a spiral burns the entire 8000-token budget and returns nothing, so the setting that spirals least is also the cheapest. Unlike qwen3.6-27b, this model therefore cannot run both arms at the same temperature, and its off/on delta carries the same sampling confound the published report declares."
+}

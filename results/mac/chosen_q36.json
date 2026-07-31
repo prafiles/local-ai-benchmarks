@@ -1,0 +1,8 @@
+{
+ "model": "qwen/qwen3.6-27b",
+ "sampling": {
+  "temperature": 0.0
+ },
+ "name": "t0/greedy",
+ "why": "Measured on the 6 probes that spiral, 2 passes each, budget 8000 (hardtemp_q36.json): t0/greedy 12/12 for 31998 tok; t0.6/k20 12/12 for 34164; t0.8/k20 10/12 for 43373 (sql-001 1/2, ts-001 1/2); t1.0/k64 11/12 for 37584 (sql-001 1/2). Greedy wins on BOTH reliability and cost, and hotter is strictly worse here -- the opposite of Qwen3.5-9B on the vLLM node, where greedy never terminated and t1.0/k64 was needed to get from 4/12 to 10/12. Greedy was only excluded from the original sweep because of that Qwen3.5 result, which is a fact about that model and not a law; it was retested here (see patch_hardtemp_mac.py) and does not hold. This matters beyond cost: the off arm also runs greedy, so this model's two arms differ ONLY in whether reasoning is suppressed. That is a genuine single-variable comparison, which no entry in the published vLLM report can offer -- there thinking mode could not be run at temperature 0 at all, and the temperature change had to be declared as a confound."
+}

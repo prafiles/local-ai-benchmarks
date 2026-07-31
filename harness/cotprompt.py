@@ -19,14 +19,16 @@ same failure the native arm had.
     cotprompt.py <model> [workers]
 """
 import json
+import os
 import sys
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-sys.path.insert(0, "/root/bench2")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import b3  # noqa: E402
 
-URL = "http://localhost:8000/v1/chat/completions"
+URL = os.environ.get("B4_URL",
+                     "http://localhost:8000/v1/chat/completions")
 MODEL = sys.argv[1]
 WORKERS = int(sys.argv[2]) if len(sys.argv) > 2 else 8
 PROBES = ["py-001", "sql-001", "sh-001", "git-001", "ts-001", "doc-001",
@@ -100,5 +102,6 @@ for name, kind, instr in VARIANTS:
 
 print("\n-> %s" % best[1], flush=True)
 json.dump({"name": best[1], "kind": best[2], "instr": best[3]},
-          open("/root/bench2/cot_instr.json", "w"), indent=1)
-print("saved -> /root/bench2/cot_instr.json", flush=True)
+          open(os.path.join(os.environ.get("B4_OUT", "/root/bench2"), "cot_instr.json"), "w"), indent=1)
+print("saved -> %s" % os.path.join(os.environ.get("B4_OUT", "/root/bench2"),
+                                   "cot_instr.json"), flush=True)

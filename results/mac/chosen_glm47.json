@@ -1,0 +1,8 @@
+{
+ "model": "zai-org/glm-4.7-flash",
+ "sampling": {
+  "temperature": 1.0
+ },
+ "name": "t1.0 (vendor default)",
+ "why": "NOT measured by hardtemp.py -- chosen by instruction to use the model's recommended defaults. The value is taken verbatim from the generation_config.json shipped with the weights (GLM-4.7-Flash-MLX-6bit), which sets temperature 1.0 and specifies no top_p or top_k; those are therefore left unset rather than filled in from memory of a model card that cannot be checked offline. This is a deliberate methodological exception: every other model here has its first-attempt temperature measured on the six probes that spiral, because a vendor default is a recommendation for general use and not evidence about this suite -- the sweep contradicted the vendor recommendation outright on Qwen3.5-9B, where Qwen's own suggested t0.6/k20 answered 4/12 against 10/12 at t1.0/k64. Consequence for interpretation: temperature 1.0 differs from the off arm's greedy, so this model's off/on delta carries a sampling confound and is NOT the single-variable measurement that Gemma 4 26B and Qwen3.6 27B provide. Both arms do share a context window of 128000, which is the other variable that had to be held."
+}

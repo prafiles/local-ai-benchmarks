@@ -24,15 +24,17 @@ and every spiral costs a full budget in wasted tokens.
     hardtemp.py <model> [budget] [passes]
 """
 import json
+import os
 import sys
 import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-sys.path.insert(0, "/root/bench2")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import b3  # noqa: E402
 
-URL = "http://localhost:8000/v1/chat/completions"
+URL = os.environ.get("B4_URL",
+                     "http://localhost:8000/v1/chat/completions")
 MODEL = sys.argv[1]
 BUDGET = int(sys.argv[2]) if len(sys.argv) > 2 else 8000
 PASSES = int(sys.argv[3]) if len(sys.argv) > 3 else 2
@@ -45,6 +47,28 @@ CONFIGS = [
     ("t1.0/k64", {"temperature": 1.0, "top_p": 0.95, "top_k": 64}),
 ]
 
+
+def _parse_configs(spec):
+    """'name=temp,top_p,top_k' entries, whitespace separated, '-' to omit."""
+    cfgs = []
+    for entry in spec.split():
+        name, _, vals = entry.partition("=")
+        parts = (vals.split(",") + ["-", "-", "-"])[:3]
+        samp = {}
+        for field, v in zip(("temperature", "top_p", "top_k"), parts):
+            if v and v != "-":
+                samp[field] = int(v) if field == "top_k" else float(v)
+        cfgs.append((name, samp))
+    return cfgs
+
+
+# Greedy is excluded above because it was measured unusable in thinking mode on
+# the two vLLM models -- a conclusion about those models, not a law. Override to
+# retest it: if thinking terminates at temperature 0 on a given model, both arms
+# can run at identical sampling and the temperature confound disappears.
+if os.environ.get("B4_HARD_CONFIGS"):
+    CONFIGS = _parse_configs(os.environ["B4_HARD_CONFIGS"])
+
 TASKS = {t[0]: t for t in b3.all_tasks()}
 
 
@@ -52,7 +76,14 @@ def one(job):
     tid, samp = job
     _t, _c, _k, prompt, _mt = TASKS[tid]
     payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}],
-               "max_tokens": BUDGET, "chat_template_kwargs": {"enable_thinking": True}}
+               "max_tokens": BUDGET}
+    # How thinking is requested is server-specific. vLLM honours the template
+    # kwarg; LM Studio's MLX engine drops it silently and those models think by
+    # default, so there the correct payload is one that says nothing at all.
+    # Sending the kwarg anyway would still have measured thinking mode, but for
+    # the wrong reason -- see patch_lmstudio.py.
+    if os.environ.get("B4_OFF_MECH") != "reasoning_effort":
+        payload["chat_template_kwargs"] = {"enable_thinking": True}
     payload.update(samp)
     req = urllib.request.Request(URL, data=json.dumps(payload).encode(),
                                  headers={"Content-Type": "application/json"})
@@ -87,8 +118,9 @@ for name, samp in CONFIGS:
           flush=True)
     out[name] = {"samp": samp, "answered": ok, "n": n, "tokens": tok, "per": per,
                  "rows": rows}
-    json.dump(out, open("/root/bench2/hardtemp.json", "w"), indent=1)
+    json.dump(out, open(os.path.join(os.environ.get("B4_OUT", "/root/bench2"), "hardtemp.json"), "w"), indent=1)
 
 best = max(out.items(), key=lambda kv: (kv[1]["answered"], -kv[1]["tokens"]))
 print("\n-> first attempt: %s  %s" % (best[0], best[1]["samp"]), flush=True)
-print("saved -> /root/bench2/hardtemp.json", flush=True)
+print("saved -> %s" % os.path.join(os.environ.get("B4_OUT", "/root/bench2"),
+                                   "hardtemp.json"), flush=True)

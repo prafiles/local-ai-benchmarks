@@ -24,7 +24,7 @@ import json
 import os
 import sys
 
-HERE = "/root/bench2"
+HERE = os.environ.get("B4_OUT", "/root/bench2")
 CATS = ["Python", "Django", "SQL", "JS", "TS", "Bash", "Git", "SSH", "GitHub",
         "Docs", "ReactNative", "RAG"]
 

@@ -1,0 +1,103 @@
+
+######## gemma26 -- google/gemma-4-26b-a4b-qat
+Thu Jul 30 03:33:13 IST 2026
+loaded google/gemma-4-26b-a4b-qat at ctx=32768, 1 slot
+
+######## gemma26 off arm (reasoning suppressed, greedy)
+Thu Jul 30 03:33:29 IST 2026
+  600 to run, 1 concurrent
+  10/600  0.4m elapsed, ~0.4h left
+  20/600  0.6m elapsed, ~0.3h left
+  30/600  1.0m elapsed, ~0.3h left
+  40/600  1.3m elapsed, ~0.3h left
+  50/600  1.7m elapsed, ~0.3h left
+  60/600  1.9m elapsed, ~0.3h left
+  70/600  2.1m elapsed, ~0.3h left
+  80/600  2.2m elapsed, ~0.2h left
+  90/600  2.4m elapsed, ~0.2h left
+  100/600  2.6m elapsed, ~0.2h left
+  110/600  2.7m elapsed, ~0.2h left
+  120/600  2.9m elapsed, ~0.2h left
+  130/600  3.0m elapsed, ~0.2h left
+  140/600  3.2m elapsed, ~0.2h left
+  150/600  3.4m elapsed, ~0.2h left
+  160/600  3.6m elapsed, ~0.2h left
+  170/600  3.9m elapsed, ~0.2h left
+  180/600  4.1m elapsed, ~0.2h left
+  190/600  4.3m elapsed, ~0.2h left
+  200/600  4.5m elapsed, ~0.2h left
+  210/600  4.8m elapsed, ~0.1h left
+  220/600  5.0m elapsed, ~0.1h left
+  230/600  5.2m elapsed, ~0.1h left
+  240/600  5.4m elapsed, ~0.1h left
+  250/600  5.6m elapsed, ~0.1h left
+  260/600  5.7m elapsed, ~0.1h left
+  270/600  5.7m elapsed, ~0.1h left
+  280/600  5.8m elapsed, ~0.1h left
+  290/600  5.9m elapsed, ~0.1h left
+  300/600  5.9m elapsed, ~0.1h left
+  310/600  6.0m elapsed, ~0.1h left
+  320/600  6.0m elapsed, ~0.1h left
+  330/600  6.1m elapsed, ~0.1h left
+  340/600  6.1m elapsed, ~0.1h left
+  350/600  6.2m elapsed, ~0.1h left
+  360/600  6.3m elapsed, ~0.1h left
+  370/600  6.4m elapsed, ~0.1h left
+  380/600  6.4m elapsed, ~0.1h left
+  390/600  6.5m elapsed, ~0.1h left
+  400/600  6.6m elapsed, ~0.1h left
+  410/600  6.9m elapsed, ~0.1h left
+  420/600  6.9m elapsed, ~0.0h left
+  430/600  7.0m elapsed, ~0.0h left
+  440/600  7.1m elapsed, ~0.0h left
+  450/600  7.1m elapsed, ~0.0h left
+  460/600  8.0m elapsed, ~0.0h left
+  470/600  9.1m elapsed, ~0.0h left
+  480/600  10.4m elapsed, ~0.0h left
+  490/600  11.6m elapsed, ~0.0h left
+  500/600  13.1m elapsed, ~0.0h left
+  510/600  13.6m elapsed, ~0.0h left
+  520/600  14.2m elapsed, ~0.0h left
+  530/600  14.9m elapsed, ~0.0h left
+  540/600  15.5m elapsed, ~0.0h left
+  550/600  16.0m elapsed, ~0.0h left
+  560/600  16.1m elapsed, ~0.0h left
+  570/600  16.1m elapsed, ~0.0h left
+  580/600  16.2m elapsed, ~0.0h left
+  590/600  16.2m elapsed, ~0.0h left
+  600/600  16.3m elapsed, ~0.0h left
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/b_gemma26.json
+
+######## gemma26 temperature sweep for thinking mode
+Thu Jul 30 03:49:45 IST 2026
+### first-attempt temperature on the hard probes, budget=8000, 2 passes
+
+ t0.6/k20   answered 12/12   tokens  14996   wall  225s
+   dj-001 2/2  doc-001 2/2  py-001 2/2  sh-001 2/2  sql-001 2/2  ts-001 2/2
+
+ t0.8/k20   answered 12/12   tokens  19948   wall  298s
+   dj-001 2/2  doc-001 2/2  py-001 2/2  sh-001 2/2  sql-001 2/2  ts-001 2/2
+
+ t1.0/k64   answered 12/12   tokens  20962   wall  314s
+   dj-001 2/2  doc-001 2/2  py-001 2/2  sh-001 2/2  sql-001 2/2  ts-001 2/2
+
+-> first attempt: t0.6/k20  {'temperature': 0.6, 'top_p': 0.95, 'top_k': 20}
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/hardtemp.json
+!! write /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/chosen_gemma26.json from the sweep above, then re-run
+
+######## gemma26 -- google/gemma-4-26b-a4b-qat
+Thu Jul 30 04:04:19 IST 2026
+loaded google/gemma-4-26b-a4b-qat at ctx=32768, 1 slot
+
+######## gemma26 off arm (reasoning suppressed, greedy)
+Thu Jul 30 04:04:33 IST 2026
+  resuming: 600/600 already done
+  0 to run, 1 concurrent
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/b_gemma26.json
+
+######## gemma26 on arm (native thinking, budget 8000)
+Thu Jul 30 04:04:33 IST 2026
+google/gemma-4-26b-a4b-qat -> {'temperature': 0.6, 'top_p': 0.95, 'top_k': 20}
+            Measured on the 6 probes that spiral, 2 passes each, budget 8000 (hardtemp_gemma26.json): t0.6/k20 12/12 for 14996 tok; t0.8/k20 12/12 for 19948; t1.0/k64 12/12 for 20962. Unlike Qwen3.5-9B on the vLLM node -- which answered only 4/12 at t0.6 and needed t1.0/k64 to reach 10/12 -- this model does not spiral at any of the three settings, so reliability does not separate them and the choice falls to cost. Picked the coolest, which is also the cheapest (14996 vs 20962 tokens, a 1.4x saving) and better for code generation. Same setting the 12B Gemma 4 chose on the node, reached by different evidence: there t0.6 won on answered count, here it wins on tokens at equal answered count.
+  600 to run, 1 concurrent
+  10/600  4.3m elapsed, ~4.2h left

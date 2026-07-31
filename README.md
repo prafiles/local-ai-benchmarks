@@ -195,9 +195,10 @@ empties. Qwen2.5-Coder's 24 zeros are HTTP rejections, tracked separately from w
 ```
 harness/     task sets, runners, graders, oracle builders, analysis
 images/      Dockerfiles for the three grading sandboxes
-serving/     vLLM launch scripts and compose file
+serving/     vLLM launch scripts and compose file; macpair.sh for LM Studio
 results/     raw model output + graded output for both suites
-report/      standalone HTML report (open report/index.html)
+report/      standalone HTML reports: index.html (CUDA, 8 entries),
+             overview.html (merged view across both stacks)
 ```
 
 Key files:
@@ -213,6 +214,11 @@ Key files:
 | `harness/agg4.py` | combined view across both suites |
 | `harness/nulloracle.py`, `nulloracle4.py` | **grade a run that answers nothing — every task must fail** |
 | `harness/hardtemp.py` | first-attempt sampling, measured per probe on the probes that spiral |
+| `harness/patch_lmstudio.py` | **LM Studio: template kwargs are dropped — switch arms with `reasoning_effort`** |
+| `harness/patch_rawchat.py` | raw-completions escape for a model whose chat template is broken |
+| `harness/patch_hardtemp_mac.py` | retest greedy in thinking mode; it is not universally unusable |
+| `harness/aggmac.py` | Apple Silicon dataset, flags whether each delta is single-variable |
+| `serving/macpair.sh` | **one load, both arms — holds the context window fixed across a pair** |
 | `harness/budgettest.py` | the test that proved budget does not bound a reasoning trace |
 | `harness/tune2.py` | trace-cap / sampling / concurrency sweep |
 | `harness/agg_think.py` | reasoning arm vs its own no-reasoning baseline |
@@ -417,6 +423,66 @@ Qwen3.5 — its traces grow to fill any budget — so for the native arms reason
 changed together, and no rerun separates them. The prompted-CoT arms do not have this problem:
 they run greedy on both sides against a concurrency-matched baseline, making them the only
 genuinely single-variable comparison in this repository.
+
+---
+
+## Apple Silicon: the same suite on LM Studio / MLX
+
+A second stack, run on an Apple M2 Max (64 GB) against LM Studio's MLX engine. Same 600 tasks,
+same graders — the grading sandboxes were rebuilt for arm64 and re-validated before any score
+was trusted: reference oracle 600/600, null oracle 0/600, and 60/60 and 0/60 on the
+long-context set, all matching the CUDA results exactly.
+
+| model | off | on | Δ | comparison |
+|---|---|---|---|---|
+| Gemma 4 26B A4B QAT | 553 | **579** | **+26** | single-variable |
+| Qwen3.6 27B | 557 | **572** | +15 | single-variable |
+| Qwen3.6 35B A3B | 556 | **568** | +12 | sampling confound |
+| GLM 4.7 Flash | 521 | *running* | — | vendor-default sampling |
+| DeepSeek VL2 | **167** | n/a | — | range 112–167, no reasoning axis |
+
+Merged view across both stacks: [`report/overview.html`](report/overview.html).
+
+**Native thinking helped every model that has it; prompted CoT helped neither model that
+needed it.** That split now holds across two GPUs, two serving stacks and four vendors, which
+is a stronger claim than any single delta, because the two stacks share nothing but the task
+set and the grader.
+
+Two of these are the cleanest measurements in the repository. Gemma 4 26B and Qwen3.6 27B run
+**both** arms greedy, so the only thing separating them is whether reasoning was suppressed —
+something no CUDA native arm can claim.
+
+### What this stack does differently, and why
+
+Each of these was measured, and each would have produced a quietly wrong result if assumed:
+
+- **`chat_template_kwargs` is silently dropped.** `enable_thinking` absent / `False` / `True`
+  return byte-identical output on qwen3.6-35b-a3b. The arms are switched with
+  `reasoning_effort: "none"` instead — the only one of four candidate mechanisms that
+  suppressed the trace while leaving the answer correct. These models think by *default*, so
+  here the **off** arm is the one carrying a flag. See
+  [`harness/patch_lmstudio.py`](harness/patch_lmstudio.py).
+- **`THINK_CAPABLE` had to be extended.** "qwen3.6" does not match "qwen3.5", so both Qwen3.6
+  models would have been classed as non-thinking and routed to the prompted-CoT arm — whose
+  baseline would *also* have been thinking, making every entry for them a reasoning run wearing
+  a baseline label.
+- **Concurrency buys nothing.** 4 concurrent requests aggregate 84 tok/s against 79
+  single-stream (1.06×), where CUDA scaled 22 → 83 tok/s. Everything runs at one worker, which
+  also makes greedy genuinely deterministic — confirmed 40/40 and 8/8 on repeat runs.
+- **Greedy thinking is not universally broken.** It was excluded on CUDA because Qwen3.5-9B and
+  Gemma 4 12B never terminated. Retested here ([`harness/patch_hardtemp_mac.py`](harness/patch_hardtemp_mac.py)),
+  it wins outright on Qwen3.6 27B and Gemma 4 26B. The choice does not follow the model family:
+  Qwen3.6 27B wants greedy while its own MoE sibling needs `t1.0/k64`.
+- **The context window is an experimental variable.** The same model at 32768 vs 128000
+  produces different output on 226 of 600 tasks, and it cannot be pinned by asking — identical
+  requests yield different actual windows depending on system state. Its effect on the *score*
+  is small (6 tasks flipped, net 0), but both arms must still be held at one window, which is
+  what [`serving/macpair.sh`](serving/macpair.sh) exists to guarantee: one load, both arms.
+- **DeepSeek VL2's chat template is broken in this build**, emitting garbage where
+  `/v1/completions` on the same weights is coherent. It is prompted through the raw endpoint
+  with DeepSeek's documented turn format ([`harness/patch_rawchat.py`](harness/patch_rawchat.py)).
+  Its score is a **range**: one trailing space in that format broke 84 tasks and fixed 29,
+  moving the total from 167 to 112. Both runs are committed.
 
 ---
 

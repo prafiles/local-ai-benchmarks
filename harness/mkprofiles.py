@@ -19,7 +19,8 @@ import sys
 prof = {}
 for arg in sys.argv[1:]:
     label, key = arg.split("=", 1)
-    p = "/root/bench2/chosen_%s.json" % label
+    p = os.path.join(os.environ.get("B4_CHOSEN_DIR", "/root/bench2"),
+                     "chosen_%s.json" % label)
     if not os.path.exists(p):
         sys.stderr.write("no chosen_%s.json -- refusing to guess sampling params\n" % label)
         raise SystemExit(1)

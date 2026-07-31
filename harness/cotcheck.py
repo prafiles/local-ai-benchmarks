@@ -18,15 +18,17 @@
     cotcheck.py <model> <baseline.json> [workers]
 """
 import json
+import os
 import sys
 import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-sys.path.insert(0, "/root/bench2")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import b3  # noqa: E402
 
-URL = "http://localhost:8000/v1/chat/completions"
+URL = os.environ.get("B4_URL",
+                     "http://localhost:8000/v1/chat/completions")
 MODEL = sys.argv[1]
 BASE = sys.argv[2]
 WORKERS = int(sys.argv[3]) if len(sys.argv) > 3 else 4

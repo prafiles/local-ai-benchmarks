@@ -32,8 +32,8 @@ import b4_ctx as C1     # noqa: E402
 import b4_ctx2 as C2    # noqa: E402
 import b4_gen as GEN    # noqa: E402
 
-URL = "http://localhost:8000/v1/chat/completions"
-TMP = "/root/bench2/tmp/b4"
+URL = os.environ.get("B4_URL", "http://localhost:8000/v1/chat/completions")
+TMP = os.environ.get("B4_TMP", "/root/bench2/tmp/b4")
 CPT = 3.4               # nominal chars per token
 
 # Per-category correction, measured against the served tokenizer. The generators
@@ -127,6 +127,20 @@ TEMP = float(os.environ.get("B4_TEMP", "0"))
 TOPP = float(os.environ.get("B4_TOPP", "0.95"))
 
 THINK_CAPABLE = ("gemma-4", "qwen3.5")
+# Extra substrings for models this list predates -- e.g. qwen3.6, whose name does
+# not match "qwen3.5" but which thinks by default. Misclassifying a thinking model
+# as non-thinking is the worst failure available here: it routes the model to the
+# prompted-CoT arm, whose baseline would then also be thinking, and every entry
+# for that model becomes a reasoning run with a baseline label.
+THINK_CAPABLE += tuple(x.strip().lower() for x in
+                       os.environ.get("B4_THINK_CAPABLE", "").split(",") if x.strip())
+
+# How the two arms are separated. "template" is chat_template_kwargs, which is
+# what vLLM honours and what every published number used. "reasoning_effort" is
+# for servers that silently drop chat_template_kwargs (measured on LM Studio's
+# MLX engine) and where the model thinks by default -- there the ON arm sends
+# nothing and the OFF arm is the one carrying the flag.
+OFF_MECH = os.environ.get("B4_OFF_MECH", "template")
 
 
 def can_think(model):
@@ -158,10 +172,17 @@ def sampling(payload, model):
     tmpl_extra = prof.pop("_tmpl", {})
     payload.update(prof)
     if can_think(model):
-        # explicit either way: the flag is what separates the two arms
-        tmpl = {"enable_thinking": bool(THINK)}
-        tmpl.update(tmpl_extra)
-        payload["chat_template_kwargs"] = tmpl
+        if OFF_MECH == "reasoning_effort":
+            # This server ignores chat_template_kwargs, and the model thinks by
+            # default, so only the OFF arm needs to say anything. Sending nothing
+            # on the ON arm is deliberate: it is the model's own default mode.
+            if not THINK:
+                payload["reasoning_effort"] = "none"
+        else:
+            # explicit either way: the flag is what separates the two arms
+            tmpl = {"enable_thinking": bool(THINK)}
+            tmpl.update(tmpl_extra)
+            payload["chat_template_kwargs"] = tmpl
     return payload
 
 

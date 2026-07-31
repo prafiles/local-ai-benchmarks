@@ -1,0 +1,373 @@
+
+################ gemma26 on arm -- google/gemma-4-26b-a4b-qat
+Thu Jul 30 08:10:21 IST 2026
+google/gemma-4-26b-a4b-qat -> {'temperature': 0.0}
+            Measured on the 6 probes that spiral, 2 passes each, budget 8000 (hardtemp_gemma26_greedy.json): t0/greedy 12/12 for 15757 tok; t0.6/k20 12/12 for 15114; t0.8/k20 12/12 for 17699; t1.0/k64 12/12 for 14166. This model never spirals -- every config answered 12/12 -- so reliability cannot separate them and the auto-pick falls through to fewest tokens, which is t1.0/k64. Overridden deliberately, for the second time in this repo that the auto-pick has been the wrong answer. The 11% token gap between greedy and t1.0/k64 is a single-pass measurement at temperature > 0, i.e. within its own noise, while choosing greedy buys something that cannot be bought later: the off arm is also greedy, so the two arms then differ in exactly one thing -- whether reasoning was suppressed. Cost inside the noise is worth trading for the only single-variable reasoning delta available. An earlier chosen_gemma26.json here recorded t0.6/k20 from a 3-config sweep that never tested greedy, because greedy had been ruled out on the vLLM node on the strength of Qwen3.5-9B and Gemma 4 12B; retesting (patch_hardtemp_mac.py) showed that conclusion does not transfer. The 10 on-arm tasks already generated under t0.6/k20 were discarded rather than kept, since mixing two sampling configs inside one arm would make the run uninterpretable.
+  600 to run, 1 concurrent
+
+################ gemma26 on arm -- google/gemma-4-26b-a4b-qat
+Thu Jul 30 09:13:06 IST 2026
+google/gemma-4-26b-a4b-qat -> {'temperature': 0.0}
+            Measured on the 6 probes that spiral, 2 passes each, budget 8000 (hardtemp_gemma26_greedy.json): t0/greedy 12/12 for 15757 tok; t0.6/k20 12/12 for 15114; t0.8/k20 12/12 for 17699; t1.0/k64 12/12 for 14166. This model never spirals -- every config answered 12/12 -- so reliability cannot separate them and the auto-pick falls through to fewest tokens, which is t1.0/k64. Overridden deliberately, for the second time in this repo that the auto-pick has been the wrong answer. The 11% token gap between greedy and t1.0/k64 is a single-pass measurement at temperature > 0, i.e. within its own noise, while choosing greedy buys something that cannot be bought later: the off arm is also greedy, so the two arms then differ in exactly one thing -- whether reasoning was suppressed. Cost inside the noise is worth trading for the only single-variable reasoning delta available. An earlier chosen_gemma26.json here recorded t0.6/k20 from a 3-config sweep that never tested greedy, because greedy had been ruled out on the vLLM node on the strength of Qwen3.5-9B and Gemma 4 12B; retesting (patch_hardtemp_mac.py) showed that conclusion does not transfer. The 10 on-arm tasks already generated under t0.6/k20 were discarded rather than kept, since mixing two sampling configs inside one arm would make the run uninterpretable.
+  600 to run, 1 concurrent
+
+################ gemma26 on arm -- google/gemma-4-26b-a4b-qat
+Thu Jul 30 09:16:00 IST 2026
+ABORT gemma26: another model is also resident: IDENTIFIER
+
+################ q36 on arm -- qwen/qwen3.6-27b
+Thu Jul 30 09:16:14 IST 2026
+ABORT q36: another model is also resident: IDENTIFIER
+
+################ q36moe on arm -- qwen/qwen3.6-35b-a3b
+Thu Jul 30 09:16:26 IST 2026
+ABORT q36moe: another model is also resident: IDENTIFIER
+
+################ GRADING
+Thu Jul 30 09:16:41 IST 2026
+
+---- b_gemma26
+
+===== google/gemma-4-26b-a4b-qat
+  Bash           49/50
+  Django         38/50
+  Docs           49/50
+  Git            49/50
+  GitHub         40/50
+  JS             50/50
+  Python         44/50
+  RAG            50/50
+  ReactNative    48/50
+  SQL            45/50
+  SSH            43/50
+  TS             48/50
+  TOTAL         553/600
+  decode: 63789 tok / 976s = 65.4 tok/s
+graded -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/b_gemma26.graded.json
+
+################ gemma26 on arm -- google/gemma-4-26b-a4b-qat
+Thu Jul 30 09:18:18 IST 2026
+verified: google/gemma-4-26b-a4b-qat alone, context 262144
+google/gemma-4-26b-a4b-qat -> {'temperature': 0.0}
+            Measured on the 6 probes that spiral, 2 passes each, budget 8000 (hardtemp_gemma26_greedy.json): t0/greedy 12/12 for 15757 tok; t0.6/k20 12/12 for 15114; t0.8/k20 12/12 for 17699; t1.0/k64 12/12 for 14166. This model never spirals -- every config answered 12/12 -- so reliability cannot separate them and the auto-pick falls through to fewest tokens, which is t1.0/k64. Overridden deliberately, for the second time in this repo that the auto-pick has been the wrong answer. The 11% token gap between greedy and t1.0/k64 is a single-pass measurement at temperature > 0, i.e. within its own noise, while choosing greedy buys something that cannot be bought later: the off arm is also greedy, so the two arms then differ in exactly one thing -- whether reasoning was suppressed. Cost inside the noise is worth trading for the only single-variable reasoning delta available. An earlier chosen_gemma26.json here recorded t0.6/k20 from a 3-config sweep that never tested greedy, because greedy had been ruled out on the vLLM node on the strength of Qwen3.5-9B and Gemma 4 12B; retesting (patch_hardtemp_mac.py) showed that conclusion does not transfer. The 10 on-arm tasks already generated under t0.6/k20 were discarded rather than kept, since mixing two sampling configs inside one arm would make the run uninterpretable.
+  600 to run, 1 concurrent
+  10/600  6.9m elapsed, ~6.8h left
+  20/600  9.5m elapsed, ~4.6h left
+  30/600  17.3m elapsed, ~5.5h left
+  40/600  21.0m elapsed, ~4.9h left
+  50/600  26.9m elapsed, ~4.9h left
+  60/600  28.5m elapsed, ~4.3h left
+  70/600  30.4m elapsed, ~3.8h left
+  80/600  32.8m elapsed, ~3.5h left
+  90/600  34.6m elapsed, ~3.3h left
+  100/600  39.7m elapsed, ~3.3h left
+  110/600  43.2m elapsed, ~3.2h left
+  120/600  46.7m elapsed, ~3.1h left
+  130/600  48.9m elapsed, ~2.9h left
+  140/600  52.7m elapsed, ~2.9h left
+  150/600  57.9m elapsed, ~2.9h left
+  160/600  60.2m elapsed, ~2.8h left
+  170/600  61.9m elapsed, ~2.6h left
+  180/600  64.7m elapsed, ~2.5h left
+  190/600  66.2m elapsed, ~2.4h left
+  200/600  68.7m elapsed, ~2.3h left
+  210/600  72.1m elapsed, ~2.2h left
+  220/600  74.8m elapsed, ~2.2h left
+  230/600  80.9m elapsed, ~2.2h left
+  240/600  82.7m elapsed, ~2.1h left
+  250/600  85.7m elapsed, ~2.0h left
+  260/600  90.1m elapsed, ~2.0h left
+  270/600  94.6m elapsed, ~1.9h left
+  280/600  95.5m elapsed, ~1.8h left
+  290/600  99.2m elapsed, ~1.8h left
+  300/600  102.5m elapsed, ~1.7h left
+  310/600  103.0m elapsed, ~1.6h left
+  320/600  103.6m elapsed, ~1.5h left
+  330/600  105.7m elapsed, ~1.4h left
+  340/600  106.2m elapsed, ~1.4h left
+  350/600  106.7m elapsed, ~1.3h left
+  360/600  107.6m elapsed, ~1.2h left
+  370/600  108.7m elapsed, ~1.1h left
+  380/600  109.4m elapsed, ~1.1h left
+  390/600  110.6m elapsed, ~1.0h left
+  400/600  117.1m elapsed, ~1.0h left
+  410/600  118.6m elapsed, ~0.9h left
+  420/600  124.5m elapsed, ~0.9h left
+  430/600  125.3m elapsed, ~0.8h left
+  440/600  126.5m elapsed, ~0.8h left
+  450/600  129.9m elapsed, ~0.7h left
+  460/600  132.3m elapsed, ~0.7h left
+  470/600  135.1m elapsed, ~0.6h left
+  480/600  137.8m elapsed, ~0.6h left
+  490/600  141.1m elapsed, ~0.5h left
+  500/600  144.8m elapsed, ~0.5h left
+  510/600  146.6m elapsed, ~0.4h left
+  520/600  148.7m elapsed, ~0.4h left
+  530/600  150.8m elapsed, ~0.3h left
+  540/600  152.4m elapsed, ~0.3h left
+  550/600  154.0m elapsed, ~0.2h left
+  560/600  154.7m elapsed, ~0.2h left
+  570/600  155.4m elapsed, ~0.1h left
+  580/600  156.2m elapsed, ~0.1h left
+  590/600  157.0m elapsed, ~0.0h left
+  600/600  158.0m elapsed, ~0.0h left
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/t_gemma26.json
+Thu Jul 30 11:56:28 IST 2026
+
+################ q36 on arm -- qwen/qwen3.6-27b
+Thu Jul 30 11:56:28 IST 2026
+verified: qwen/qwen3.6-27b alone, context 208384
+qwen/qwen3.6-27b -> {'temperature': 0.0}
+            Measured on the 6 probes that spiral, 2 passes each, budget 8000 (hardtemp_q36.json): t0/greedy 12/12 for 31998 tok; t0.6/k20 12/12 for 34164; t0.8/k20 10/12 for 43373 (sql-001 1/2, ts-001 1/2); t1.0/k64 11/12 for 37584 (sql-001 1/2). Greedy wins on BOTH reliability and cost, and hotter is strictly worse here -- the opposite of Qwen3.5-9B on the vLLM node, where greedy never terminated and t1.0/k64 was needed to get from 4/12 to 10/12. Greedy was only excluded from the original sweep because of that Qwen3.5 result, which is a fact about that model and not a law; it was retested here (see patch_hardtemp_mac.py) and does not hold. This matters beyond cost: the off arm also runs greedy, so this model's two arms differ ONLY in whether reasoning is suppressed. That is a genuine single-variable comparison, which no entry in the published vLLM report can offer -- there thinking mode could not be run at temperature 0 at all, and the temperature change had to be declared as a confound.
+  600 to run, 1 concurrent
+  10/600  21.4m elapsed, ~21.0h left
+  20/600  37.9m elapsed, ~18.3h left
+  30/600  62.1m elapsed, ~19.7h left
+  40/600  81.5m elapsed, ~19.0h left
+  50/600  112.6m elapsed, ~20.6h left
+  60/600  126.8m elapsed, ~19.0h left
+  70/600  147.0m elapsed, ~18.6h left
+  80/600  163.1m elapsed, ~17.7h left
+  90/600  176.4m elapsed, ~16.7h left
+  100/600  197.8m elapsed, ~16.5h left
+  110/600  220.4m elapsed, ~16.4h left
+  120/600  244.6m elapsed, ~16.3h left
+  130/600  261.6m elapsed, ~15.8h left
+  140/600  297.9m elapsed, ~16.3h left
+  150/600  344.1m elapsed, ~17.2h left
+  160/600  362.5m elapsed, ~16.6h left
+  170/600  377.7m elapsed, ~15.9h left
+  180/600  391.2m elapsed, ~15.2h left
+  190/600  407.0m elapsed, ~14.6h left
+  200/600  422.3m elapsed, ~14.1h left
+  210/600  443.9m elapsed, ~13.7h left
+  220/600  469.7m elapsed, ~13.5h left
+  230/600  490.2m elapsed, ~13.1h left
+  240/600  508.3m elapsed, ~12.7h left
+  250/600  535.8m elapsed, ~12.5h left
+  260/600  548.6m elapsed, ~12.0h left
+  270/600  561.5m elapsed, ~11.4h left
+  280/600  571.3m elapsed, ~10.9h left
+  290/600  583.1m elapsed, ~10.4h left
+  300/600  593.4m elapsed, ~9.9h left
+  310/600  601.3m elapsed, ~9.4h left
+  320/600  607.9m elapsed, ~8.9h left
+  330/600  615.1m elapsed, ~8.4h left
+  340/600  621.7m elapsed, ~7.9h left
+  350/600  627.7m elapsed, ~7.5h left
+  360/600  638.5m elapsed, ~7.1h left
+  370/600  648.7m elapsed, ~6.7h left
+  380/600  655.8m elapsed, ~6.3h left
+  390/600  665.4m elapsed, ~6.0h left
+  400/600  677.7m elapsed, ~5.6h left
+  410/600  690.3m elapsed, ~5.3h left
+  420/600  696.4m elapsed, ~5.0h left
+  430/600  705.9m elapsed, ~4.7h left
+  440/600  719.8m elapsed, ~4.4h left
+  450/600  728.2m elapsed, ~4.0h left
+  460/600  743.8m elapsed, ~3.8h left
+  470/600  758.0m elapsed, ~3.5h left
+  480/600  772.3m elapsed, ~3.2h left
+  490/600  789.1m elapsed, ~3.0h left
+  500/600  808.1m elapsed, ~2.7h left
+  510/600  821.6m elapsed, ~2.4h left
+  520/600  834.1m elapsed, ~2.1h left
+  530/600  847.0m elapsed, ~1.9h left
+  540/600  859.0m elapsed, ~1.6h left
+  550/600  871.6m elapsed, ~1.3h left
+  560/600  875.7m elapsed, ~1.0h left
+  570/600  882.2m elapsed, ~0.8h left
+  580/600  886.3m elapsed, ~0.5h left
+  590/600  891.7m elapsed, ~0.3h left
+  600/600  897.9m elapsed, ~0.0h left
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/t_q36.json
+Fri Jul 31 02:54:37 IST 2026
+
+################ q36moe on arm -- qwen/qwen3.6-35b-a3b
+Fri Jul 31 02:54:37 IST 2026
+verified: qwen/qwen3.6-35b-a3b alone, context 262144
+qwen/qwen3.6-35b-a3b -> {'temperature': 1.0, 'top_p': 0.95, 'top_k': 64}
+            Measured on the 6 probes that spiral, 2 passes each, budget 8000 (hardtemp_q36moe.json): t0/greedy 10/12 for 49544 tok; t0.6/k20 9/12 for 46511; t0.8/k20 10/12 for 36912; t1.0/k64 11/12 for 34293. Hotter is both more reliable and cheaper, which is the same pattern Qwen3.5-9B showed on the node and the opposite of its own dense sibling qwen3.6-27b, where greedy won outright -- so the sampling choice does not follow the model family, and reusing one profile across it would have been wrong. The cost ordering is the tell: a spiral burns the entire 8000-token budget and returns nothing, so the setting that spirals least is also the cheapest. Unlike qwen3.6-27b, this model therefore cannot run both arms at the same temperature, and its off/on delta carries the same sampling confound the published report declares.
+  600 to run, 1 concurrent
+  10/600  8.3m elapsed, ~8.1h left
+  20/600  13.6m elapsed, ~6.6h left
+  30/600  19.0m elapsed, ~6.0h left
+  40/600  28.6m elapsed, ~6.7h left
+  50/600  38.6m elapsed, ~7.1h left
+  60/600  42.3m elapsed, ~6.4h left
+  70/600  45.6m elapsed, ~5.8h left
+  80/600  49.3m elapsed, ~5.3h left
+  90/600  53.2m elapsed, ~5.0h left
+  100/600  58.1m elapsed, ~4.8h left
+  110/600  65.6m elapsed, ~4.9h left
+  120/600  70.9m elapsed, ~4.7h left
+  130/600  76.1m elapsed, ~4.6h left
+  140/600  82.2m elapsed, ~4.5h left
+  150/600  91.3m elapsed, ~4.6h left
+  160/600  96.2m elapsed, ~4.4h left
+  170/600  102.0m elapsed, ~4.3h left
+  180/600  105.7m elapsed, ~4.1h left
+  190/600  110.8m elapsed, ~4.0h left
+  200/600  117.4m elapsed, ~3.9h left
+  210/600  122.7m elapsed, ~3.8h left
+  220/600  130.1m elapsed, ~3.7h left
+  230/600  137.7m elapsed, ~3.7h left
+  240/600  143.1m elapsed, ~3.6h left
+  250/600  147.7m elapsed, ~3.4h left
+  260/600  149.9m elapsed, ~3.3h left
+  270/600  153.5m elapsed, ~3.1h left
+  280/600  156.3m elapsed, ~3.0h left
+  290/600  159.8m elapsed, ~2.8h left
+  300/600  162.4m elapsed, ~2.7h left
+  310/600  164.0m elapsed, ~2.6h left
+  320/600  166.1m elapsed, ~2.4h left
+  330/600  168.0m elapsed, ~2.3h left
+  340/600  170.0m elapsed, ~2.2h left
+  350/600  171.8m elapsed, ~2.0h left
+  360/600  175.2m elapsed, ~1.9h left
+  370/600  177.8m elapsed, ~1.8h left
+  380/600  179.7m elapsed, ~1.7h left
+  390/600  181.8m elapsed, ~1.6h left
+  400/600  185.7m elapsed, ~1.5h left
+  410/600  188.4m elapsed, ~1.5h left
+  420/600  190.4m elapsed, ~1.4h left
+  430/600  192.8m elapsed, ~1.3h left
+  440/600  194.7m elapsed, ~1.2h left
+  450/600  197.3m elapsed, ~1.1h left
+  460/600  201.8m elapsed, ~1.0h left
+  470/600  205.7m elapsed, ~0.9h left
+  480/600  209.7m elapsed, ~0.9h left
+  490/600  213.9m elapsed, ~0.8h left
+  500/600  219.0m elapsed, ~0.7h left
+  510/600  223.5m elapsed, ~0.7h left
+  520/600  226.5m elapsed, ~0.6h left
+  530/600  229.8m elapsed, ~0.5h left
+  540/600  233.1m elapsed, ~0.4h left
+  550/600  236.1m elapsed, ~0.4h left
+  560/600  237.3m elapsed, ~0.3h left
+  570/600  239.1m elapsed, ~0.2h left
+  580/600  240.8m elapsed, ~0.1h left
+  590/600  242.0m elapsed, ~0.1h left
+  600/600  243.9m elapsed, ~0.0h left
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/t_q36moe.json
+Fri Jul 31 06:58:47 IST 2026
+
+################ GRADING
+Fri Jul 31 06:58:48 IST 2026
+
+---- b_gemma26
+
+===== google/gemma-4-26b-a4b-qat
+  Bash           49/50
+  Django         38/50
+  Docs           49/50
+  Git            49/50
+  GitHub         40/50
+  JS             50/50
+  Python         44/50
+  RAG            50/50
+  ReactNative    48/50
+  SQL            45/50
+  SSH            43/50
+  TS             48/50
+  TOTAL         553/600
+  decode: 63789 tok / 976s = 65.4 tok/s
+graded -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/b_gemma26.graded.json
+
+---- t_gemma26
+
+===== google/gemma-4-26b-a4b-qat
+  Bash           49/50
+  Django         47/50
+  Docs           48/50
+  Git            48/50
+  GitHub         44/50
+  JS             50/50
+  Python         49/50
+  RAG            50/50
+  ReactNative    49/50
+  SQL            50/50
+  SSH            46/50
+  TS             49/50
+  TOTAL         579/600
+  decode: 537077 tok / 9481s = 56.6 tok/s
+graded -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/t_gemma26.graded.json
+
+---- b_q36
+
+===== qwen/qwen3.6-27b
+  Bash           47/50
+  Django         43/50
+  Docs           46/50
+  Git            47/50
+  GitHub         43/50
+  JS             49/50
+  Python         47/50
+  RAG            50/50
+  ReactNative    49/50
+  SQL            42/50
+  SSH            46/50
+  TS             48/50
+  TOTAL         557/600
+  decode: 53751 tok / 3088s = 17.4 tok/s
+graded -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/b_q36.graded.json
+
+---- t_q36
+
+===== qwen/qwen3.6-27b
+  Bash           47/50
+  Django         45/50
+  Docs           49/50
+  Git            50/50
+  GitHub         43/50
+  JS             49/50
+  Python         50/50
+  RAG            50/50
+  ReactNative    50/50
+  SQL            45/50
+  SSH            47/50
+  TS             47/50
+  TOTAL         572/600
+  decode: 1020261 tok / 53875s = 18.9 tok/s
+graded -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/t_q36.graded.json
+
+---- b_q36moe
+
+===== qwen/qwen3.6-35b-a3b
+  Bash           47/50
+  Django         45/50
+  Docs           44/50
+  Git            46/50
+  GitHub         44/50
+  JS             49/50
+  Python         45/50
+  RAG            50/50
+  ReactNative    50/50
+  SQL            43/50
+  SSH            43/50
+  TS             50/50
+  TOTAL         556/600
+  decode: 57863 tok / 809s = 71.5 tok/s
+graded -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/b_q36moe.graded.json
+
+---- t_q36moe
+
+===== qwen/qwen3.6-35b-a3b
+  Bash           48/50
+  Django         44/50
+  Docs           49/50
+  Git            50/50
+  GitHub         43/50
+  JS             49/50
+  Python         49/50
+  RAG            50/50
+  ReactNative    49/50
+  SQL            48/50
+  SSH            42/50
+  TS             47/50
+  TOTAL         568/600
+  decode: 1063072 tok / 14631s = 72.7 tok/s
+graded -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/t_q36moe.graded.json
+
+################ ON ARMS DONE
+Fri Jul 31 07:06:02 IST 2026

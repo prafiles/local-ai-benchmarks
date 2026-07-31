@@ -17,7 +17,7 @@ import json
 import os
 import sys
 
-HERE = "/root/bench2"
+HERE = os.environ.get("B4_OUT", "/root/bench2")
 MODELS = [("gemma", "Gemma 4 12B QAT"), ("q35", "Qwen3.5-9B FP8"),
           ("mellum", "Mellum2-12B-A2.5B"), ("qwen", "Qwen2.5-Coder-14B")]
 CATS = ["Python", "Django", "SQL", "JS", "TS", "Bash", "Git", "SSH", "GitHub",

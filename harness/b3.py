@@ -30,8 +30,8 @@ import b3_rag as RAG        # noqa: E402
 import b3_shell as SH       # noqa: E402
 import b3_sql as SQL        # noqa: E402
 
-URL = "http://localhost:8000/v1/chat/completions"
-TMP = "/root/bench2/tmp/run"
+URL = os.environ.get("B4_URL", "http://localhost:8000/v1/chat/completions")
+TMP = os.environ.get("B4_TMP", "/root/bench2/tmp/run")
 
 SQL_TASKS, SQL_BROKEN = SQL.build()
 assert not SQL_BROKEN, SQL_BROKEN
@@ -99,6 +99,20 @@ TEMP = float(os.environ.get("B4_TEMP", "0"))
 TOPP = float(os.environ.get("B4_TOPP", "0.95"))
 
 THINK_CAPABLE = ("gemma-4", "qwen3.5")
+# Extra substrings for models this list predates -- e.g. qwen3.6, whose name does
+# not match "qwen3.5" but which thinks by default. Misclassifying a thinking model
+# as non-thinking is the worst failure available here: it routes the model to the
+# prompted-CoT arm, whose baseline would then also be thinking, and every entry
+# for that model becomes a reasoning run with a baseline label.
+THINK_CAPABLE += tuple(x.strip().lower() for x in
+                       os.environ.get("B4_THINK_CAPABLE", "").split(",") if x.strip())
+
+# How the two arms are separated. "template" is chat_template_kwargs, which is
+# what vLLM honours and what every published number used. "reasoning_effort" is
+# for servers that silently drop chat_template_kwargs (measured on LM Studio's
+# MLX engine) and where the model thinks by default -- there the ON arm sends
+# nothing and the OFF arm is the one carrying the flag.
+OFF_MECH = os.environ.get("B4_OFF_MECH", "template")
 
 # --------------------------------------------------------------- CoT arm
 # For models with no reasoning mode of their own. Asking in the prompt is not the
@@ -174,10 +188,17 @@ def sampling(payload, model):
     tmpl_extra = prof.pop("_tmpl", {})
     payload.update(prof)
     if can_think(model):
-        # explicit either way: the flag is what separates the two arms
-        tmpl = {"enable_thinking": bool(THINK)}
-        tmpl.update(tmpl_extra)
-        payload["chat_template_kwargs"] = tmpl
+        if OFF_MECH == "reasoning_effort":
+            # This server ignores chat_template_kwargs, and the model thinks by
+            # default, so only the OFF arm needs to say anything. Sending nothing
+            # on the ON arm is deliberate: it is the model's own default mode.
+            if not THINK:
+                payload["reasoning_effort"] = "none"
+        else:
+            # explicit either way: the flag is what separates the two arms
+            tmpl = {"enable_thinking": bool(THINK)}
+            tmpl.update(tmpl_extra)
+            payload["chat_template_kwargs"] = tmpl
     return payload
 
 
@@ -196,7 +217,44 @@ ESCALATE = [float(x) for x in
             os.environ.get("B4_ESCALATE", "0.9,1.0").split(",") if x.strip()]
 
 
+# ------------------------------------------------- broken-chat-template escape
+# Set only for a model whose server-side chat template is known broken; see
+# patch_rawchat.py for the evidence that this is a template fault and not the
+# model. Empty means every model goes through /v1/chat/completions as normal.
+RAW_FMT = os.environ.get("B4_RAW_FMT", "")
+RAW_STOP = [s for s in os.environ.get("B4_RAW_STOP", "").split(",") if s]
+COMPLETIONS_URL = URL.replace("/chat/completions", "/completions")
+
+
+def _once_raw(model, prompt, max_tokens, temp=None):
+    """One generation through /v1/completions, formatting the turn ourselves."""
+    payload = sampling({"model": model,
+                        "prompt": RAW_FMT.format(prompt=with_cot(model, prompt)),
+                        "max_tokens": budget(max_tokens)}, model)
+    # A chat endpoint stops at the turn boundary for us; a raw completion will
+    # happily begin a new user turn and answer itself, so the boundary has to be
+    # supplied or the graded text ends up containing a whole invented dialogue.
+    if RAW_STOP:
+        payload["stop"] = RAW_STOP
+    payload.pop("chat_template_kwargs", None)
+    payload.pop("reasoning_effort", None)
+    if temp is not None:
+        payload["temperature"] = temp
+    req = urllib.request.Request(COMPLETIONS_URL, data=json.dumps(payload).encode(),
+                                 headers={"Content-Type": "application/json"})
+    t0 = time.time()
+    with urllib.request.urlopen(req, timeout=REQ_TIMEOUT) as r:
+        d = json.loads(r.read())
+    ch = d["choices"][0]
+    return {"text": ch.get("text") or "", "think": "", "think_chars": 0,
+            "tok": d.get("usage", {}).get("completion_tokens", 0),
+            "secs": round(time.time() - t0, 2),
+            "finish": ch.get("finish_reason", "")}
+
+
 def _once(model, prompt, max_tokens, temp=None):
+    if RAW_FMT:
+        return _once_raw(model, prompt, max_tokens, temp)
     payload = sampling({"model": model,
                         "messages": [{"role": "user",
                                       "content": with_cot(model, prompt)}],

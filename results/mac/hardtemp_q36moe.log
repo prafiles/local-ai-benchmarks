@@ -1,0 +1,16 @@
+### first-attempt temperature on the hard probes, budget=8000, 2 passes
+
+ t0/greedy  answered 10/12   tokens  49544   wall  613s
+   dj-001 2/2  doc-001 0/2  py-001 2/2  sh-001 2/2  sql-001 2/2  ts-001 2/2
+
+ t0.6/k20   answered  9/12   tokens  46511   wall  588s
+   dj-001 2/2  doc-001 1/2  py-001 0/2  sh-001 2/2  sql-001 2/2  ts-001 2/2
+
+ t0.8/k20   answered 10/12   tokens  36912   wall  462s
+   dj-001 2/2  doc-001 1/2  py-001 1/2  sh-001 2/2  sql-001 2/2  ts-001 2/2
+
+ t1.0/k64   answered 11/12   tokens  34293   wall  428s
+   dj-001 2/2  doc-001 2/2  py-001 1/2  sh-001 2/2  sql-001 2/2  ts-001 2/2
+
+-> first attempt: t1.0/k64  {'temperature': 1.0, 'top_p': 0.95, 'top_k': 64}
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/hardtemp.json

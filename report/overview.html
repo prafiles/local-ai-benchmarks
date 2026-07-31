@@ -1,0 +1,280 @@
+<title>Does reasoning mode help? Nine runs, two stacks</title>
+<style>
+  :root {
+    --bg:#F7F5F1; --panel:#FFFFFF; --ink:#1C1F26; --ink-2:#4A515E; --ink-3:#7A8290;
+    --rule:#E2DED7; --rule-2:#EEEBE5;
+    --off:#78889F; --on:#116B5C;
+    --pos:#116B5C; --neg:#A8451B; --warn:#8A5A12; --warn-bg:#FBF3E2;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+    --serif:ui-serif,Georgia,"Iowan Old Style",serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14161A; --panel:#1B1E24; --ink:#E9ECF1; --ink-2:#AEB6C2; --ink-3:#7C8592;
+      --rule:#2C3039; --rule-2:#23272E; --off:#8E9EB6; --on:#4FBCA4;
+      --pos:#4FBCA4; --neg:#E08A5B; --warn:#E0B15B; --warn-bg:#2A2416; }
+  }
+  :root[data-theme="dark"] { --bg:#14161A; --panel:#1B1E24; --ink:#E9ECF1; --ink-2:#AEB6C2;
+    --ink-3:#7C8592; --rule:#2C3039; --rule-2:#23272E; --off:#8E9EB6; --on:#4FBCA4;
+    --pos:#4FBCA4; --neg:#E08A5B; --warn:#E0B15B; --warn-bg:#2A2416; }
+  :root[data-theme="light"] { --bg:#F7F5F1; --panel:#FFFFFF; --ink:#1C1F26; --ink-2:#4A515E;
+    --ink-3:#7A8290; --rule:#E2DED7; --rule-2:#EEEBE5; --off:#78889F; --on:#116B5C;
+    --pos:#116B5C; --neg:#A8451B; --warn:#8A5A12; --warn-bg:#FBF3E2; }
+
+  .wrap { background:var(--bg); color:var(--ink); font-family:var(--sans);
+          padding:2.4rem 1.4rem 4rem; line-height:1.55; }
+  .col { max-width:62rem; margin:0 auto; display:flex; flex-direction:column; gap:2.1rem; }
+
+  .eyebrow { font-family:var(--mono); font-size:.7rem; letter-spacing:.14em;
+             text-transform:uppercase; color:var(--ink-3); margin:0 0 .5rem; }
+  h1 { font-family:var(--serif); font-size:clamp(1.75rem,4.2vw,2.6rem); line-height:1.13;
+       margin:0 0 .6rem; text-wrap:balance; font-weight:600; letter-spacing:-.012em; }
+  .lede { color:var(--ink-2); max-width:46rem; margin:0; font-size:1.03rem; }
+  h2 { font-family:var(--serif); font-size:1.3rem; margin:0 0 .2rem; font-weight:600; }
+  h3 { font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+       color:var(--ink-3); margin:1.5rem 0 .7rem; font-weight:500; }
+  h3:first-of-type { margin-top:.4rem; }
+  .sub { color:var(--ink-3); font-size:.87rem; margin:0 0 1.1rem; }
+
+  .card { background:var(--panel); border:1px solid var(--rule); border-radius:10px;
+          padding:1.35rem 1.45rem; }
+
+  /* ---------- diverging delta chart ---------- */
+  .dgrid { display:grid; grid-template-columns:13rem 1fr 3.2rem; gap:.34rem .8rem;
+           align-items:center; font-size:.83rem; }
+  .dname { color:var(--ink-2); display:flex; align-items:baseline; gap:.4rem; }
+  .dname small { font-family:var(--mono); font-size:.66rem; color:var(--ink-3); }
+  .dtrack { position:relative; height:14px; background:var(--rule-2); border-radius:3px; }
+  .dzero { position:absolute; top:-3px; bottom:-3px; left:20%; width:1px;
+           background:var(--ink-3); opacity:.55; }
+  .dfill { position:absolute; top:0; bottom:0; border-radius:3px; }
+  .dfill.pos { background:var(--pos); left:20%; }
+  .dfill.neg { background:var(--neg); }
+  .dnum { font-family:var(--mono); font-variant-numeric:tabular-nums; text-align:right;
+          font-weight:600; }
+  .dnum.pos { color:var(--pos); } .dnum.neg { color:var(--neg); }
+  .dnum.pend { color:var(--ink-3); font-weight:400; }
+  .axis { display:grid; grid-template-columns:13rem 1fr 3.2rem; gap:.8rem;
+          font-family:var(--mono); font-size:.66rem; color:var(--ink-3); margin-top:.35rem; }
+  .axis .marks { position:relative; height:1rem; }
+  .axis .marks span { position:absolute; transform:translateX(-50%); }
+
+  /* ---------- tables ---------- */
+  .scroll { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; min-width:36rem; font-size:.83rem;
+          color:var(--ink); font-family:var(--sans); }
+  th, td { text-align:left; padding:.46rem .62rem; border-bottom:1px solid var(--rule-2);
+           color:var(--ink); vertical-align:middle; }
+  th { font-family:var(--mono); font-size:.67rem; letter-spacing:.06em; text-transform:uppercase;
+       color:var(--ink-3); font-weight:500; }
+  td.num, th.num { text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums; }
+  td b { color:var(--ink); }
+  .up { color:var(--pos); font-weight:600; } .dn { color:var(--neg); font-weight:600; }
+  .pend { color:var(--ink-3); }
+  .kind { font-family:var(--mono); font-size:.68rem; letter-spacing:.05em; text-transform:uppercase; }
+  .kind.native { color:var(--on); } .kind.cot { color:var(--neg); } .kind.none { color:var(--ink-3); }
+
+  .note { margin-top:.7rem; font-size:.84rem; color:var(--ink-2);
+          border-left:2px solid var(--rule); padding-left:.75rem; }
+  .note.warn { border-left-color:var(--warn); background:var(--warn-bg);
+               padding:.55rem .75rem; border-radius:0 5px 5px 0; }
+  .note.key { border-left-color:var(--on); }
+
+  ul.tight { margin:.35rem 0 0; padding-left:1.05rem; color:var(--ink-2); font-size:.87rem; }
+  ul.tight li { margin:.34rem 0; }
+  code { font-family:var(--mono); font-size:.86em; background:var(--rule-2);
+         padding:.08em .32em; border-radius:3px; }
+  footer { color:var(--ink-3); font-size:.78rem; font-family:var(--mono);
+           border-top:1px solid var(--rule); padding-top:.9rem; }
+</style>
+
+<div class="wrap"><div class="col">
+
+  <header>
+    <p class="eyebrow">600 execution-graded tasks · 12 categories · nine model-runs</p>
+    <h1>Does reasoning mode actually help?</h1>
+    <p class="lede">Nine local models, two serving stacks, one task set. Each model runs the
+      suite twice — reasoning off, then on — so the question is answered by a difference rather
+      than by a leaderboard position.</p>
+  </header>
+
+  <!-- =================================================== headline -->
+  <section class="card">
+    <h2>The answer depends on which kind of reasoning</h2>
+    <p class="sub">Change in tasks passed out of 600 when reasoning is enabled.</p>
+
+    <h3>Native thinking mode</h3>
+    <div class="dgrid">
+      <div class="dname">Qwen3.5 9B FP8 <small>CUDA</small></div>
+      <div class="dtrack"><div class="dzero"></div><div class="dfill pos" style="width:61.3%"></div></div>
+      <div class="dnum pos">+46</div>
+
+      <div class="dname">Gemma 4 12B QAT <small>CUDA</small></div>
+      <div class="dtrack"><div class="dzero"></div><div class="dfill pos" style="width:38.7%"></div></div>
+      <div class="dnum pos">+29</div>
+
+      <div class="dname">Gemma 4 26B A4B <small>M2 Max</small></div>
+      <div class="dtrack"><div class="dzero"></div><div class="dfill pos" style="width:34.7%"></div></div>
+      <div class="dnum pos">+26</div>
+
+      <div class="dname">Qwen3.6 27B <small>M2 Max</small></div>
+      <div class="dtrack"><div class="dzero"></div><div class="dfill pos" style="width:20.0%"></div></div>
+      <div class="dnum pos">+15</div>
+
+      <div class="dname">Qwen3.6 35B A3B <small>M2 Max</small></div>
+      <div class="dtrack"><div class="dzero"></div><div class="dfill pos" style="width:16.0%"></div></div>
+      <div class="dnum pos">+12</div>
+
+      <div class="dname">GLM 4.7 Flash <small>M2 Max</small></div>
+      <div class="dtrack"><div class="dzero"></div></div>
+      <div class="dnum pend">run…</div>
+    </div>
+
+    <h3>Prompted chain-of-thought — models with no thinking mode</h3>
+    <div class="dgrid">
+      <div class="dname">Qwen2.5-Coder 14B <small>CUDA</small></div>
+      <div class="dtrack"><div class="dzero"></div><div class="dfill neg" style="width:4.0%; left:16.0%"></div></div>
+      <div class="dnum neg">−3</div>
+
+      <div class="dname">Mellum2 12B A2.5B <small>CUDA</small></div>
+      <div class="dtrack"><div class="dzero"></div><div class="dfill neg" style="width:12.0%; left:8.0%"></div></div>
+      <div class="dnum neg">−9</div>
+    </div>
+    <div class="axis"><span></span>
+      <span class="marks"><span style="left:8%">−9</span><span style="left:20%">0</span>
+        <span style="left:46.7%">+20</span><span style="left:73.3%">+40</span></span><span></span></div>
+
+    <p class="note key"><b>Every model with a trained thinking mode improved. Both models that
+      only had reasoning asked for in the prompt got worse.</b> That split holds across two
+      different GPUs, two serving stacks, and model families from four vendors — which is a
+      stronger claim than any single number here, because nothing about the two stacks is
+      shared except the task set and the grader.</p>
+    <p class="note warn">Prompted CoT is also the least stable measurement in the set. Rewording
+      the instruction once moved Qwen2.5-Coder by 30 tasks, so −3 and −9 should be read as
+      "no help, possibly harm" rather than as precise quantities. The rejected-wording runs are
+      committed alongside so that claim is checkable.</p>
+  </section>
+
+  <!-- =================================================== apple silicon -->
+  <section class="card">
+    <h2>Apple M2 Max · LM Studio / MLX</h2>
+    <p class="sub">64 GB unified memory, single stream, 6-bit to 4-bit quantisation.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Model</th><th>Reasoning</th><th class="num">Off</th><th class="num">On</th>
+        <th class="num">Δ</th><th class="num">Think:answer</th><th class="num">tok/s</th><th>Comparison</th></tr></thead>
+      <tbody>
+        <tr><td><b>Gemma 4 26B A4B QAT</b><br><span class="pend">26B MoE · 4B active</span></td>
+          <td><span class="kind native">native</span></td>
+          <td class="num">553</td><td class="num"><b>579</b></td><td class="num up">+26</td>
+          <td class="num">6.4×</td><td class="num">56.6</td><td>single-variable</td></tr>
+        <tr><td><b>Qwen3.6 27B</b><br><span class="pend">27B dense</span></td>
+          <td><span class="kind native">native</span></td>
+          <td class="num">557</td><td class="num"><b>572</b></td><td class="num up">+15</td>
+          <td class="num">15.5×</td><td class="num">18.9</td><td>single-variable</td></tr>
+        <tr><td><b>Qwen3.6 35B A3B</b><br><span class="pend">35B MoE · 3B active</span></td>
+          <td><span class="kind native">native</span></td>
+          <td class="num">556</td><td class="num"><b>568</b></td><td class="num up">+12</td>
+          <td class="num">15.9×</td><td class="num">72.7</td><td>sampling confound</td></tr>
+        <tr><td><b>GLM 4.7 Flash</b><br><span class="pend">MoE lite · 6-bit</span></td>
+          <td><span class="kind native">native</span></td>
+          <td class="num">521</td><td class="num pend">running</td><td class="num pend">—</td>
+          <td class="num pend">—</td><td class="num">41.5</td><td>vendor-default sampling</td></tr>
+        <tr><td><b>DeepSeek VL2</b><br><span class="pend">27B MoE · 4.5B active</span></td>
+          <td><span class="kind none">none</span></td>
+          <td class="num">167</td><td class="num pend">n/a</td><td class="num pend">—</td>
+          <td class="num pend">—</td><td class="num">52.4</td><td>range 112–167</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note"><b>Two of these are the cleanest measurements in the whole project.</b> Gemma
+      4 26B and Qwen3.6 27B ran <em>both</em> arms greedy, so the only thing separating them is
+      whether reasoning was suppressed. No CUDA entry can say that: there, thinking mode could
+      not be run at temperature 0 at all, so a temperature change is baked into every native
+      delta.</p>
+    <p class="note warn"><b>DeepSeek VL2's score is a range, not a number.</b> This build's chat
+      template for the architecture is broken — it emits garbage — so it was prompted through
+      <code>/v1/completions</code> with DeepSeek's documented turn format. Adding one trailing
+      space to that format broke 84 tasks and fixed 29, moving the total from 167 to 112. It
+      also has no off/on axis: no thinking mode, a CoT marker honoured on 1 of 8 probes, and
+      prose reasoning already present by default.</p>
+  </section>
+
+  <!-- =================================================== cuda -->
+  <section class="card">
+    <h2>RTX 4060 Ti 16 GB · vLLM</h2>
+    <p class="sub">The original run. Same 600 tasks, same graders.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Model</th><th>Reasoning</th><th class="num">Off</th><th class="num">On</th>
+        <th class="num">Δ</th><th class="num">Think:answer</th><th class="num">Flips</th></tr></thead>
+      <tbody>
+        <tr><td><b>Gemma 4 12B QAT</b></td><td><span class="kind native">native</span></td>
+          <td class="num">546</td><td class="num"><b>575</b></td><td class="num up">+29</td>
+          <td class="num">7.0×</td><td class="num">+38 / −9</td></tr>
+        <tr><td><b>Qwen3.5 9B FP8</b></td><td><span class="kind native">native</span></td>
+          <td class="num">500</td><td class="num"><b>546</b></td><td class="num up">+46</td>
+          <td class="num">24.2×</td><td class="num">+69 / −23</td></tr>
+        <tr><td><b>Qwen2.5-Coder 14B</b></td><td><span class="kind cot">prompted</span></td>
+          <td class="num">539</td><td class="num">536</td><td class="num dn">−3</td>
+          <td class="num">2.5×</td><td class="num">+27 / −30</td></tr>
+        <tr><td><b>Mellum2 12B A2.5B</b></td><td><span class="kind cot">prompted</span></td>
+          <td class="num">527</td><td class="num">518</td><td class="num dn">−9</td>
+          <td class="num">1.2×</td><td class="num">+31 / −40</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">The think-to-answer ratios track the gains: Qwen3.5 reasons 24× its answer
+      length for +46, while Mellum2 manages 1.2× for −9. A model that barely deliberates when
+      told to is not doing the thing the instruction asked for.</p>
+  </section>
+
+  <!-- =================================================== comparability -->
+  <section class="card">
+    <h2>What can and cannot be compared</h2>
+    <ul class="tight">
+      <li><b>Scores are comparable across both stacks.</b> Identical task set and identical
+        graders, and the graders were re-validated after being rebuilt for arm64 — reference
+        oracle 600/600, null oracle 0/600, plus 60/60 and 0/60 on the long-context set, all
+        matching the CUDA results exactly.</li>
+      <li><b>Speeds are not comparable.</b> Different GPUs, different runtimes, different
+        quantisations, and MLX runs single-stream because concurrency buys nothing there —
+        4 concurrent requests aggregate 84 tok/s against 79 single-stream, where CUDA scaled
+        22 → 83 tok/s.</li>
+      <li><b>Deltas are more comparable than absolute scores.</b> Each is a within-model,
+        within-stack difference, so it cancels most of what differs between the two setups.</li>
+      <li><b>The noise floor is measured, not assumed.</b> Re-running an identical arm at a
+        different context window flips ~6 tasks for a net change of 0. On CUDA, batching alone
+        flipped 25 tasks for a net −3. So <b>+12 and −3 sit near the floor; +26, +29 and +46
+        clear it comfortably</b>.</li>
+    </ul>
+    <p class="note warn"><b>Open items.</b> GLM 4.7 Flash's reasoning arm is still running. The
+      Qwen3.6 off arms ran at unrecorded context windows and are queued to be re-run at matched
+      ones — Gemma's equivalent re-run flipped 6 tasks and landed on the same total. The
+      60-probe long-context suite is deferred to a later stage.</p>
+  </section>
+
+  <!-- =================================================== method -->
+  <section class="card">
+    <h2>Why these numbers are trustworthy</h2>
+    <ul class="tight">
+      <li><b>A null oracle sits opposite the reference oracle.</b> The reference run of every
+        correct answer must score 600/600; a run that answers <em>nothing</em> must score 0/600.
+        The second caught a task whose setup satisfied its own check — passable by saying
+        nothing — which no amount of reference-checking would have found.</li>
+      <li><b>Sampling is measured per model.</b> Greedy thinking works on some models and
+        spirals on others, and the pattern does not follow the family: Qwen3.6 27B wants greedy
+        while its own MoE sibling needs <code>t1.0/k64</code>, where hotter is simultaneously
+        more reliable and cheaper, because a spiral burns the whole budget and returns nothing.</li>
+      <li><b>Every serving quirk that could fake a result was tested for.</b>
+        <code>chat_template_kwargs</code> is silently dropped on MLX — thinking absent, false and
+        true return byte-identical output — so the arms are switched with
+        <code>reasoning_effort</code> instead. Two Qwen3.6 models would otherwise have been
+        classed as non-thinking and routed to the CoT arm, whose baseline would <em>also</em>
+        have been thinking.</li>
+      <li><b>Decisions are recorded with their evidence.</b> Each model's sampling choice lives
+        in a <code>chosen_*.json</code> with the measurements behind it, including the cases
+        where the automatic pick was overridden and why.</li>
+    </ul>
+  </section>
+
+  <footer>600 tasks · execution-graded in sandboxed containers, no network ·
+    reference + null oracles on both stacks · raw runs and graded output committed</footer>
+
+</div></div>

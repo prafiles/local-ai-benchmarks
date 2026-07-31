@@ -18,7 +18,7 @@ import os
 import subprocess
 import sys
 
-HERE = "/root/bench2"
+HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import b3  # noqa: E402
 

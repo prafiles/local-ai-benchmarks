@@ -1,0 +1,8 @@
+{
+ "model": "google/gemma-4-26b-a4b-qat",
+ "sampling": {
+  "temperature": 0.0
+ },
+ "name": "t0/greedy",
+ "why": "Measured on the 6 probes that spiral, 2 passes each, budget 8000 (hardtemp_gemma26_greedy.json): t0/greedy 12/12 for 15757 tok; t0.6/k20 12/12 for 15114; t0.8/k20 12/12 for 17699; t1.0/k64 12/12 for 14166. This model never spirals -- every config answered 12/12 -- so reliability cannot separate them and the auto-pick falls through to fewest tokens, which is t1.0/k64. Overridden deliberately, for the second time in this repo that the auto-pick has been the wrong answer. The 11% token gap between greedy and t1.0/k64 is a single-pass measurement at temperature > 0, i.e. within its own noise, while choosing greedy buys something that cannot be bought later: the off arm is also greedy, so the two arms then differ in exactly one thing -- whether reasoning was suppressed. Cost inside the noise is worth trading for the only single-variable reasoning delta available. An earlier chosen_gemma26.json here recorded t0.6/k20 from a 3-config sweep that never tested greedy, because greedy had been ruled out on the vLLM node on the strength of Qwen3.5-9B and Gemma 4 12B; retesting (patch_hardtemp_mac.py) showed that conclusion does not transfer. The 10 on-arm tasks already generated under t0.6/k20 were discarded rather than kept, since mixing two sampling configs inside one arm would make the run uninterpretable."
+}
