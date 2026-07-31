@@ -1,6 +1,6 @@
 # local-ai-benchmarks
 
-Execution-graded benchmarks for local coding models. **Nine models, eighteen runs, two serving
+Execution-graded benchmarks for local coding models. **Ten models, nineteen runs, two serving
 stacks** — an RTX 4060 Ti (16 GB) under vLLM, and an Apple M2 Max (64 GB) under LM Studio / MLX.
 
 Every model runs the same 600 tasks **twice**: once with reasoning suppressed, once with it
@@ -31,11 +31,12 @@ model actually achieved.
 | 2 | Gemma 4 12B QAT | CUDA | 546 | **575** | 575 | +29 |
 | 3 | Qwen3.6 27B | M2 Max | 557 | **572** | 572 | +15 |
 | 4 | Qwen3.6 35B A3B | M2 Max | 556 | **568** | 568 | +12 |
-| 5 | Qwen3.5 9B FP8 | CUDA | 500 | **546** | 546 | +46 |
-| 6 | Qwen2.5-Coder 14B | CUDA | **539** | 536 | 539 | −3 |
-| 7 | Mellum2 12B A2.5B | CUDA | **527** | 518 | 527 | −9 |
-| 8 | GLM 4.7 Flash | M2 Max | **521** | 515 | 521 | −6 |
-| 9 | DeepSeek VL2 | M2 Max | **167** | n/a | 167 | — |
+| 5 | Qwen3-Coder-Next | M2 Max | **558** | 553 | 558 | −5 |
+| 6 | Qwen3.5 9B FP8 | CUDA | 500 | **546** | 546 | +46 |
+| 7 | Qwen2.5-Coder 14B | CUDA | **539** | 536 | 539 | −3 |
+| 8 | Mellum2 12B A2.5B | CUDA | **527** | 518 | 527 | −9 |
+| 9 | GLM 4.7 Flash | M2 Max | **521** | 515 | 521 | −6 |
+| 10 | DeepSeek VL2 | M2 Max | **167** | n/a | 167 | — |
 
 **The top four are separated by 11 tasks out of 600.** They land within 2% of each other
 against a measured noise floor of ~6 tasks, so this is one leading cluster rather than a
@@ -44,10 +45,17 @@ ranking, and the order inside it is not something the data supports.
 **Doubling the parameters bought four tasks.** Gemma 4 12B on a 16 GB consumer GPU scores 575;
 Gemma 4 26B on a 64 GB Mac scores 579. Same family, 2× the parameters, 4 tasks apart.
 
+**Qwen3-Coder-Next lands at #5 on 3B active parameters** — one of the smallest active
+footprints in the set — and beats the dense Qwen3.5 9B (546) with a third of that model's
+active weights. It has no reasoning mode to lose points on: 558 is capability alone, confirmed
+against the official model card, which states outright that the model "supports only
+non-thinking mode."
+
 **Reasoning depends on which kind.** Five of the six models with a *trained* thinking mode
-improved (+12 to +46). Neither model that only had reasoning *asked for in the prompt* did
-(−3, −9). That split holds across two GPUs, two serving stacks and four vendors — a stronger
-claim than any single delta, since the stacks share nothing but the task set and the grader.
+improved (+12 to +46). None of the three models that only had reasoning *asked for in the
+prompt* did (−3, −5, −9). That split holds across two GPUs, two serving stacks and four
+vendors — a stronger claim than any single delta, since the stacks share nothing but the task
+set and the grader.
 
 The sixth native model, GLM 4.7 Flash, is the exception and the one whose sampling was taken
 from the vendor's shipped default instead of measured on this suite. It churned **112 tasks**
@@ -89,15 +97,16 @@ score, while Gemma extends its lead.
 ### Per category — all twelve, every model
 
 The [interactive report](https://claude.ai/code/artifact/0758f1cc-e4e8-4dde-b414-aec5253e58d5)
-carries the full 12 × 8 matrix. Two things it makes obvious:
+carries the full 12 × 9 matrix (DeepSeek VL2 excluded — at 167/600 it would flatten the scale).
+Two things it makes obvious:
 
-**Two categories no longer discriminate.** RAG averages 49.9/50 across all eight scoring models
+**Two categories no longer discriminate.** RAG averages 49.9/50 across all nine scoring models
 and ReactNative 49.2 — every model has essentially solved them, so they contribute nothing but
 noise to a total. This suite is really measuring about ten categories, not twelve.
 
-**GitHub Actions is the hardest thing here for everyone** (41.1/50 mean, and the weakest column
-for five of the eight), then Django (43.4) and SQL (44.2). Those three are where the leading
-cluster separates; on the saturated categories every model looks alike.
+**GitHub Actions is the hardest thing here for everyone** (41.2/50 mean, and the weakest column
+for five of the nine), then Django (43.6), then SSH and SQL essentially tied around 44. Those
+are where the leading cluster separates; on the saturated categories every model looks alike.
 
 **The top cluster is not uniform underneath.** Gemma 4 26B takes SQL 50 vs the 12B's 47, while
 the 12B takes Python 50 vs 49 and Docs 50 vs 49; both Qwen3.6 models beat both Gemmas on Git
@@ -281,6 +290,7 @@ Key files:
 | `harness/patch_hardtemp_mac.py` | retest greedy in thinking mode; it is not universally unusable |
 | `harness/aggmac.py` | Apple Silicon dataset, flags whether each delta is single-variable |
 | `serving/macpair.sh` | **one load, both arms — holds the context window fixed across a pair** |
+| `serving/macpair_cot.sh` | one load, both arms, for a no-native-thinking model (assumes pre-loaded) |
 | `harness/budgettest.py` | the test that proved budget does not bound a reasoning trace |
 | `harness/tune2.py` | trace-cap / sampling / concurrency sweep |
 | `harness/agg_think.py` | reasoning arm vs its own no-reasoning baseline |
@@ -500,6 +510,7 @@ long-context set, all matching the CUDA results exactly.
 | Gemma 4 26B A4B QAT | 553 | **579** | **+26** | single-variable |
 | Qwen3.6 27B | 557 | **572** | +15 | single-variable |
 | Qwen3.6 35B A3B | 556 | **568** | +12 | sampling confound |
+| Qwen3-Coder-Next | **558** | 553 | **−5** | prompted CoT, single-variable |
 | GLM 4.7 Flash | 521 | 515 | **−6** | vendor-default sampling, **unmeasured** |
 | DeepSeek VL2 | **167** | n/a | — | range 112–167, no reasoning axis |
 
@@ -507,6 +518,18 @@ Merged view across both stacks: [`report/overview.html`](report/overview.html).
 
 The cross-stack picture is in [How the models compare](#how-the-models-compare); what follows
 is the detail specific to this stack.
+
+Qwen3-Coder-Next has no native reasoning mode — confirmed three ways before assuming it: its
+chat template has no `enable_thinking` logic at all, every suppression mechanism
+(`chat_template_kwargs`, `reasoning_effort`, the `reasoning` field) returned
+`reasoning_tokens=0` with byte-identical output, and the official model card states outright
+that it "supports only non-thinking mode." So it runs through the prompted-CoT arm — the same
+treatment as Mellum2 and Qwen2.5-Coder on CUDA — with both arms greedy for a genuine
+single-variable comparison, deliberately *not* the vendor's recommended
+`temperature=1.0, top_p=0.95, top_k=40`: using that on only one arm would reproduce the exact
+sampling confound that makes GLM's −6 unresolved. The CoT instruction needed no adjustment —
+8/8 compliance on the first check, including correct `module.exports` handling, unlike
+Qwen2.5-Coder on CUDA which needed a format-preserving fix.
 
 GLM 4.7 Flash is the only model whose sampling was taken from
 the vendor's shipped `generation_config.json` rather than measured on this suite with
@@ -518,9 +541,9 @@ recommended t0.6/k20 answered 4/12 where the measured t1.0/k64 answered 10/12. *
 evidence that thinking fails on GLM**, and at a ~6-task noise floor it is barely separable from
 zero. Resolving it needs a sweep and a re-run of the on arm.
 
-Two of these are the cleanest measurements in the repository. Gemma 4 26B and Qwen3.6 27B run
-**both** arms greedy, so the only thing separating them is whether reasoning was suppressed —
-something no CUDA native arm can claim.
+Three of these are the cleanest measurements in the repository. Gemma 4 26B, Qwen3.6 27B and
+Qwen3-Coder-Next run **both** arms greedy, so the only thing separating off from on is whether
+reasoning happened at all — something no CUDA native arm can claim.
 
 ### What this stack does differently, and why
 

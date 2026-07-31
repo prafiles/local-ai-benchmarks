@@ -1,0 +1,8 @@
+{
+ "model": "qwen/qwen3-coder-next",
+ "sampling": {
+  "temperature": 0.0
+ },
+ "arm_kind": "cot",
+ "why": "No native reasoning mode -- confirmed three ways before assuming it. (1) config.json's chat_template has no enable_thinking logic at all. (2) empirically, every suppression mechanism (chat_template_kwargs, reasoning_effort, the reasoning field) returned reasoning_tokens=0 with byte-identical output across all of them -- the same signature as 'this flag reaches nothing'. (3) the official model card (huggingface.co/Qwen/Qwen3-Coder-Next) states outright: 'This model supports only non-thinking mode and does not generate <think></think> blocks in its output.' So it is routed through the prompted-CoT arm, the same treatment as Mellum2 and Qwen2.5-Coder on the CUDA stack.\n\nSampling is greedy on BOTH arms, not the vendor-recommended temperature=1.0/top_p=0.95/top_k=40 (also confirmed via the model card and matching its shipped generation_config.json). That recommendation is for general use, not evidence about this suite, and using it on only one arm would introduce exactly the sampling confound that made GLM 4.7 Flash's -6 uninterpretable. Greedy on both sides is what let the CUDA CoT arms (Mellum2, Qwen2.5-Coder) claim the only genuinely single-variable comparison in the whole project -- this model gets the same property for the same reason. The CoT instruction was checked for compliance before trusting it, not assumed: 8/8 probes across categories produced a real explanation before the ANSWER: marker and a clean answer after it, including correct module.exports handling on the JS probe -- no format-preservation fix was needed, unlike Qwen2.5-Coder on the CUDA stack."
+}

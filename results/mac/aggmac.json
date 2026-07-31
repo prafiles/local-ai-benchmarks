@@ -330,6 +330,88 @@
    "empty": 0,
    "retried": 4
   },
+  "qcn": {
+   "label": "Qwen3-Coder-Next",
+   "params": "80B MoE / 3B active",
+   "arm": "cot",
+   "note": "no native reasoning mode (confirmed on the model card); prompted-CoT arm, both sides greedy",
+   "off": 558,
+   "on": 553,
+   "delta": -5,
+   "percat": {
+    "Python": {
+     "off": 45,
+     "on": 48,
+     "n": 50
+    },
+    "Django": {
+     "off": 45,
+     "on": 42,
+     "n": 50
+    },
+    "SQL": {
+     "off": 42,
+     "on": 45,
+     "n": 50
+    },
+    "JS": {
+     "off": 48,
+     "on": 49,
+     "n": 50
+    },
+    "TS": {
+     "off": 49,
+     "on": 48,
+     "n": 50
+    },
+    "Bash": {
+     "off": 48,
+     "on": 45,
+     "n": 50
+    },
+    "Git": {
+     "off": 49,
+     "on": 50,
+     "n": 50
+    },
+    "SSH": {
+     "off": 43,
+     "on": 43,
+     "n": 50
+    },
+    "GitHub": {
+     "off": 42,
+     "on": 41,
+     "n": 50
+    },
+    "Docs": {
+     "off": 48,
+     "on": 47,
+     "n": 50
+    },
+    "ReactNative": {
+     "off": 49,
+     "on": 49,
+     "n": 50
+    },
+    "RAG": {
+     "off": 50,
+     "on": 46,
+     "n": 50
+    }
+   },
+   "gained": 25,
+   "lost": 30,
+   "on_sampling": {
+    "temperature": 0.0
+   },
+   "sampling_matched": true,
+   "tokens": 131267,
+   "think_chars": 383051,
+   "answer_chars": 188020,
+   "empty": 0,
+   "retried": 0
+  },
   "dsvl2": {
    "label": "DeepSeek VL2",
    "params": "27B MoE / 4.5B active",

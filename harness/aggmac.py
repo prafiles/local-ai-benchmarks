@@ -39,6 +39,8 @@ MODELS = [
     ("q36", "Qwen3.6 27B", "27B dense", ""),
     ("q36moe", "Qwen3.6 35B A3B", "35B MoE / 3B active", ""),
     ("glm47", "GLM 4.7 Flash", "MoE lite, 6-bit", ""),
+    ("qcn", "Qwen3-Coder-Next", "80B MoE / 3B active",
+     "no native reasoning mode (confirmed on the model card); prompted-CoT arm, both sides greedy"),
     ("dsvl2", "DeepSeek VL2", "27B MoE / 4.5B active",
      "4096-token window: CoT budget capped near 3000, not the 8000 the others get"),
 ]
@@ -92,8 +94,21 @@ for key, label, params, note in MODELS:
     lost = [i for i in offs if offs[i] and not ons[i]]
     gained = [i for i in offs if not offs[i] and ons[i]]
 
-    think = sum(v.get("think_chars", 0) for v in items.values())
-    answer = sum(len(v.get("text") or "") for v in items.values())
+    # Native reasoning lands in its own think_chars field; prompted CoT has no
+    # such field -- the reasoning is inline in the answer text, before the
+    # ANSWER: marker. Counting only think_chars for a "cot" arm would report it
+    # as having done no reasoning at all, which is what happened before this
+    # branch existed (qcn showed think:answer 0.0x despite an 8/8 compliance
+    # check that measured real explanations before the marker).
+    if arm == "cot":
+        think = sum(max((v.get("text") or "").rfind("ANSWER:"), 0)
+                    for v in items.values())
+        answer = sum(len((v.get("text") or "")[
+                         (v.get("text") or "").rfind("ANSWER:") + 7:])
+                     for v in items.values())
+    else:
+        think = sum(v.get("think_chars", 0) for v in items.values())
+        answer = sum(len(v.get("text") or "") for v in items.values())
     d = {
         "label": label, "params": params, "arm": arm, "note": note,
         "off": off_total, "on": on_total, "delta": on_total - off_total,
