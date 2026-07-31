@@ -19,7 +19,11 @@ GitHub workflows are parsed and asserted structurally.
 ## How the models compare
 
 600 tasks. `off` is reasoning suppressed, `on` is reasoning enabled; **best** is whichever the
-model actually achieved. Visual version: [`report/overview.html`](report/overview.html).
+model actually achieved.
+
+> **[Interactive report →](https://claude.ai/code/artifact/0758f1cc-e4e8-4dde-b414-aec5253e58d5)**
+> — ranked comparison, per-category heatmap across all twelve categories, and the reasoning
+> off/on breakdown. Same page as [`report/overview.html`](report/overview.html) in this repo.
 
 | # | Model | Stack | off | on | best | Δ |
 |---|---|---|---|---|---|---|
@@ -81,6 +85,23 @@ prompt instead. Full detail in [Reasoning mode](#reasoning-mode):
 A trained thinking mode gains; a prompt asking for one does not. Within this stack reasoning
 does not reorder the ranking: Qwen3.5 gains most and lands exactly on Gemma's *non-reasoning*
 score, while Gemma extends its lead.
+
+### Per category — all twelve, every model
+
+The [interactive report](https://claude.ai/code/artifact/0758f1cc-e4e8-4dde-b414-aec5253e58d5)
+carries the full 12 × 8 matrix. Two things it makes obvious:
+
+**Two categories no longer discriminate.** RAG averages 49.9/50 across all eight scoring models
+and ReactNative 49.2 — every model has essentially solved them, so they contribute nothing but
+noise to a total. This suite is really measuring about ten categories, not twelve.
+
+**GitHub Actions is the hardest thing here for everyone** (41.1/50 mean, and the weakest column
+for five of the eight), then Django (43.4) and SQL (44.2). Those three are where the leading
+cluster separates; on the saturated categories every model looks alike.
+
+**The top cluster is not uniform underneath.** Gemma 4 26B takes SQL 50 vs the 12B's 47, while
+the 12B takes Python 50 vs 49 and Docs 50 vs 49; both Qwen3.6 models beat both Gemmas on Git
+(50 vs 48) and lose Django by 2. Which model is "best" depends on what you write.
 
 ### Long context — 60 probes, at depth vs. control
 

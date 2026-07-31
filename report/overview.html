@@ -96,6 +96,38 @@
   .kind { font-family:var(--mono); font-size:.68rem; letter-spacing:.05em; text-transform:uppercase; }
   .kind.native { color:var(--on); } .kind.cot { color:var(--neg); } .kind.none { color:var(--ink-3); }
 
+  /* ---------- category heatmap ----------
+     Sequential, one hue, light -> dark: the value is a magnitude, not an identity,
+     so it gets a single ramp rather than categorical colours. Steps are defined per
+     theme rather than by opacity, so the dark surface gets its own ramp instead of
+     a washed-out version of the light one. Every cell keeps its number, so the
+     colour is a second encoding and never the only one. */
+  .heatmap { min-width:44rem; }
+  .heatmap td, .heatmap th { border-bottom:1px solid var(--panel); padding:.4rem .5rem; }
+  .heatmap td.heat { color:var(--ink); font-weight:500; }
+  .heat.q1 { background:#EFF3F1; } .heat.q2 { background:#DCE8E3; }
+  .heat.q3 { background:#BFD8CF; } .heat.q4 { background:#95BFB0; }
+  .heat.q5 { background:#63A08C; }
+  .heatmap td.mean { color:var(--ink-3); }
+  .heatmap .totrow td { border-top:1px solid var(--rule); background:transparent; }
+  .heatmap th small { font-family:var(--mono); font-size:.9em; color:var(--ink-3);
+                      font-weight:400; letter-spacing:0; }
+  @media (prefers-color-scheme: dark) {
+    .heat.q1 { background:#20262A; } .heat.q2 { background:#23332F; }
+    .heat.q3 { background:#254740; } .heat.q4 { background:#255E52; }
+    .heat.q5 { background:#1F7060; }
+  }
+  :root[data-theme="dark"] .heat.q1 { background:#20262A; }
+  :root[data-theme="dark"] .heat.q2 { background:#23332F; }
+  :root[data-theme="dark"] .heat.q3 { background:#254740; }
+  :root[data-theme="dark"] .heat.q4 { background:#255E52; }
+  :root[data-theme="dark"] .heat.q5 { background:#1F7060; }
+  :root[data-theme="light"] .heat.q1 { background:#EFF3F1; }
+  :root[data-theme="light"] .heat.q2 { background:#DCE8E3; }
+  :root[data-theme="light"] .heat.q3 { background:#BFD8CF; }
+  :root[data-theme="light"] .heat.q4 { background:#95BFB0; }
+  :root[data-theme="light"] .heat.q5 { background:#63A08C; }
+
   .note { margin-top:.7rem; font-size:.84rem; color:var(--ink-2);
           border-left:2px solid var(--rule); padding-left:.75rem; }
   .note.warn { border-left-color:var(--warn); background:var(--warn-bg);
@@ -218,6 +250,44 @@
       the instruction once moved Qwen2.5-Coder by 30 tasks, so −3 and −9 should be read as
       "no help, possibly harm" rather than as precise quantities. The rejected-wording runs are
       committed alongside so that claim is checkable.</p>
+  </section>
+
+
+  <!-- =================================================== categories -->
+  <section class="card">
+    <h2>Where the differences actually are</h2>
+    <p class="sub">Tasks passed per category, out of 50 — each model's better arm. Darker is
+      stronger. DeepSeek VL2 is omitted: at 167/600 overall it would flatten the scale.</p>
+    <div class="scroll"><table class="heatmap">
+      <thead><tr><th>Category</th><th class="num">Gemma 4 26B<br><small>M2</small></th><th class="num">Gemma 4 12B<br><small>CUDA</small></th><th class="num">Qwen3.6 27B<br><small>M2</small></th><th class="num">Qwen3.6 35B<br><small>M2</small></th><th class="num">Qwen3.5 9B<br><small>CUDA</small></th><th class="num">Coder 14B<br><small>CUDA</small></th><th class="num">Mellum2 12B<br><small>CUDA</small></th><th class="num">GLM 4.7<br><small>M2</small></th><th class="num">mean</th></tr></thead>
+      <tbody>
+      <tr><td>Python</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q2">42</td><td class="num heat q3">45</td><td class="num heat q4">47</td><td class="num mean">47.5</td></tr>
+      <tr><td>Django</td><td class="num heat q4">47</td><td class="num heat q4">47</td><td class="num heat q3">45</td><td class="num heat q3">45</td><td class="num heat q2">43</td><td class="num heat q2">43</td><td class="num heat q1">38</td><td class="num heat q1">39</td><td class="num mean">43.4</td></tr>
+      <tr><td>SQL</td><td class="num heat q5">50</td><td class="num heat q4">47</td><td class="num heat q3">45</td><td class="num heat q4">48</td><td class="num heat q3">44</td><td class="num heat q2">41</td><td class="num heat q2">42</td><td class="num heat q1">37</td><td class="num mean">44.2</td></tr>
+      <tr><td>JS</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q5">50</td><td class="num mean">49.2</td></tr>
+      <tr><td>TS</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q5">50</td><td class="num heat q3">45</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q3">45</td><td class="num mean">47.9</td></tr>
+      <tr><td>Bash</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">47</td><td class="num heat q4">48</td><td class="num heat q3">44</td><td class="num heat q3">44</td><td class="num heat q2">42</td><td class="num heat q2">42</td><td class="num mean">45.6</td></tr>
+      <tr><td>Git</td><td class="num heat q4">48</td><td class="num heat q4">48</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q3">44</td><td class="num heat q4">47</td><td class="num mean">48.1</td></tr>
+      <tr><td>SSH</td><td class="num heat q3">46</td><td class="num heat q3">46</td><td class="num heat q4">47</td><td class="num heat q2">43</td><td class="num heat q2">43</td><td class="num heat q3">44</td><td class="num heat q2">43</td><td class="num heat q2">43</td><td class="num mean">44.4</td></tr>
+      <tr><td>GitHub</td><td class="num heat q3">44</td><td class="num heat q2">41</td><td class="num heat q2">43</td><td class="num heat q3">44</td><td class="num heat q1">36</td><td class="num heat q2">41</td><td class="num heat q2">42</td><td class="num heat q1">38</td><td class="num mean">41.1</td></tr>
+      <tr><td>Docs</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q3">44</td><td class="num heat q3">46</td><td class="num heat q4">48</td><td class="num mean">47.9</td></tr>
+      <tr><td>ReactNative</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q4">48</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num mean">49.2</td></tr>
+      <tr><td>RAG</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num mean">49.9</td></tr>
+      <tr class="totrow"><td><b>mean</b></td><td class="num"><b>48.3</b></td><td class="num"><b>48.0</b></td><td class="num"><b>47.8</b></td><td class="num"><b>47.9</b></td><td class="num"><b>45.6</b></td><td class="num"><b>45.5</b></td><td class="num"><b>44.7</b></td><td class="num"><b>44.6</b></td><td class="num"></td></tr>
+      </tbody>
+    </table></div>
+    <p class="note key"><b>Two of the twelve categories no longer discriminate.</b> RAG averages
+      49.9/50 across all eight models and ReactNative 49.2 — every model has essentially solved
+      them, so they contribute nothing to the ranking except noise. A suite that keeps them is
+      measuring eleven-ish categories, not twelve.</p>
+    <p class="note"><b>GitHub Actions is the hardest thing here for everyone</b> (41.1/50 mean,
+      and the weakest column for five of the eight models), followed by Django and SQL. Those
+      three are where the leading cluster separates from the rest — on the saturated categories
+      every model looks identical.</p>
+    <p class="note"><b>The cluster at the top is not uniform underneath.</b> Gemma 4 26B and
+      Gemma 4 12B lead on mean but split their strengths: 26B takes SQL 50 vs 47, while 12B
+      takes Python 50 vs 49 and Docs 50 vs 49. Qwen3.6 27B and 35B beat both Gemmas on Git
+      (50 vs 48) and lose Django by 2. Which model is "best" depends on what you write.</p>
   </section>
 
   <!-- =================================================== apple silicon -->
