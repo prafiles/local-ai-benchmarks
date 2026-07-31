@@ -91,7 +91,7 @@
 <div class="wrap"><div class="col">
 
   <header>
-    <p class="eyebrow">600 execution-graded tasks · 12 categories · nine model-runs</p>
+    <p class="eyebrow">600 execution-graded tasks · 12 categories · nine models, eighteen runs</p>
     <h1>Does reasoning mode actually help?</h1>
     <p class="lede">Nine local models, two serving stacks, one task set. Each model runs the
       suite twice — reasoning off, then on — so the question is answered by a difference rather
@@ -126,8 +126,8 @@
       <div class="dnum pos">+12</div>
 
       <div class="dname">GLM 4.7 Flash <small>M2 Max</small></div>
-      <div class="dtrack"><div class="dzero"></div></div>
-      <div class="dnum pend">run…</div>
+      <div class="dtrack"><div class="dzero"></div><div class="dfill neg" style="width:8.0%; left:12.0%"></div></div>
+      <div class="dnum neg">−6</div>
     </div>
 
     <h3>Prompted chain-of-thought — models with no thinking mode</h3>
@@ -144,11 +144,18 @@
       <span class="marks"><span style="left:8%">−9</span><span style="left:20%">0</span>
         <span style="left:46.7%">+20</span><span style="left:73.3%">+40</span></span><span></span></div>
 
-    <p class="note key"><b>Every model with a trained thinking mode improved. Both models that
-      only had reasoning asked for in the prompt got worse.</b> That split holds across two
-      different GPUs, two serving stacks, and model families from four vendors — which is a
-      stronger claim than any single number here, because nothing about the two stacks is
-      shared except the task set and the grader.</p>
+    <p class="note key"><b>Five of the six models with a trained thinking mode improved. Neither
+      model that only had reasoning asked for in the prompt did.</b> That holds across two GPUs,
+      two serving stacks and four vendors — a stronger claim than any single number here, since
+      the stacks share nothing but the task set and the grader.</p>
+    <p class="note warn"><b>The exception is instructive.</b> GLM 4.7 Flash is the only model
+      whose sampling was taken from the vendor's shipped default rather than measured on this
+      suite — and it is the only native arm to lose ground. It also churned <b>112 tasks</b>
+      getting there (53 gained, 59 lost) against 38 for Gemma 4 26B at matched sampling. Roughly
+      three times the movement for a worse total is the signature of the temperature change, not
+      of reasoning: its off arm ran greedy and its on arm at t1.0. Until its temperature is
+      measured the way every other model's was, <b>−6 is not evidence that thinking fails on
+      GLM</b> — and at a noise floor of ~6 tasks it is barely distinguishable from zero anyway.</p>
     <p class="note warn">Prompted CoT is also the least stable measurement in the set. Rewording
       the instruction once moved Qwen2.5-Coder by 30 tasks, so −3 and −9 should be read as
       "no help, possibly harm" rather than as precise quantities. The rejected-wording runs are
@@ -177,8 +184,8 @@
           <td class="num">15.9×</td><td class="num">72.7</td><td>sampling confound</td></tr>
         <tr><td><b>GLM 4.7 Flash</b><br><span class="pend">MoE lite · 6-bit</span></td>
           <td><span class="kind native">native</span></td>
-          <td class="num">521</td><td class="num pend">running</td><td class="num pend">—</td>
-          <td class="num pend">—</td><td class="num">41.5</td><td>vendor-default sampling</td></tr>
+          <td class="num">521</td><td class="num">515</td><td class="num dn">−6</td>
+          <td class="num">11.4×</td><td class="num">42.6</td><td>vendor-default sampling, unmeasured</td></tr>
         <tr><td><b>DeepSeek VL2</b><br><span class="pend">27B MoE · 4.5B active</span></td>
           <td><span class="kind none">none</span></td>
           <td class="num">167</td><td class="num pend">n/a</td><td class="num pend">—</td>

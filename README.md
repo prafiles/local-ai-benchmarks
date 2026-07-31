@@ -438,15 +438,25 @@ long-context set, all matching the CUDA results exactly.
 | Gemma 4 26B A4B QAT | 553 | **579** | **+26** | single-variable |
 | Qwen3.6 27B | 557 | **572** | +15 | single-variable |
 | Qwen3.6 35B A3B | 556 | **568** | +12 | sampling confound |
-| GLM 4.7 Flash | 521 | *running* | — | vendor-default sampling |
+| GLM 4.7 Flash | 521 | 515 | **−6** | vendor-default sampling, **unmeasured** |
 | DeepSeek VL2 | **167** | n/a | — | range 112–167, no reasoning axis |
 
 Merged view across both stacks: [`report/overview.html`](report/overview.html).
 
-**Native thinking helped every model that has it; prompted CoT helped neither model that
-needed it.** That split now holds across two GPUs, two serving stacks and four vendors, which
-is a stronger claim than any single delta, because the two stacks share nothing but the task
-set and the grader.
+**Five of six models with a trained thinking mode improved; prompted CoT helped neither model
+that needed it.** That holds across two GPUs, two serving stacks and four vendors — a stronger
+claim than any single delta, because the two stacks share nothing but the task set and the
+grader.
+
+The exception earns its own note. GLM 4.7 Flash is the only model whose sampling was taken from
+the vendor's shipped `generation_config.json` rather than measured on this suite with
+`hardtemp.py`, and it is the only native arm to lose ground. It also churned **112 tasks** doing
+so (53 gained, 59 lost) against 38 for Gemma 4 26B at matched sampling — three times the
+movement for a worse total, which is the signature of the temperature change (greedy off arm,
+t1.0 on arm) rather than of reasoning. There is precedent: on Qwen3.5-9B the vendor's own
+recommended t0.6/k20 answered 4/12 where the measured t1.0/k64 answered 10/12. **−6 is not
+evidence that thinking fails on GLM**, and at a ~6-task noise floor it is barely separable from
+zero. Resolving it needs a sweep and a re-run of the on arm.
 
 Two of these are the cleanest measurements in the repository. Gemma 4 26B and Qwen3.6 27B run
 **both** arms greedy, so the only thing separating them is whether reasoning was suppressed —

@@ -251,9 +251,84 @@
   "glm47": {
    "label": "GLM 4.7 Flash",
    "params": "MoE lite, 6-bit",
-   "off": 522,
-   "on": null,
-   "note": ""
+   "arm": "native",
+   "note": "",
+   "off": 521,
+   "on": 515,
+   "delta": -6,
+   "percat": {
+    "Python": {
+     "off": 47,
+     "on": 45,
+     "n": 50
+    },
+    "Django": {
+     "off": 32,
+     "on": 39,
+     "n": 50
+    },
+    "SQL": {
+     "off": 36,
+     "on": 37,
+     "n": 50
+    },
+    "JS": {
+     "off": 48,
+     "on": 50,
+     "n": 50
+    },
+    "TS": {
+     "off": 45,
+     "on": 36,
+     "n": 50
+    },
+    "Bash": {
+     "off": 42,
+     "on": 42,
+     "n": 50
+    },
+    "Git": {
+     "off": 44,
+     "on": 47,
+     "n": 50
+    },
+    "SSH": {
+     "off": 43,
+     "on": 40,
+     "n": 50
+    },
+    "GitHub": {
+     "off": 38,
+     "on": 34,
+     "n": 50
+    },
+    "Docs": {
+     "off": 47,
+     "on": 48,
+     "n": 50
+    },
+    "ReactNative": {
+     "off": 49,
+     "on": 48,
+     "n": 50
+    },
+    "RAG": {
+     "off": 50,
+     "on": 49,
+     "n": 50
+    }
+   },
+   "gained": 53,
+   "lost": 59,
+   "on_sampling": {
+    "temperature": 1.0
+   },
+   "sampling_matched": false,
+   "tokens": 706806,
+   "think_chars": 2555973,
+   "answer_chars": 223861,
+   "empty": 0,
+   "retried": 4
   },
   "dsvl2": {
    "label": "DeepSeek VL2",

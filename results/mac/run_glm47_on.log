@@ -12,3 +12,53 @@
   110/600  67.5m elapsed, ~5.0h left
   resuming: 110/600 already done
   490 to run, 1 concurrent
+  120/600  5.8m elapsed, ~4.6h left
+  130/600  12.1m elapsed, ~4.7h left
+  140/600  18.2m elapsed, ~4.7h left
+  150/600  25.6m elapsed, ~4.8h left
+  160/600  31.6m elapsed, ~4.6h left
+  170/600  35.2m elapsed, ~4.2h left
+  180/600  41.1m elapsed, ~4.1h left
+  190/600  45.4m elapsed, ~3.9h left
+  200/600  49.7m elapsed, ~3.7h left
+  210/600  55.2m elapsed, ~3.6h left
+  220/600  60.2m elapsed, ~3.5h left
+  230/600  69.3m elapsed, ~3.6h left
+  240/600  75.2m elapsed, ~3.5h left
+  250/600  79.6m elapsed, ~3.3h left
+  260/600  84.8m elapsed, ~3.2h left
+  270/600  92.2m elapsed, ~3.2h left
+  280/600  96.9m elapsed, ~3.0h left
+  290/600  102.0m elapsed, ~2.9h left
+  300/600  105.4m elapsed, ~2.8h left
+  310/600  107.4m elapsed, ~2.6h left
+  320/600  108.8m elapsed, ~2.4h left
+  330/600  112.5m elapsed, ~2.3h left
+  340/600  114.6m elapsed, ~2.2h left
+  350/600  117.5m elapsed, ~2.0h left
+  360/600  120.1m elapsed, ~1.9h left
+  370/600  122.2m elapsed, ~1.8h left
+  380/600  124.7m elapsed, ~1.7h left
+  390/600  127.3m elapsed, ~1.6h left
+  400/600  136.5m elapsed, ~1.6h left
+  410/600  140.0m elapsed, ~1.5h left
+  420/600  142.6m elapsed, ~1.4h left
+  430/600  147.4m elapsed, ~1.3h left
+  440/600  151.0m elapsed, ~1.2h left
+  450/600  153.4m elapsed, ~1.1h left
+  460/600  157.6m elapsed, ~1.1h left
+  470/600  163.3m elapsed, ~1.0h left
+  480/600  168.3m elapsed, ~0.9h left
+  490/600  174.0m elapsed, ~0.8h left
+  500/600  180.7m elapsed, ~0.8h left
+  510/600  183.8m elapsed, ~0.7h left
+  520/600  188.1m elapsed, ~0.6h left
+  530/600  192.6m elapsed, ~0.5h left
+  540/600  196.1m elapsed, ~0.5h left
+  550/600  200.0m elapsed, ~0.4h left
+  560/600  201.4m elapsed, ~0.3h left
+  570/600  203.0m elapsed, ~0.2h left
+  580/600  204.4m elapsed, ~0.1h left
+  590/600  205.9m elapsed, ~0.1h left
+  600/600  209.0m elapsed, ~0.0h left
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/t_glm47.json
