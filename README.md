@@ -1,24 +1,65 @@
 # local-ai-benchmarks
 
-Execution-graded benchmarks for local coding models on a **single RTX 4060 Ti (16 GB)**.
+Execution-graded benchmarks for local coding models. **Nine models, eighteen runs, two serving
+stacks** — an RTX 4060 Ti (16 GB) under vLLM, and an Apple M2 Max (64 GB) under LM Studio / MLX.
 
-Two suites, both run against four models served by vLLM 0.22.1:
+Every model runs the same 600 tasks **twice**: once with reasoning suppressed, once with it
+enabled. Nothing is scored by an LLM judge. Python, Django, JS, TS and SQL answers are
+**executed**; shell and git answers run against **fixture repositories** and are graded on the
+resulting state; SSH configs go through **`ssh -G`**; TypeScript must survive **`tsc --strict`**;
+GitHub workflows are parsed and asserted structurally.
 
 | Suite | What it asks | Size |
 |---|---|---|
 | **short-context** | Can the model do the work? | 600 tasks, 12 categories |
 | **long-context** | Can it still do the work after 118,000 tokens of conversation? | 60 multi-turn probes, 5 depths |
 
-Nothing here is scored by an LLM judge. Python, Django, JS, TS and SQL answers are
-**executed**; shell and git answers run against **fixture repositories** and are graded on
-the resulting state; SSH configs go through **`ssh -G`**; TypeScript must survive
-**`tsc --strict`**; GitHub workflows are parsed and asserted structurally.
+---
+
+## How the models compare
+
+600 tasks. `off` is reasoning suppressed, `on` is reasoning enabled; **best** is whichever the
+model actually achieved. Visual version: [`report/overview.html`](report/overview.html).
+
+| # | Model | Stack | off | on | best | Δ |
+|---|---|---|---|---|---|---|
+| 1 | Gemma 4 26B A4B QAT | M2 Max | 553 | **579** | **579** | +26 |
+| 2 | Gemma 4 12B QAT | CUDA | 546 | **575** | 575 | +29 |
+| 3 | Qwen3.6 27B | M2 Max | 557 | **572** | 572 | +15 |
+| 4 | Qwen3.6 35B A3B | M2 Max | 556 | **568** | 568 | +12 |
+| 5 | Qwen3.5 9B FP8 | CUDA | 500 | **546** | 546 | +46 |
+| 6 | Qwen2.5-Coder 14B | CUDA | **539** | 536 | 539 | −3 |
+| 7 | Mellum2 12B A2.5B | CUDA | **527** | 518 | 527 | −9 |
+| 8 | GLM 4.7 Flash | M2 Max | **521** | 515 | 521 | −6 |
+| 9 | DeepSeek VL2 | M2 Max | **167** | n/a | 167 | — |
+
+**The top four are separated by 11 tasks out of 600.** They land within 2% of each other
+against a measured noise floor of ~6 tasks, so this is one leading cluster rather than a
+ranking, and the order inside it is not something the data supports.
+
+**Doubling the parameters bought four tasks.** Gemma 4 12B on a 16 GB consumer GPU scores 575;
+Gemma 4 26B on a 64 GB Mac scores 579. Same family, 2× the parameters, 4 tasks apart.
+
+**Reasoning depends on which kind.** Five of the six models with a *trained* thinking mode
+improved (+12 to +46). Neither model that only had reasoning *asked for in the prompt* did
+(−3, −9). That split holds across two GPUs, two serving stacks and four vendors — a stronger
+claim than any single delta, since the stacks share nothing but the task set and the grader.
+
+The sixth native model, GLM 4.7 Flash, is the exception and the one whose sampling was taken
+from the vendor's shipped default instead of measured on this suite. It churned **112 tasks**
+reaching −6 (53 gained, 59 lost) against 38 for Gemma 4 26B at matched sampling — three times
+the movement for a worse total, which looks like the temperature change (greedy off arm, t1.0
+on arm) rather than reasoning. It is recorded, not resolved.
+
+Scores are comparable across both stacks — identical tasks, identical graders, re-validated
+after the sandboxes were rebuilt for arm64. **Speeds are not**: different GPUs, runtimes and
+quantisations.
 
 ---
 
-## Results
+## Results in detail
 
-### Short context — 600 tasks
+### Short context — 600 tasks, CUDA / vLLM
 
 | Model | Score | | Speed | Weakest |
 |---|---|---|---|---|
@@ -37,9 +78,9 @@ prompt instead. Full detail in [Reasoning mode](#reasoning-mode):
 | Qwen2.5-Coder-14B | prompted CoT | 539/600 | **536/600** | **-3** |
 | Mellum2-12B-A2.5B | prompted CoT | 527/600 | **518/600** | **-9** |
 
-A trained thinking mode gains; a prompt asking for one does not. Reasoning does not reorder the
-ranking: Qwen3.5 gains most and lands exactly on Gemma's *non-reasoning* score, while Gemma
-extends its lead.
+A trained thinking mode gains; a prompt asking for one does not. Within this stack reasoning
+does not reorder the ranking: Qwen3.5 gains most and lands exactly on Gemma's *non-reasoning*
+score, while Gemma extends its lead.
 
 ### Long context — 60 probes, at depth vs. control
 
@@ -165,7 +206,7 @@ of which would have been charged to the models as failures:
   answers opened with that import — which raised, because the harness only provided
   `bench_app.models`. **The oracle could not catch this**: reference answers use the harness
   globals and never write the import. Only spot-checking real output found it.
-- A docs probe demanded a literal `E####` code the prompt never asked for. All four models
+- A docs probe demanded a literal `E####` code the prompt never asked for. All four CUDA models
   failed it identically, which is the signature of a bad probe rather than a hard one.
 - The TypeScript grader ran 50 sequential `tsc --strict` compiles in one 2 GB container. Under
   load the container was killed mid-loop, and a missing verdict scores as a failure — a
@@ -179,7 +220,7 @@ of which would have been charged to the models as failures:
   neither. Now the live directory diverges from the archived copy and carries a file absent from
   the tarball, so the check requires both operations. Verified three ways: reference 50/50,
   empty 0/50, and "extract without deleting" correctly failed.
-  **This changed no published score** — all four models had answered with an explicit
+  **This changed no published score** — all four CUDA models had answered with an explicit
   `rm -rf arch` — and every stored run was re-graded against the fixed check to confirm it
   (oracle still 600/600; 546 / 539 / 530 / 500 unchanged). It mattered enough to fix anyway,
   because reasoning mode can genuinely return an empty answer, which would have been a free pass.
@@ -299,7 +340,7 @@ python3 harness/b4.py oracle b4_oracle.json && python3 harness/b4.py grade b4_or
 
 ## Reasoning mode
 
-Only two of the four models have a reasoning mode. Gemma 4's template defaults `enable_thinking`
+Only two of the four CUDA models have a reasoning mode. Gemma 4's template defaults `enable_thinking`
 to **false**; Qwen3.5 thinks unless told not to. Mellum2's template only strips `</think>` out of
 history, and Qwen2.5-Coder has no thinking in its template at all — for those two there is no
 switch to throw, so they get a **chain-of-thought prompt** instead. That is reported as a
@@ -443,12 +484,10 @@ long-context set, all matching the CUDA results exactly.
 
 Merged view across both stacks: [`report/overview.html`](report/overview.html).
 
-**Five of six models with a trained thinking mode improved; prompted CoT helped neither model
-that needed it.** That holds across two GPUs, two serving stacks and four vendors — a stronger
-claim than any single delta, because the two stacks share nothing but the task set and the
-grader.
+The cross-stack picture is in [How the models compare](#how-the-models-compare); what follows
+is the detail specific to this stack.
 
-The exception earns its own note. GLM 4.7 Flash is the only model whose sampling was taken from
+GLM 4.7 Flash is the only model whose sampling was taken from
 the vendor's shipped `generation_config.json` rather than measured on this suite with
 `hardtemp.py`, and it is the only native arm to lose ground. It also churned **112 tasks** doing
 so (53 gained, 59 lost) against 38 for Gemma 4 26B at matched sampling — three times the
@@ -516,7 +555,7 @@ Each of these was measured, and each would have produced a quietly wrong result 
 - **It measures session-holding, not needle distance.** Canonical answers are inserted into the
   history so every model sees identical context, which means conventions are effectively
   restated every ~28K tokens. RAG is the only category free of that effect.
-- **The four models did not run under equal conditions.** Qwen2.5-Coder needs YaRN and 4-bit
+- **The four CUDA models did not run under equal conditions.** Qwen2.5-Coder needs YaRN and 4-bit
   TurboQuant KV; Gemma and Mellum2 run native 131K on fp8; Qwen3.5 runs fp8 weights with fp8 KV.
   Each choice costs something.
 - **Category scores measure different things.** Docs and React Native measure adherence to a
