@@ -12,7 +12,30 @@ GitHub workflows are parsed and asserted structurally.
 | Suite | What it asks | Size |
 |---|---|---|
 | **short-context** | Can the model do the work? | 600 tasks, 12 categories |
+| **hard tier** | Can it do the work when the obvious answer is wrong? | 104 tasks, 6 categories |
 | **long-context** | Can it still do the work after 118,000 tokens of conversation? | 60 multi-turn probes, 5 depths |
+
+---
+
+## The 600-task suite is saturated — so there is now a hard tier
+
+The leader below scores 96.5%, per-category pass rates run 84–98%, and the top three models span
+11 tasks against a ~6-task noise floor. At that point the suite reports which model got lucky on
+the last two dozen tasks, not which one is better.
+
+[**`b5.py`**](harness/b5.py) is a second tier of **104 tasks, execution-graded only** — the five
+regex-graded categories are dropped, because a regex rewards vocabulary rather than correctness
+and those are exactly the categories sitting at 96–98%. Every task is spec-exact (SemVer, RFC 7233,
+RFC 6901, RFC 4180, gitignore globs, unified diff), a near-miss trap on a famous problem, or
+scale-gated so the quadratic answer cannot finish in the grader's timeout. Output budgets are 4–6×
+larger and the reasoning floor moves 8000 → 32000.
+
+The same model that scores **579/600 (96.5%)** on the suite below scores **53/104 (51%)** here —
+and **3/15 on TypeScript**, where it scores 49/50 on the original tier.
+
+> **See [HARD_TIER.md](HARD_TIER.md)** for the design, the budget evidence, the validation gates,
+> and a correction to this repo's earlier claim that greedy decoding is unconditionally
+> deterministic at a fixed context window.
 
 ---
 
