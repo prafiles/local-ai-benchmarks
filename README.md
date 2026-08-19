@@ -30,17 +30,30 @@ RFC 6901, RFC 4180, gitignore globs, unified diff), a near-miss trap on a famous
 scale-gated so the quadratic answer cannot finish in the grader's timeout. Output budgets are 4–6×
 larger and the reasoning floor moves 8000 → 32000.
 
-Two models measured so far, reasoning off:
+All seven Mac models measured, reasoning off:
 
 | Model | b3 | hard tier | TS |
 |---|---|---|---|
+| Qwen3.6 27B | 572/600 (95.3%) | **62/104** (60%) | 5/15 |
 | Qwen3.8 27B | 556/600 (92.7%) | **58/104** (56%) | 3/15 |
+| Qwen3-Coder-Next | 558/600 (93.0%) | **53/104** (51%) | 3/15 |
 | Gemma 4 26B A4B QAT | 579/600 (96.5%) | **53/104** (51%) | 3/15 |
+| Qwen3.6 35B A3B | 568/600 (94.7%) | **48/104** (46%) | 0/15 |
+| GLM 4.7 Flash | 521/600 (86.8%) | **35/104** (34%) | 3/15 |
+| DeepSeek VL2 | 167/600 (27.8%) | **1/104** (1%) | 0/15 |
 
-**The ranking inverts.** Gemma leads by 23 tasks on b3 and trails by 5 here — and both drop from
-49/50 to 3/15 on TypeScript, which is the difference between annotating JavaScript and writing a
-conditional type. 43 tasks are solved by both models and 36 by neither, leaving **25 that tell them
-apart**; the equivalent figure on b3 is 12.
+**The b3 ranking does not survive.** Rank correlation between the tiers is **Spearman ρ = 0.49**
+and only **9 of 14** pairwise orderings hold: b3's first-place model finishes tied for third, and
+the model b3 ranked last in its leading cluster finishes second. What b3 got right it still gets
+right — GLM 4.7 Flash is last on both tiers — but the ordering *inside* the leading cluster was
+reporting a confidence its 11-task spread never supported.
+
+**It discriminates.** 64 of the 104 tasks split the field, against 20 solved by every model and 20
+by none. Best-to-worst spread is 27 tasks, **26% of the suite**, where b3's was 9.7%.
+
+**TypeScript is where the old suite was blindest.** Every model above scores 49 or 50 out of 50 on
+b3's TS category; here the best is 5/15 and one model scores zero. **Eight of the fifteen
+type-level tasks are solved by no model at all** — the largest untouched block in the tier.
 
 > **See [HARD_TIER.md](HARD_TIER.md)** for the design, the budget evidence, the validation gates,
 > and a correction to this repo's earlier claim that greedy decoding is unconditionally

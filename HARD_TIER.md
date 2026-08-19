@@ -127,42 +127,93 @@ experimental variable rather than a setting.
 
 ## First measurements
 
-Reasoning off, greedy, LM Studio / MLX on an Apple M2 Max. Both models loaded at
-`--parallel 1` with the window read back and recorded.
+Reasoning off, greedy, LM Studio / MLX on an Apple M2 Max. Every model loaded at
+`--parallel 1` with the window read back and recorded next to its results. All
+seven Mac models from the b3 suite, run the same way.
 
-| Model | b3 | hard tier | |
-|---|---|---|---|
-| Qwen3.8 27B | 556/600 (92.7%) | **58/104** | 56% |
-| Gemma 4 26B A4B QAT | 579/600 (96.5%) | **53/104** | 51% |
+| Model | b3 | hard tier | | window |
+|---|---|---|---|---|
+| Qwen3.6 27B | 572/600 (95.3%) | **62/104** | 60% | 208384 |
+| Qwen3.8 27B | 556/600 (92.7%) | **58/104** | 56% | 208384 |
+| Qwen3-Coder-Next | 558/600 (93.0%) | **53/104** | 51% | 32768 |
+| Gemma 4 26B A4B QAT | 579/600 (96.5%) | **53/104** | 51% | 262144 |
+| Qwen3.6 35B A3B | 568/600 (94.7%) | **48/104** | 46% | 262144 |
+| GLM 4.7 Flash | 521/600 (86.8%) | **35/104** | 34% | 32768 |
+| DeepSeek VL2 | 167/600 (27.8%) | **1/104** | 1% | 32768 |
 
-**The ranking inverts.** On b3 Gemma beats Qwen3.8 by 23 tasks; here Qwen3.8
-leads by 5. That gap is only modestly above the ~3-task noise floor measured
-below, so the honest reading is not "Qwen3.8 is better" — it is that the 23-task
-lead b3 reported does not survive contact with harder work. The old tier ranked
-them confidently on tasks neither model finds difficult.
+**The b3 ranking does not survive.** Rank correlation between the two tiers is
+**Spearman ρ = 0.49**, and only **9 of 14** pairwise orderings hold. b3's
+first-place model finishes tied for third here; the model b3 put last in its
+leading cluster finishes second.
+
+| | b3 order | hard-tier order |
+|---|---|---|
+| 1 | Gemma 4 26B | Qwen3.6 27B |
+| 2 | Qwen3.6 27B | Qwen3.8 27B |
+| 3 | Qwen3.6 35B A3B | Gemma 4 26B / Qwen3-Coder-Next |
+| 5 | Qwen3-Coder-Next | Qwen3.6 35B A3B |
+| 6 | Qwen3.8 27B | GLM 4.7 Flash |
+
+This is the result the tier was built to get. It is not that b3 was measuring
+nothing — GLM 4.7 Flash is last on both, and DeepSeek VL2 is at the floor on
+both — but that b3's *ordering inside its leading cluster* was reporting a
+confidence its 11-task spread never supported.
+
+### It discriminates
+
+Across the six scoring models, of 104 tasks:
+
+| | tasks | |
+|---|---|---|
+| solved by every model | 20 | 19% |
+| solved by no model | 20 | 19% — the headroom |
+| **split the field** | **64** | **62%** |
+
+Spread from best to worst scoring model is **27 tasks, 26% of the suite**,
+against **9.7%** on b3 (58 of 600). Including DeepSeek VL2 it is 61 tasks, 59%.
 
 Per category, reasoning off:
 
-| Category | n | Gemma 4 26B | Qwen3.8 27B |
-|---|---|---|---|
-| Python | 30 | 16 | 17 |
-| SQL | 20 | 16 | 15 |
-| Bash | 12 | 9 | 7 |
-| Git | 12 | 4 | 7 |
-| JS | 15 | 5 | **9** |
-| TS | 15 | 3 | 3 |
+| Category | n | Q3.6 27B | Q3.8 27B | QCN | Gemma 26B | Q3.6 35B | GLM 4.7 |
+|---|---|---|---|---|---|---|---|
+| Python | 30 | 17 | 17 | 14 | 16 | 12 | 10 |
+| SQL | 20 | 15 | 15 | 14 | **16** | 13 | 9 |
+| JS | 15 | 7 | **9** | 6 | 5 | **9** | 3 |
+| TS | 15 | **5** | 3 | 3 | 3 | 0 | 3 |
+| Bash | 12 | **10** | 7 | **10** | 9 | 9 | 5 |
+| Git | 12 | **8** | 7 | 6 | 4 | 5 | 5 |
 
-**TypeScript is the sharpest result against b3**, where both models score 49/50.
-3/15 is the difference between annotating JavaScript and writing a conditional
-type, and it was completely invisible before. It is also, so far, the category
-that separates these two models *least* — both sit near the floor, so it is
-measuring a shared limitation rather than a difference. Whether it discriminates
-at all is an open question until a stronger model runs.
+**TypeScript is the sharpest result against b3**, where every one of these models
+scores 49 or 50 out of 50. Here the best is 5/15 and one model scores zero. Eight
+of the fifteen type-level tasks are solved by **no model at all** — the largest
+block of untouched headroom in the tier, and the clearest evidence that b3's TS
+category was measuring whether a model can annotate JavaScript, not whether it
+can write a conditional type.
 
-**The tier discriminates where b3 did not.** Of the 104 tasks, 43 are solved by
-both models and 36 by neither — leaving **25 tasks that tell the two apart** (10
-only Gemma, 15 only Qwen3.8). The 36 solved by neither are the headroom a third
-model can occupy; on b3 the equivalent figure was 12.
+Git is the second surprise: b3 had both Qwen3.6 models at 50/50 and Gemma at 48,
+a two-task spread. Here it runs 8 down to 4.
+
+**No model is being measured against the output cap.** Capped answers per model
+run 0, 0, 1, 1, 3, 6 out of 104 — and Gemma's 6 are the known
+trailing-chatter truncations, two of which still pass. Nobody hit an empty
+answer, and `think_chars` is 0 for every model on every task, so the off arm
+really is reasoning-suppressed.
+
+### DeepSeek VL2 is a floor, not a broken run
+
+1/104 sits one task above the null oracle, so it is worth showing that this is
+the model and not the harness. It is prompted through `/v1/completions` with
+DeepSeek's own turn format, because its chat template is broken in this build
+(see `patch_rawchat.py`) — and the output that format produces is fluent English
+wrapped around code that does not work:
+
+- a Python answer whose body is `# rest of the function`
+- SQL with a `JOIN` clause placed after `WHERE`
+- `find . -name "*.txt" -exec mv '{}' .md \;`, which renames every match to the
+  literal file `.md`
+
+That is a capability result. The b3 tier scored it 167/600 because 250 of those
+tasks were pattern-graded, and prose like the above matches patterns.
 
 ### The budget pass
 
@@ -171,9 +222,9 @@ hit the output cap — 15% of the failures were the budget running out mid-answe
 Budgets were raised to 5000/1500/800/1000 and the run repeated. Six answers still
 reach the cap, but two of them now *pass*, which is the signal that matters: the
 cap is landing after a complete answer and truncating trailing chatter, not
-cutting an answer short. The score moved 52 → 53. Qwen3.8, run only at the raised budgets, hit the cap on
-exactly 1 of 104 answers, which is the confirmation that the new numbers are
-sized for the tier rather than tuned to one model.
+cutting an answer short. The score moved 52 → 53. Gemma is the *worst* case: across the other six models
+the cap is hit 0, 0, 1, 1, 3 and 4 times out of 104, which is the confirmation
+that the raised numbers are sized for the tier rather than tuned to one model.
 
 ### Noise floor, and a correction about greedy
 
@@ -198,4 +249,5 @@ The precise claim is therefore: greedy is reproducible when the request sequence
 is reproducible, not unconditionally. For a suite that runs 104 different prompts
 in order, that puts the floor at roughly **3 tasks, net ~1** — about 3% of this
 tier, against 1% on b3. Proportionally larger, but set against a spread that is
-now 49 tasks of headroom rather than 21.
+now 42 tasks of headroom rather than 21, and a best-to-worst gap of 27 tasks
+across the six scoring models — roughly nine times the floor.

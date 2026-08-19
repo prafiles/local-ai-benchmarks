@@ -37,7 +37,7 @@
   },
   "q38": {
    "label": "Qwen3.8 27B",
-   "params": "27B dense, vision-language",
+   "params": "27B dense",
    "off": 58,
    "on": null,
    "note": "",
@@ -69,6 +69,181 @@
    },
    "off_tokens": 48913,
    "off_capped": 1
+  },
+  "q36": {
+   "label": "Qwen3.6 27B",
+   "params": "27B dense",
+   "off": 62,
+   "on": null,
+   "note": "",
+   "percat": {
+    "Python": {
+     "off": 17,
+     "n": 30
+    },
+    "JS": {
+     "off": 7,
+     "n": 15
+    },
+    "TS": {
+     "off": 5,
+     "n": 15
+    },
+    "SQL": {
+     "off": 15,
+     "n": 20
+    },
+    "Bash": {
+     "off": 10,
+     "n": 12
+    },
+    "Git": {
+     "off": 8,
+     "n": 12
+    }
+   },
+   "off_tokens": 38675,
+   "off_capped": 0
+  },
+  "q36moe": {
+   "label": "Qwen3.6 35B A3B",
+   "params": "35B MoE / 3B active",
+   "off": 48,
+   "on": null,
+   "note": "",
+   "percat": {
+    "Python": {
+     "off": 12,
+     "n": 30
+    },
+    "JS": {
+     "off": 9,
+     "n": 15
+    },
+    "TS": {
+     "off": 0,
+     "n": 15
+    },
+    "SQL": {
+     "off": 13,
+     "n": 20
+    },
+    "Bash": {
+     "off": 9,
+     "n": 12
+    },
+    "Git": {
+     "off": 5,
+     "n": 12
+    }
+   },
+   "off_tokens": 48813,
+   "off_capped": 1
+  },
+  "glm47": {
+   "label": "GLM 4.7 Flash",
+   "params": "MoE lite, 6-bit",
+   "off": 35,
+   "on": null,
+   "note": "",
+   "percat": {
+    "Python": {
+     "off": 10,
+     "n": 30
+    },
+    "JS": {
+     "off": 3,
+     "n": 15
+    },
+    "TS": {
+     "off": 3,
+     "n": 15
+    },
+    "SQL": {
+     "off": 9,
+     "n": 20
+    },
+    "Bash": {
+     "off": 5,
+     "n": 12
+    },
+    "Git": {
+     "off": 5,
+     "n": 12
+    }
+   },
+   "off_tokens": 33230,
+   "off_capped": 3
+  },
+  "qcn": {
+   "label": "Qwen3-Coder-Next",
+   "params": "80B MoE / 3B active",
+   "off": 53,
+   "on": null,
+   "note": "",
+   "percat": {
+    "Python": {
+     "off": 14,
+     "n": 30
+    },
+    "JS": {
+     "off": 6,
+     "n": 15
+    },
+    "TS": {
+     "off": 3,
+     "n": 15
+    },
+    "SQL": {
+     "off": 14,
+     "n": 20
+    },
+    "Bash": {
+     "off": 10,
+     "n": 12
+    },
+    "Git": {
+     "off": 6,
+     "n": 12
+    }
+   },
+   "off_tokens": 30825,
+   "off_capped": 0
+  },
+  "dsvl2": {
+   "label": "DeepSeek VL2",
+   "params": "27B MoE / 4B active, vision-language",
+   "off": 1,
+   "on": null,
+   "note": "raw /v1/completions, broken chat template",
+   "percat": {
+    "Python": {
+     "off": 0,
+     "n": 30
+    },
+    "JS": {
+     "off": 0,
+     "n": 15
+    },
+    "TS": {
+     "off": 0,
+     "n": 15
+    },
+    "SQL": {
+     "off": 0,
+     "n": 20
+    },
+    "Bash": {
+     "off": 1,
+     "n": 12
+    },
+    "Git": {
+     "off": 0,
+     "n": 12
+    }
+   },
+   "off_tokens": 50820,
+   "off_capped": 4
   }
  },
  "meta": {

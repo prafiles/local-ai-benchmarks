@@ -27,11 +27,16 @@ N_TASKS = 104
 # key, label, params, notes
 MODELS = [
     ("gemma26", "Gemma 4 26B A4B QAT", "26B MoE / 4B active", ""),
-    ("q38", "Qwen3.8 27B", "27B dense, vision-language", ""),
+    ("q38", "Qwen3.8 27B", "27B dense", ""),
     ("q36", "Qwen3.6 27B", "27B dense", ""),
     ("q36moe", "Qwen3.6 35B A3B", "35B MoE / 3B active", ""),
     ("glm47", "GLM 4.7 Flash", "MoE lite, 6-bit", ""),
     ("qcn", "Qwen3-Coder-Next", "80B MoE / 3B active", ""),
+    # Prompted through /v1/completions, not the chat template -- see
+    # patch_rawchat.py. Its answers are coherent prose and syntactically
+    # plausible code, so this is a capability floor and not a template artefact.
+    ("dsvl2", "DeepSeek VL2", "27B MoE / 4B active, vision-language",
+     "raw /v1/completions, broken chat template"),
 ]
 
 
