@@ -19,12 +19,18 @@
 # than 600.
 #
 #   macpair5.sh <key> <model> [ctx-request]
+#
+# B5_ARMS=off|on|both (default both) selects which arms to run under the single
+# load. The cross-model sweep uses off: every model in the comparison has to be
+# measured the same way, and the reasoning arm is a separate axis that not every
+# model even has.
 set -u
 
 HARNESS="$(cd "$(dirname "${BASH_SOURCE[0]}")/../harness" && pwd)"
 OUT="${B4_OUT:?set B4_OUT}"
 LMS="${LMS:-$HOME/.lmstudio/bin/lms}"
 KEY="$1"; MODEL="$2"; CTX="${3:-32768}"
+ARMS="${B5_ARMS:-both}"
 
 export B4_URL="${B4_URL:-http://localhost:1234/v1/chat/completions}"
 export B4_TMP="${B4_TMP:-$OUT/tmp/run5}"
@@ -59,19 +65,23 @@ else
 fi
 echo "$WIN" > "$OUT/window5_$KEY.txt"
 
-echo "---- $KEY off arm (reasoning suppressed, greedy) @ window $WIN"
-B4_THINK=0 B4_COT=0 B4_PROFILES='{}' \
-  python3 -u b5.py run "$MODEL" "$OUT/hb_$KEY.json" || exit 1
+if [ "$ARMS" = "off" ] || [ "$ARMS" = "both" ]; then
+  echo "---- $KEY off arm (reasoning suppressed, greedy) @ window $WIN"
+  B4_THINK=0 B4_COT=0 B4_PROFILES='{}' \
+    python3 -u b5.py run "$MODEL" "$OUT/hb_$KEY.json" || exit 1
 
-NOW=$(actual_ctx)
-[ "$NOW" = "$WIN" ] || { echo "ABORT: window changed $WIN -> $NOW mid-run"; exit 1; }
+  NOW=$(actual_ctx)
+  [ "$NOW" = "$WIN" ] || { echo "ABORT: window changed $WIN -> $NOW mid-run"; exit 1; }
+fi
 
-echo "---- $KEY on arm (native thinking, budget $THINK_BUDGET) @ window $WIN"
-B4_THINK=1 B4_COT=0 B4_BUDGET="$THINK_BUDGET" B4_BUDGET_MULT=1 B4_RETRIES=2 \
-  B4_ESCALATE="${B4_ESCALATE:-1.0,1.15}" \
-  B4_PROFILES="${B5_PROFILES:-$(python3 mkprofiles.py "$KEY=$MODEL" 2>/dev/null || echo '{}')}" \
-  python3 -u b5.py run "$MODEL" "$OUT/ht_$KEY.json" || exit 1
+if [ "$ARMS" = "on" ] || [ "$ARMS" = "both" ]; then
+  echo "---- $KEY on arm (native thinking, budget $THINK_BUDGET) @ window $WIN"
+  B4_THINK=1 B4_COT=0 B4_BUDGET="$THINK_BUDGET" B4_BUDGET_MULT=1 B4_RETRIES=2 \
+    B4_ESCALATE="${B4_ESCALATE:-1.0,1.15}" \
+    B4_PROFILES="${B5_PROFILES:-$(python3 mkprofiles.py "$KEY=$MODEL" 2>/dev/null || echo '{}')}" \
+    python3 -u b5.py run "$MODEL" "$OUT/ht_$KEY.json" || exit 1
+fi
 
 FIN=$(actual_ctx)
 [ "$FIN" = "$WIN" ] || echo "WARNING: window ended at $FIN, started $WIN"
-echo "######## $KEY HARD TIER DONE -- both arms at window $WIN"; date
+echo "######## $KEY HARD TIER DONE -- arms=$ARMS at window $WIN"; date

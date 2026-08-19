@@ -248,6 +248,36 @@ def grade_ts(items):
     return _verdicts(out, ids, "ts")
 
 
+# The SQL grader is the one grader that does NOT run inside a container, so it
+# does not inherit the container's timeout -- and a model answer is arbitrary
+# code. Qwen3.6-27B wrote a non-terminating query (a recursive CTE with no
+# stopping condition); sqlite executed it inside a single C call for 53 minutes
+# and blocked the whole sweep, because a wrong answer had become an infinite
+# loop instead of a False.
+#
+# A thread-based timeout cannot fix this: the interpreter never regains control
+# during sqlite3_step. set_progress_handler is the mechanism that can -- sqlite
+# calls back into Python every N VM opcodes and aborts when the callback returns
+# non-zero. The row cap is the second half of the same problem: a cartesian
+# product terminates, but not before exhausting memory.
+SQL_DEADLINE = float(os.environ.get("B5_SQL_TIMEOUT", "15"))
+SQL_ROW_CAP = int(os.environ.get("B5_SQL_ROW_CAP", "100000"))
+
+
+def _sql_run(con, sql):
+    """Execute one model query under a wall-clock and a row ceiling."""
+    stop = time.monotonic() + SQL_DEADLINE
+    con.set_progress_handler(lambda: 1 if time.monotonic() > stop else 0, 2000)
+    try:
+        cur = con.execute(sql)
+        rows = cur.fetchmany(SQL_ROW_CAP + 1)
+        if len(rows) > SQL_ROW_CAP:
+            raise RuntimeError("row cap exceeded")
+        return rows
+    finally:
+        con.set_progress_handler(None, 0)
+
+
 def grade_sql(items):
     res = {}
     for tid, _prompt, expected in SQL_TASKS:
@@ -257,7 +287,7 @@ def grade_sql(items):
             con = sqlite3.connect(":memory:")
             try:
                 con.executescript(SQL.SCHEMA)
-                rows = con.execute(sql).fetchall()
+                rows = _sql_run(con, sql)
 
                 def norm(rs):
                     return [tuple(round(v, 2) if isinstance(v, float) else v for v in r)
