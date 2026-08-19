@@ -248,6 +248,88 @@
    "empty": 2,
    "retried": 12
   },
+  "q38": {
+   "label": "Qwen3.8 27B",
+   "params": "27B dense, vision-language",
+   "arm": "native",
+   "note": "24 traces never terminated and returned no answer; on the 576 it did answer, 535 -> 556 (+21)",
+   "off": 556,
+   "on": 556,
+   "delta": 0,
+   "percat": {
+    "Python": {
+     "off": 49,
+     "on": 44,
+     "n": 50
+    },
+    "Django": {
+     "off": 46,
+     "on": 43,
+     "n": 50
+    },
+    "SQL": {
+     "off": 41,
+     "on": 44,
+     "n": 50
+    },
+    "JS": {
+     "off": 48,
+     "on": 46,
+     "n": 50
+    },
+    "TS": {
+     "off": 50,
+     "on": 41,
+     "n": 50
+    },
+    "Bash": {
+     "off": 45,
+     "on": 48,
+     "n": 50
+    },
+    "Git": {
+     "off": 49,
+     "on": 50,
+     "n": 50
+    },
+    "SSH": {
+     "off": 43,
+     "on": 46,
+     "n": 50
+    },
+    "GitHub": {
+     "off": 42,
+     "on": 46,
+     "n": 50
+    },
+    "Docs": {
+     "off": 44,
+     "on": 48,
+     "n": 50
+    },
+    "ReactNative": {
+     "off": 49,
+     "on": 50,
+     "n": 50
+    },
+    "RAG": {
+     "off": 50,
+     "on": 50,
+     "n": 50
+    }
+   },
+   "gained": 28,
+   "lost": 28,
+   "on_sampling": {
+    "temperature": 0.0
+   },
+   "sampling_matched": true,
+   "tokens": 833880,
+   "think_chars": 3111098,
+   "answer_chars": 194111,
+   "empty": 24,
+   "retried": 41
+  },
   "glm47": {
    "label": "GLM 4.7 Flash",
    "params": "MoE lite, 6-bit",

@@ -38,6 +38,8 @@ MODELS = [
     ("gemma26", "Gemma 4 26B A4B QAT", "26B MoE / 4B active", ""),
     ("q36", "Qwen3.6 27B", "27B dense", ""),
     ("q36moe", "Qwen3.6 35B A3B", "35B MoE / 3B active", ""),
+    ("q38", "Qwen3.8 27B", "27B dense, vision-language",
+     "24 traces never terminated and returned no answer; on the 576 it did answer, 535 -> 556 (+21)"),
     ("glm47", "GLM 4.7 Flash", "MoE lite, 6-bit", ""),
     ("qcn", "Qwen3-Coder-Next", "80B MoE / 3B active",
      "no native reasoning mode (confirmed on the model card); prompted-CoT arm, both sides greedy"),

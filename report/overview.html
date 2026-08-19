@@ -1,4 +1,4 @@
-<title>How ten local coding models compare</title>
+<title>How eleven local coding models compare</title>
 <style>
   :root {
     --bg:#F7F5F1; --panel:#FFFFFF; --ink:#1C1F26; --ink-2:#4A515E; --ink-3:#7A8290;
@@ -145,8 +145,8 @@
 <div class="wrap"><div class="col">
 
   <header>
-    <p class="eyebrow">600 execution-graded tasks · 12 categories · ten models, nineteen runs</p>
-    <h1>How ten local coding models compare</h1>
+    <p class="eyebrow">600 execution-graded tasks · 12 categories · eleven models, twenty-one runs</p>
+    <h1>How eleven local coding models compare</h1>
     <p class="lede">Every model runs the same 600 execution-graded tasks twice — reasoning off,
       then on — across two GPUs and two serving stacks. Nothing is judged by another model:
       answers are executed, typechecked, or run against fixture repositories.</p>
@@ -168,6 +168,7 @@
       <div class="dname">Qwen3.6 27B <small>M2 Max</small></div><div class="dtrack2"><span class="rng" style="left:92.8%; width:2.5%"></span><span class="pt off" style="left:92.8%"></span><span class="pt on" style="left:95.3%"></span></div><div class="dnum">572</div>
       <div class="dname">Qwen3.6 35B A3B <small>M2 Max</small></div><div class="dtrack2"><span class="rng" style="left:92.7%; width:2.0%"></span><span class="pt off" style="left:92.7%"></span><span class="pt on" style="left:94.7%"></span></div><div class="dnum">568</div>
       <div class="dname">Qwen3-Coder-Next <small>M2 Max</small></div><div class="dtrack2"><span class="rng" style="left:92.2%; width:0.8%"></span><span class="pt off" style="left:93.0%"></span><span class="pt on" style="left:92.2%"></span></div><div class="dnum">558</div>
+      <div class="dname">Qwen3.8 27B <small>M2 Max</small></div><div class="dtrack2"><span class="pt off" style="left:92.7%"></span><span class="pt on" style="left:92.7%"></span></div><div class="dnum">556</div>
       <div class="dname">Qwen3.5 9B FP8 <small>CUDA</small></div><div class="dtrack2"><span class="rng" style="left:83.3%; width:7.7%"></span><span class="pt off" style="left:83.3%"></span><span class="pt on" style="left:91.0%"></span></div><div class="dnum">546</div>
       <div class="dname">Qwen2.5-Coder 14B <small>CUDA</small></div><div class="dtrack2"><span class="rng" style="left:89.3%; width:0.5%"></span><span class="pt off" style="left:89.8%"></span><span class="pt on" style="left:89.3%"></span></div><div class="dnum">539</div>
       <div class="dname">Mellum2 12B A2.5B <small>CUDA</small></div><div class="dtrack2"><span class="rng" style="left:86.3%; width:1.5%"></span><span class="pt off" style="left:87.8%"></span><span class="pt on" style="left:86.3%"></span></div><div class="dnum">527</div>
@@ -221,6 +222,10 @@
       <div class="dtrack"><div class="dzero"></div><div class="dfill pos" style="width:16.0%"></div></div>
       <div class="dnum pos">+12</div>
 
+      <div class="dname">Qwen3.8 27B <small>M2 Max</small></div>
+      <div class="dtrack"><div class="dzero"></div></div>
+      <div class="dnum">0</div>
+
       <div class="dname">GLM 4.7 Flash <small>M2 Max</small></div>
       <div class="dtrack"><div class="dzero"></div><div class="dfill neg" style="width:8.0%; left:12.0%"></div></div>
       <div class="dnum neg">−6</div>
@@ -244,10 +249,18 @@
       <span class="marks"><span style="left:8%">−9</span><span style="left:20%">0</span>
         <span style="left:46.7%">+20</span><span style="left:73.3%">+40</span></span><span></span></div>
 
-    <p class="note key"><b>Five of the six models with a trained thinking mode improved. None
+    <p class="note key"><b>Five of the seven models with a trained thinking mode improved. None
       of the three models that only had reasoning asked for in the prompt did.</b> That holds
       across two GPUs, two serving stacks and four vendors — a stronger claim than any single
       number here, since the stacks share nothing but the task set and the grader.</p>
+    <p class="note warn"><b>Qwen3.8 27B is the clearest illustration of what reasoning costs.</b>
+      Its two arms tie at 556, and the tie is not "nothing happened": it gained 28 tasks and lost
+      28. <b>21 of those 28 losses are tasks where the trace consumed the whole 8000-token budget
+      and returned no answer at all</b> — 24 such tasks in total, against 1 for its predecessor
+      qwen3.6-27b. On the 576 tasks where it did produce an answer, it goes <b>535 → 556 (+21)</b>.
+      So reasoning helps it about as much as it helps the others; it simply gives all of that back
+      by not terminating. The empties concentrate exactly where a long trace and a long answer must
+      share one budget: TS 8, Python 6, JS 3, Django 3.</p>
     <p class="note warn"><b>The exception is instructive.</b> GLM 4.7 Flash is the only model
       whose sampling was taken from the vendor's shipped default rather than measured on this
       suite — and it is the only native arm to lose ground. It also churned <b>112 tasks</b>
@@ -272,30 +285,30 @@
     <p class="sub">Tasks passed per category, out of 50 — each model's better arm. Darker is
       stronger. DeepSeek VL2 is omitted: at 167/600 overall it would flatten the scale.</p>
     <div class="scroll"><table class="heatmap">
-      <thead><tr><th>Category</th><th class="num">Gemma 4 26B<br><small>M2</small></th><th class="num">Gemma 4 12B<br><small>CUDA</small></th><th class="num">Qwen3.6 27B<br><small>M2</small></th><th class="num">Qwen3.6 35B<br><small>M2</small></th><th class="num">Coder-Next<br><small>M2</small></th><th class="num">Qwen3.5 9B<br><small>CUDA</small></th><th class="num">Coder 14B<br><small>CUDA</small></th><th class="num">Mellum2 12B<br><small>CUDA</small></th><th class="num">GLM 4.7<br><small>M2</small></th><th class="num">mean</th></tr></thead>
+      <thead><tr><th>Category</th><th class="num">Gemma 4 26B<br><small>M2</small></th><th class="num">Gemma 4 12B<br><small>CUDA</small></th><th class="num">Qwen3.6 27B<br><small>M2</small></th><th class="num">Qwen3.6 35B<br><small>M2</small></th><th class="num">Coder-Next<br><small>M2</small></th><th class="num">Qwen3.8 27B<br><small>M2</small></th><th class="num">Qwen3.5 9B<br><small>CUDA</small></th><th class="num">Coder 14B<br><small>CUDA</small></th><th class="num">Mellum2 12B<br><small>CUDA</small></th><th class="num">GLM 4.7<br><small>M2</small></th><th class="num">mean</th></tr></thead>
       <tbody>
-      <tr><td>Python</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q4">48</td><td class="num heat q2">42</td><td class="num heat q3">45</td><td class="num heat q4">47</td><td class="num mean">47.6</td></tr>
-      <tr><td>Django</td><td class="num heat q4">47</td><td class="num heat q4">47</td><td class="num heat q3">45</td><td class="num heat q3">45</td><td class="num heat q3">45</td><td class="num heat q2">43</td><td class="num heat q2">43</td><td class="num heat q1">38</td><td class="num heat q1">39</td><td class="num mean">43.6</td></tr>
-      <tr><td>SQL</td><td class="num heat q5">50</td><td class="num heat q4">47</td><td class="num heat q3">45</td><td class="num heat q4">48</td><td class="num heat q3">45</td><td class="num heat q3">44</td><td class="num heat q2">41</td><td class="num heat q2">42</td><td class="num heat q1">37</td><td class="num mean">44.3</td></tr>
-      <tr><td>JS</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q5">50</td><td class="num mean">49.2</td></tr>
-      <tr><td>TS</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q3">45</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q3">45</td><td class="num mean">48.0</td></tr>
-      <tr><td>Bash</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">47</td><td class="num heat q4">48</td><td class="num heat q4">48</td><td class="num heat q3">44</td><td class="num heat q3">44</td><td class="num heat q2">42</td><td class="num heat q2">42</td><td class="num mean">45.9</td></tr>
-      <tr><td>Git</td><td class="num heat q4">48</td><td class="num heat q4">48</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q3">44</td><td class="num heat q4">47</td><td class="num mean">48.3</td></tr>
-      <tr><td>SSH</td><td class="num heat q3">46</td><td class="num heat q3">46</td><td class="num heat q4">47</td><td class="num heat q2">43</td><td class="num heat q2">43</td><td class="num heat q2">43</td><td class="num heat q3">44</td><td class="num heat q2">43</td><td class="num heat q2">43</td><td class="num mean">44.2</td></tr>
-      <tr><td>GitHub</td><td class="num heat q3">44</td><td class="num heat q2">41</td><td class="num heat q2">43</td><td class="num heat q3">44</td><td class="num heat q2">42</td><td class="num heat q1">36</td><td class="num heat q2">41</td><td class="num heat q2">42</td><td class="num heat q1">38</td><td class="num mean">41.2</td></tr>
-      <tr><td>Docs</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q4">48</td><td class="num heat q3">44</td><td class="num heat q3">46</td><td class="num heat q4">48</td><td class="num mean">47.9</td></tr>
-      <tr><td>ReactNative</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num mean">49.2</td></tr>
-      <tr><td>RAG</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num mean">49.9</td></tr>
-      <tr class="totrow"><td><b>mean</b></td><td class="num"><b>48.3</b></td><td class="num"><b>48.0</b></td><td class="num"><b>47.8</b></td><td class="num"><b>47.9</b></td><td class="num"><b>47.2</b></td><td class="num"><b>45.6</b></td><td class="num"><b>45.5</b></td><td class="num"><b>44.7</b></td><td class="num"><b>44.6</b></td><td class="num"></td></tr>
+      <tr><td>Python</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q2">42</td><td class="num heat q3">45</td><td class="num heat q4">47</td><td class="num mean">47.7</td></tr>
+      <tr><td>Django</td><td class="num heat q4">47</td><td class="num heat q4">47</td><td class="num heat q3">45</td><td class="num heat q3">45</td><td class="num heat q3">45</td><td class="num heat q3">46</td><td class="num heat q2">43</td><td class="num heat q2">43</td><td class="num heat q1">38</td><td class="num heat q1">39</td><td class="num mean">43.8</td></tr>
+      <tr><td>SQL</td><td class="num heat q5">50</td><td class="num heat q4">47</td><td class="num heat q3">45</td><td class="num heat q4">48</td><td class="num heat q3">45</td><td class="num heat q3">44</td><td class="num heat q3">44</td><td class="num heat q2">41</td><td class="num heat q2">42</td><td class="num heat q1">37</td><td class="num mean">44.3</td></tr>
+      <tr><td>JS</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q5">50</td><td class="num mean">49.1</td></tr>
+      <tr><td>TS</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num heat q3">45</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q3">45</td><td class="num mean">48.2</td></tr>
+      <tr><td>Bash</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">47</td><td class="num heat q4">48</td><td class="num heat q4">48</td><td class="num heat q4">48</td><td class="num heat q3">44</td><td class="num heat q3">44</td><td class="num heat q2">42</td><td class="num heat q2">42</td><td class="num mean">46.1</td></tr>
+      <tr><td>Git</td><td class="num heat q4">48</td><td class="num heat q4">48</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q3">44</td><td class="num heat q4">47</td><td class="num mean">48.5</td></tr>
+      <tr><td>SSH</td><td class="num heat q3">46</td><td class="num heat q3">46</td><td class="num heat q4">47</td><td class="num heat q2">43</td><td class="num heat q2">43</td><td class="num heat q3">46</td><td class="num heat q2">43</td><td class="num heat q3">44</td><td class="num heat q2">43</td><td class="num heat q2">43</td><td class="num mean">44.4</td></tr>
+      <tr><td>GitHub</td><td class="num heat q3">44</td><td class="num heat q2">41</td><td class="num heat q2">43</td><td class="num heat q3">44</td><td class="num heat q2">42</td><td class="num heat q3">46</td><td class="num heat q1">36</td><td class="num heat q2">41</td><td class="num heat q2">42</td><td class="num heat q1">38</td><td class="num mean">41.7</td></tr>
+      <tr><td>Docs</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q4">48</td><td class="num heat q4">48</td><td class="num heat q3">44</td><td class="num heat q3">46</td><td class="num heat q4">48</td><td class="num mean">47.9</td></tr>
+      <tr><td>ReactNative</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num heat q4">48</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">49</td><td class="num mean">49.3</td></tr>
+      <tr><td>RAG</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num mean">49.9</td></tr>
+      <tr class="totrow"><td><b>mean</b></td><td class="num"><b>48.3</b></td><td class="num"><b>48.0</b></td><td class="num"><b>47.8</b></td><td class="num"><b>47.9</b></td><td class="num"><b>47.2</b></td><td class="num"><b>47.9</b></td><td class="num"><b>45.6</b></td><td class="num"><b>45.5</b></td><td class="num"><b>44.7</b></td><td class="num"><b>44.6</b></td><td class="num"></td></tr>
       </tbody>
     </table></div>
     <p class="note key"><b>Two of the twelve categories no longer discriminate.</b> RAG averages
-      49.9/50 across all nine models and ReactNative 49.2 — every model has essentially solved
+      49.9/50 across all ten models and ReactNative 49.2 — every model has essentially solved
       them, so they contribute nothing to the ranking except noise. A suite that keeps them is
       measuring eleven-ish categories, not twelve.</p>
-    <p class="note"><b>GitHub Actions is the hardest thing here for everyone</b> (41.2/50 mean,
-      and the weakest column for five of the nine models), followed by Django (43.6), then SSH
-      and SQL essentially tied around 44. Those are where the leading cluster separates from the
+    <p class="note"><b>GitHub Actions is the hardest thing here for everyone</b> (41.7/50 mean,
+      and the weakest column for five of the ten models), followed by Django (43.8), then SQL
+      and SSH essentially tied around 44. Those are where the leading cluster separates from the
       rest — on the saturated categories every model looks identical.</p>
     <p class="note"><b>The cluster at the top is not uniform underneath.</b> Gemma 4 26B and
       Gemma 4 12B lead on mean but split their strengths: 26B takes SQL 50 vs 47, while 12B
@@ -323,6 +336,10 @@
           <td><span class="kind native">native</span></td>
           <td class="num">556</td><td class="num"><b>568</b></td><td class="num up">+12</td>
           <td class="num">15.9×</td><td class="num">72.7</td><td>sampling confound</td></tr>
+        <tr><td><b>Qwen3.8 27B</b><br><span class="pend">27B dense · vision-language</span></td>
+          <td><span class="kind native">native</span></td>
+          <td class="num">556</td><td class="num">556</td><td class="num">0</td>
+          <td class="num">16.0×</td><td class="num">11.7</td><td>single-variable; 24 never terminated</td></tr>
         <tr><td><b>Qwen3-Coder-Next</b><br><span class="pend">80B MoE · 3B active</span></td>
           <td><span class="kind cot">cot</span></td>
           <td class="num">558</td><td class="num">553</td><td class="num dn">−5</td>

@@ -1,0 +1,488 @@
+{
+ "t0/greedy": {
+  "samp": {
+   "temperature": 0.0
+  },
+  "answered": 10,
+  "n": 12,
+  "tokens": 35811,
+  "per": {
+   "sh-001": [
+    1,
+    1
+   ],
+   "sql-001": [
+    1,
+    1
+   ],
+   "ts-001": [
+    0,
+    0
+   ],
+   "dj-001": [
+    1,
+    1
+   ],
+   "doc-001": [
+    1,
+    1
+   ],
+   "py-001": [
+    1,
+    1
+   ]
+  },
+  "rows": [
+   {
+    "tid": "sh-001",
+    "think": 3971,
+    "ans": 88,
+    "tok": 4398,
+    "finish": "stop"
+   },
+   {
+    "tid": "sql-001",
+    "think": 3010,
+    "ans": 170,
+    "tok": 2877,
+    "finish": "stop"
+   },
+   {
+    "tid": "ts-001",
+    "think": 7314,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "dj-001",
+    "think": 783,
+    "ans": 199,
+    "tok": 742,
+    "finish": "stop"
+   },
+   {
+    "tid": "doc-001",
+    "think": 1433,
+    "ans": 513,
+    "tok": 1462,
+    "finish": "stop"
+   },
+   {
+    "tid": "py-001",
+    "think": 299,
+    "ans": 572,
+    "tok": 442,
+    "finish": "stop"
+   },
+   {
+    "tid": "sh-001",
+    "think": 3971,
+    "ans": 88,
+    "tok": 4398,
+    "finish": "stop"
+   },
+   {
+    "tid": "sql-001",
+    "think": 3010,
+    "ans": 170,
+    "tok": 2877,
+    "finish": "stop"
+   },
+   {
+    "tid": "ts-001",
+    "think": 7314,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "dj-001",
+    "think": 731,
+    "ans": 214,
+    "tok": 713,
+    "finish": "stop"
+   },
+   {
+    "tid": "doc-001",
+    "think": 1433,
+    "ans": 513,
+    "tok": 1462,
+    "finish": "stop"
+   },
+   {
+    "tid": "py-001",
+    "think": 299,
+    "ans": 572,
+    "tok": 442,
+    "finish": "stop"
+   }
+  ]
+ },
+ "t0.6/k20": {
+  "samp": {
+   "temperature": 0.6,
+   "top_p": 0.95,
+   "top_k": 20
+  },
+  "answered": 10,
+  "n": 12,
+  "tokens": 38126,
+  "per": {
+   "sh-001": [
+    1,
+    1
+   ],
+   "sql-001": [
+    1,
+    1
+   ],
+   "ts-001": [
+    0,
+    0
+   ],
+   "dj-001": [
+    1,
+    1
+   ],
+   "doc-001": [
+    1,
+    1
+   ],
+   "py-001": [
+    1,
+    1
+   ]
+  },
+  "rows": [
+   {
+    "tid": "sh-001",
+    "think": 4136,
+    "ans": 111,
+    "tok": 4549,
+    "finish": "stop"
+   },
+   {
+    "tid": "sql-001",
+    "think": 2864,
+    "ans": 170,
+    "tok": 2699,
+    "finish": "stop"
+   },
+   {
+    "tid": "ts-001",
+    "think": 7627,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "dj-001",
+    "think": 828,
+    "ans": 228,
+    "tok": 780,
+    "finish": "stop"
+   },
+   {
+    "tid": "doc-001",
+    "think": 1998,
+    "ans": 402,
+    "tok": 1918,
+    "finish": "stop"
+   },
+   {
+    "tid": "py-001",
+    "think": 1693,
+    "ans": 1444,
+    "tok": 2044,
+    "finish": "stop"
+   },
+   {
+    "tid": "sh-001",
+    "think": 2225,
+    "ans": 111,
+    "tok": 2650,
+    "finish": "stop"
+   },
+   {
+    "tid": "sql-001",
+    "think": 4356,
+    "ans": 170,
+    "tok": 3973,
+    "finish": "stop"
+   },
+   {
+    "tid": "ts-001",
+    "think": 7599,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "dj-001",
+    "think": 397,
+    "ans": 213,
+    "tok": 406,
+    "finish": "stop"
+   },
+   {
+    "tid": "doc-001",
+    "think": 2023,
+    "ans": 460,
+    "tok": 1980,
+    "finish": "stop"
+   },
+   {
+    "tid": "py-001",
+    "think": 755,
+    "ans": 1490,
+    "tok": 1129,
+    "finish": "stop"
+   }
+  ]
+ },
+ "t0.8/k20": {
+  "samp": {
+   "temperature": 0.8,
+   "top_p": 0.95,
+   "top_k": 20
+  },
+  "answered": 8,
+  "n": 12,
+  "tokens": 44489,
+  "per": {
+   "sh-001": [
+    0,
+    0
+   ],
+   "sql-001": [
+    1,
+    1
+   ],
+   "ts-001": [
+    0,
+    0
+   ],
+   "dj-001": [
+    1,
+    1
+   ],
+   "doc-001": [
+    1,
+    1
+   ],
+   "py-001": [
+    1,
+    1
+   ]
+  },
+  "rows": [
+   {
+    "tid": "sh-001",
+    "think": 7401,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "sql-001",
+    "think": 2612,
+    "ans": 171,
+    "tok": 2421,
+    "finish": "stop"
+   },
+   {
+    "tid": "ts-001",
+    "think": 7679,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "dj-001",
+    "think": 532,
+    "ans": 235,
+    "tok": 529,
+    "finish": "stop"
+   },
+   {
+    "tid": "doc-001",
+    "think": 2717,
+    "ans": 578,
+    "tok": 2618,
+    "finish": "stop"
+   },
+   {
+    "tid": "py-001",
+    "think": 650,
+    "ans": 1516,
+    "tok": 1040,
+    "finish": "stop"
+   },
+   {
+    "tid": "sh-001",
+    "think": 7159,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "sql-001",
+    "think": 1833,
+    "ans": 170,
+    "tok": 1696,
+    "finish": "stop"
+   },
+   {
+    "tid": "ts-001",
+    "think": 7393,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "dj-001",
+    "think": 761,
+    "ans": 171,
+    "tok": 715,
+    "finish": "stop"
+   },
+   {
+    "tid": "doc-001",
+    "think": 1431,
+    "ans": 457,
+    "tok": 1428,
+    "finish": "stop"
+   },
+   {
+    "tid": "py-001",
+    "think": 1676,
+    "ans": 1470,
+    "tok": 2046,
+    "finish": "stop"
+   }
+  ]
+ },
+ "t1.0/k64": {
+  "samp": {
+   "temperature": 1.0,
+   "top_p": 0.95,
+   "top_k": 64
+  },
+  "answered": 7,
+  "n": 12,
+  "tokens": 52707,
+  "per": {
+   "sh-001": [
+    0,
+    0
+   ],
+   "sql-001": [
+    0,
+    1
+   ],
+   "ts-001": [
+    0,
+    0
+   ],
+   "dj-001": [
+    1,
+    1
+   ],
+   "doc-001": [
+    1,
+    1
+   ],
+   "py-001": [
+    1,
+    1
+   ]
+  },
+  "rows": [
+   {
+    "tid": "sh-001",
+    "think": 7360,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "sql-001",
+    "think": 8873,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "ts-001",
+    "think": 7466,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "dj-001",
+    "think": 1104,
+    "ans": 228,
+    "tok": 1070,
+    "finish": "stop"
+   },
+   {
+    "tid": "doc-001",
+    "think": 2313,
+    "ans": 604,
+    "tok": 2222,
+    "finish": "stop"
+   },
+   {
+    "tid": "py-001",
+    "think": 1180,
+    "ans": 1470,
+    "tok": 1513,
+    "finish": "stop"
+   },
+   {
+    "tid": "sh-001",
+    "think": 7529,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "sql-001",
+    "think": 2879,
+    "ans": 164,
+    "tok": 2691,
+    "finish": "stop"
+   },
+   {
+    "tid": "ts-001",
+    "think": 7653,
+    "ans": 0,
+    "tok": 7999,
+    "finish": "length"
+   },
+   {
+    "tid": "dj-001",
+    "think": 1110,
+    "ans": 228,
+    "tok": 1038,
+    "finish": "stop"
+   },
+   {
+    "tid": "doc-001",
+    "think": 1753,
+    "ans": 475,
+    "tok": 1671,
+    "finish": "stop"
+   },
+   {
+    "tid": "py-001",
+    "think": 2070,
+    "ans": 1460,
+    "tok": 2507,
+    "finish": "stop"
+   }
+  ]
+ }
+}
