@@ -30,8 +30,17 @@ RFC 6901, RFC 4180, gitignore globs, unified diff), a near-miss trap on a famous
 scale-gated so the quadratic answer cannot finish in the grader's timeout. Output budgets are 4–6×
 larger and the reasoning floor moves 8000 → 32000.
 
-The same model that scores **579/600 (96.5%)** on the suite below scores **53/104 (51%)** here —
-and **3/15 on TypeScript**, where it scores 49/50 on the original tier.
+Two models measured so far, reasoning off:
+
+| Model | b3 | hard tier | TS |
+|---|---|---|---|
+| Qwen3.8 27B | 556/600 (92.7%) | **58/104** (56%) | 3/15 |
+| Gemma 4 26B A4B QAT | 579/600 (96.5%) | **53/104** (51%) | 3/15 |
+
+**The ranking inverts.** Gemma leads by 23 tasks on b3 and trails by 5 here — and both drop from
+49/50 to 3/15 on TypeScript, which is the difference between annotating JavaScript and writing a
+conditional type. 43 tasks are solved by both models and 36 by neither, leaving **25 that tell them
+apart**; the equivalent figure on b3 is 12.
 
 > **See [HARD_TIER.md](HARD_TIER.md)** for the design, the budget evidence, the validation gates,
 > and a correction to this repo's earlier claim that greedy decoding is unconditionally

@@ -1,0 +1,82 @@
+{
+ "hard": {
+  "gemma26": {
+   "label": "Gemma 4 26B A4B QAT",
+   "params": "26B MoE / 4B active",
+   "off": 53,
+   "on": null,
+   "note": "",
+   "percat": {
+    "Python": {
+     "off": 16,
+     "n": 30
+    },
+    "JS": {
+     "off": 5,
+     "n": 15
+    },
+    "TS": {
+     "off": 3,
+     "n": 15
+    },
+    "SQL": {
+     "off": 16,
+     "n": 20
+    },
+    "Bash": {
+     "off": 9,
+     "n": 12
+    },
+    "Git": {
+     "off": 4,
+     "n": 12
+    }
+   },
+   "off_tokens": 65917,
+   "off_capped": 6
+  },
+  "q38": {
+   "label": "Qwen3.8 27B",
+   "params": "27B dense, vision-language",
+   "off": 58,
+   "on": null,
+   "note": "",
+   "percat": {
+    "Python": {
+     "off": 17,
+     "n": 30
+    },
+    "JS": {
+     "off": 9,
+     "n": 15
+    },
+    "TS": {
+     "off": 3,
+     "n": 15
+    },
+    "SQL": {
+     "off": 15,
+     "n": 20
+    },
+    "Bash": {
+     "off": 7,
+     "n": 12
+    },
+    "Git": {
+     "off": 7,
+     "n": 12
+    }
+   },
+   "off_tokens": 48913,
+   "off_capped": 1
+  }
+ },
+ "meta": {
+  "host": "Apple M2 Max 64GB",
+  "server": "LM Studio / MLX",
+  "workers": 1,
+  "off_mechanism": "reasoning_effort=none",
+  "tasks": 104,
+  "grading": "execution only"
+ }
+}

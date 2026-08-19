@@ -125,40 +125,55 @@ resident model, record the actual context window next to the results, and abort
 if it moves mid-run. See that script's header for why the window is an
 experimental variable rather than a setting.
 
-## First measurement
+## First measurements
 
-Gemma 4 26B A4B QAT, reasoning off, greedy, window 262144, LM Studio / MLX on an
-Apple M2 Max.
+Reasoning off, greedy, LM Studio / MLX on an Apple M2 Max. Both models loaded at
+`--parallel 1` with the window read back and recorded.
 
-| | b3 tier | hard tier |
-|---|---|---|
-| score | 579/600 | **53/104** |
-| percentage | 96.5% | **51%** |
-| headroom | 21 tasks | 51 tasks |
+| Model | b3 | hard tier | |
+|---|---|---|---|
+| Qwen3.8 27B | 556/600 (92.7%) | **58/104** | 56% |
+| Gemma 4 26B A4B QAT | 579/600 (96.5%) | **53/104** | 51% |
+
+**The ranking inverts.** On b3 Gemma beats Qwen3.8 by 23 tasks; here Qwen3.8
+leads by 5. That gap is only modestly above the ~3-task noise floor measured
+below, so the honest reading is not "Qwen3.8 is better" — it is that the 23-task
+lead b3 reported does not survive contact with harder work. The old tier ranked
+them confidently on tasks neither model finds difficult.
 
 Per category, reasoning off:
 
-| Category | Score | |
-|---|---|---|
-| SQL | 16/20 | 80% |
-| Bash | 9/12 | 75% |
-| Python | 16/30 | 53% |
-| JS | 5/15 | 33% |
-| Git | 4/12 | 33% |
-| TS | 3/15 | 20% |
+| Category | n | Gemma 4 26B | Qwen3.8 27B |
+|---|---|---|---|
+| Python | 30 | 16 | 17 |
+| SQL | 20 | 16 | 15 |
+| Bash | 12 | 9 | 7 |
+| Git | 12 | 4 | 7 |
+| JS | 15 | 5 | **9** |
+| TS | 15 | 3 | 3 |
 
-TypeScript at 3/15 is the sharpest result: on b3 the same model scored 49/50 on
-TypeScript. That is the difference between annotating JavaScript and writing a
-conditional type, and it was completely invisible before.
+**TypeScript is the sharpest result against b3**, where both models score 49/50.
+3/15 is the difference between annotating JavaScript and writing a conditional
+type, and it was completely invisible before. It is also, so far, the category
+that separates these two models *least* — both sit near the floor, so it is
+measuring a shared limitation rather than a difference. Whether it discriminates
+at all is an open question until a stronger model runs.
+
+**The tier discriminates where b3 did not.** Of the 104 tasks, 43 are solved by
+both models and 36 by neither — leaving **25 tasks that tell the two apart** (10
+only Gemma, 15 only Qwen3.8). The 36 solved by neither are the headroom a third
+model can occupy; on b3 the equivalent figure was 12.
 
 ### The budget pass
 
-The first run used 3000/1200/700 and scored 52/104, but 8 of those 52 failures
+Gemma's first run used 3000/1200/700 and scored 52/104, but 8 of those 52 failures
 hit the output cap — 15% of the failures were the budget running out mid-answer.
 Budgets were raised to 5000/1500/800/1000 and the run repeated. Six answers still
 reach the cap, but two of them now *pass*, which is the signal that matters: the
 cap is landing after a complete answer and truncating trailing chatter, not
-cutting an answer short. The score moved 52 → 53.
+cutting an answer short. The score moved 52 → 53. Qwen3.8, run only at the raised budgets, hit the cap on
+exactly 1 of 104 answers, which is the confirmation that the new numbers are
+sized for the tier rather than tuned to one model.
 
 ### Noise floor, and a correction about greedy
 
