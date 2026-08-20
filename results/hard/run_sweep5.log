@@ -1,0 +1,258 @@
+######## staff-pick downloads settled Wed Aug 19 18:47:37 IST 2026
+You have 4 models, taking up 47.89 GB of disk space.
+LLM                                       PARAMS    ARCH       SIZE        DEVICE            
+google/gemma-4-26b-a4b-qat (1 variant)    26B       gemma4     15.64 GB    Local             
+qwen/qwen3.6-27b (1 variant)              27B       qwen3_5    16.08 GB    Local             
+qwen/qwen3.8-27b (1 variant)              27B       qwen3_5    16.08 GB    Local     ✓ LOADED
+EMBEDDING                               PARAMS    ARCH          SIZE        DEVICE    
+text-embedding-nomic-embed-text-v1.5              Nomic BERT    84.11 MB    Local     
+######## GET deepseek-vl2 Wed Aug 19 18:47:38 IST 2026
+Resolution completed. Downloading 15.68 GB...
+⠙ [▏                     ] 0.00%          
+⠹ [▏                     ] 0.00%          
+⠸ [▏                     ] 0.00%          
+⠼ [▏                     ] 0.00%          
+⠴ [▏                     ] 0.00%          
+⠦ [▏                     ] 0.00%          
+⠧ [▏                     ] 0.00%          
+⠇ [▏                     ] 0.00%          
+⠏ [▏                     ] 0.00%          
+⠋ [▏                     ] 0.00%          
+⠙ [▏                     ] 0.00%          
+⠹ [▏                     ] 0.00%          
+⠸ [▏                     ] 0.00%          
+⠼ [▏                     ] 0.00%          
+⠴ [▏                     ] 0.00%          
+⠦ [▏                     ] 0.00%          
+⠧ [▏                     ] 0.00%          
+⠇ [▏                     ] 0.00%          
+⠏ [▏                     ] 0.00%          
+⠋ [▏                     ] 0.00%          
+⠙ [▏                     ] 0.00%          
+⠹ [▏                     ] 0.00%          
+⠸ [▏                     ] 0.00%          
+⠼ [▏                     ] 0.00%          
+⠴ [▏                     ] 0.00%          
+⠦ [▏                     ] 0.00%          
+⠧ [▏                     ] 0.00%          
+⠇ [▏                     ] 0.00%          
+⠏ [▏                     ] 0.00%          
+⠋ [▏                     ] 0.00%          
+Download completed.
+######## all downloads finished Wed Aug 19 19:36:15 IST 2026
+You have 8 models, taking up 153.21 GB of disk space.
+LLM                                       PARAMS    ARCH              SIZE        DEVICE            
+deepseek-vl2                                        deepseek_vl_v2    15.68 GB    Local             
+google/gemma-4-26b-a4b-qat (1 variant)    26B       gemma4            15.64 GB    Local             
+qwen/qwen3-coder-next (1 variant)         80B       qwen3_next        44.86 GB    Local             
+qwen/qwen3.6-27b (1 variant)              27B       qwen3_5           16.08 GB    Local             
+qwen/qwen3.6-35b-a3b (1 variant)          35B       qwen3_5_moe       20.43 GB    Local             
+qwen/qwen3.8-27b (1 variant)              27B       qwen3_5           16.08 GB    Local     ✓ LOADED
+zai-org/glm-4.7-flash (1 variant)         30B       glm4_moe_lite     24.36 GB    Local             
+EMBEDDING                               PARAMS    ARCH          SIZE        DEVICE    
+text-embedding-nomic-embed-text-v1.5              Nomic BERT    84.11 MB    Local     
+######## STARTING SWEEP Wed Aug 19 19:36:16 IST 2026
+================================================================ q36
+######## HARD TIER  q36 -- qwen/qwen3.6-27b
+Wed Aug 19 19:36:16 IST 2026
+loaded once: requested 32768, actual window 208384 -- both arms will use it
+---- q36 off arm (reasoning suppressed, greedy) @ window 208384
+  104 to run, 1 concurrent
+  5/104  4.1m elapsed, ~1.3h left
+  10/104  5.7m elapsed, ~0.9h left
+  15/104  10.5m elapsed, ~1.0h left
+  20/104  11.9m elapsed, ~0.8h left
+  25/104  14.5m elapsed, ~0.8h left
+  30/104  17.5m elapsed, ~0.7h left
+  35/104  21.7m elapsed, ~0.7h left
+  40/104  23.4m elapsed, ~0.6h left
+  45/104  26.3m elapsed, ~0.6h left
+  50/104  27.1m elapsed, ~0.5h left
+  55/104  28.7m elapsed, ~0.4h left
+  60/104  29.8m elapsed, ~0.4h left
+  65/104  30.6m elapsed, ~0.3h left
+  70/104  31.3m elapsed, ~0.3h left
+  75/104  31.8m elapsed, ~0.2h left
+  80/104  32.5m elapsed, ~0.2h left
+  85/104  32.8m elapsed, ~0.1h left
+  90/104  33.0m elapsed, ~0.1h left
+  95/104  33.1m elapsed, ~0.1h left
+  100/104  33.3m elapsed, ~0.0h left
+  104/104  33.4m elapsed, ~0.0h left
+saved -> ./results/hard/hb_q36.json
+######## q36 HARD TIER DONE -- arms=off at window 208384
+Wed Aug 19 20:09:56 IST 2026
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+/tmp/b5dl/sweep.sh: line 11: 77276 Killed: 9                  ( cd "$REPO/harness" && python3 -u b5.py grade "$OUT/hb_$KEY.json" )
+!!!! q36 GRADE FAILED
+================================================================ q36moe
+######## HARD TIER  q36moe -- qwen/qwen3.6-35b-a3b
+Wed Aug 19 21:04:03 IST 2026
+loaded once: requested 32768, actual window 262144 -- both arms will use it
+---- q36moe off arm (reasoning suppressed, greedy) @ window 262144
+  104 to run, 1 concurrent
+  5/104  1.2m elapsed, ~0.4h left
+  10/104  1.9m elapsed, ~0.3h left
+  15/104  3.3m elapsed, ~0.3h left
+  20/104  3.7m elapsed, ~0.3h left
+  25/104  5.1m elapsed, ~0.3h left
+  30/104  6.3m elapsed, ~0.3h left
+  35/104  6.9m elapsed, ~0.2h left
+  40/104  7.5m elapsed, ~0.2h left
+  45/104  9.1m elapsed, ~0.2h left
+  50/104  9.3m elapsed, ~0.2h left
+  55/104  9.6m elapsed, ~0.1h left
+  60/104  9.9m elapsed, ~0.1h left
+  65/104  10.1m elapsed, ~0.1h left
+  70/104  10.3m elapsed, ~0.1h left
+  75/104  10.5m elapsed, ~0.1h left
+  80/104  10.6m elapsed, ~0.1h left
+  85/104  10.7m elapsed, ~0.0h left
+  90/104  10.7m elapsed, ~0.0h left
+  95/104  10.8m elapsed, ~0.0h left
+  100/104  10.8m elapsed, ~0.0h left
+  104/104  10.8m elapsed, ~0.0h left
+saved -> ./results/hard/hb_q36moe.json
+######## q36moe HARD TIER DONE -- arms=off at window 262144
+Wed Aug 19 21:15:12 IST 2026
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+===== qwen/qwen3.6-35b-a3b  (hard tier)
+  Bash            9/12
+  Git             5/12
+  JS              9/15
+  Python         12/30
+  SQL            13/20
+  TS              0/15
+  TOTAL          48/104
+  decode: 48813 tok / 650s = 75.1 tok/s
+graded -> ./results/hard/hb_q36moe.graded.json
+================================================================ glm47
+######## HARD TIER  glm47 -- zai-org/glm-4.7-flash
+Wed Aug 19 21:16:49 IST 2026
+loaded once: requested 32768, actual window 32768 -- both arms will use it
+---- glm47 off arm (reasoning suppressed, greedy) @ window 32768
+  104 to run, 1 concurrent
+  5/104  2.8m elapsed, ~0.9h left
+  10/104  3.3m elapsed, ~0.5h left
+  15/104  6.6m elapsed, ~0.7h left
+  20/104  7.2m elapsed, ~0.5h left
+  25/104  8.0m elapsed, ~0.4h left
+  30/104  8.6m elapsed, ~0.4h left
+  35/104  9.3m elapsed, ~0.3h left
+  40/104  9.7m elapsed, ~0.3h left
+  45/104  10.4m elapsed, ~0.2h left
+  50/104  10.7m elapsed, ~0.2h left
+  55/104  11.0m elapsed, ~0.2h left
+  60/104  11.5m elapsed, ~0.1h left
+  65/104  11.7m elapsed, ~0.1h left
+  70/104  12.0m elapsed, ~0.1h left
+  75/104  12.2m elapsed, ~0.1h left
+  80/104  12.3m elapsed, ~0.1h left
+  85/104  12.4m elapsed, ~0.0h left
+  90/104  12.5m elapsed, ~0.0h left
+  95/104  12.6m elapsed, ~0.0h left
+  100/104  13.0m elapsed, ~0.0h left
+  104/104  13.1m elapsed, ~0.0h left
+saved -> ./results/hard/hb_glm47.json
+######## glm47 HARD TIER DONE -- arms=off at window 32768
+Wed Aug 19 21:30:11 IST 2026
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+===== zai-org/glm-4.7-flash  (hard tier)
+  Bash            5/12
+  Git             5/12
+  JS              3/15
+  Python         10/30
+  SQL             9/20
+  TS              3/15
+  TOTAL          35/104
+  decode: 33230 tok / 786s = 42.3 tok/s
+graded -> ./results/hard/hb_glm47.graded.json
+================================================================ qcn
+######## HARD TIER  qcn -- qwen/qwen3-coder-next
+Wed Aug 19 21:32:47 IST 2026
+loaded once: requested 32768, actual window 32768 -- both arms will use it
+---- qcn off arm (reasoning suppressed, greedy) @ window 32768
+  104 to run, 1 concurrent
+  5/104  1.8m elapsed, ~0.6h left
+  10/104  2.4m elapsed, ~0.4h left
+  15/104  3.3m elapsed, ~0.3h left
+  20/104  3.9m elapsed, ~0.3h left
+  25/104  4.3m elapsed, ~0.2h left
+  30/104  5.3m elapsed, ~0.2h left
+  35/104  6.2m elapsed, ~0.2h left
+  40/104  6.9m elapsed, ~0.2h left
+  45/104  7.8m elapsed, ~0.2h left
+  50/104  8.1m elapsed, ~0.1h left
+  55/104  8.4m elapsed, ~0.1h left
+  60/104  8.8m elapsed, ~0.1h left
+  65/104  9.3m elapsed, ~0.1h left
+  70/104  9.9m elapsed, ~0.1h left
+  75/104  10.3m elapsed, ~0.1h left
+  80/104  10.7m elapsed, ~0.1h left
+  85/104  10.8m elapsed, ~0.0h left
+  90/104  10.9m elapsed, ~0.0h left
+  95/104  10.9m elapsed, ~0.0h left
+  100/104  11.0m elapsed, ~0.0h left
+  104/104  11.0m elapsed, ~0.0h left
+saved -> ./results/hard/hb_qcn.json
+######## qcn HARD TIER DONE -- arms=off at window 32768
+Wed Aug 19 21:44:12 IST 2026
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+===== qwen/qwen3-coder-next  (hard tier)
+  Bash           10/12
+  Git             6/12
+  JS              6/15
+  Python         14/30
+  SQL            14/20
+  TS              3/15
+  TOTAL          53/104
+  decode: 30825 tok / 662s = 46.5 tok/s
+graded -> ./results/hard/hb_qcn.graded.json
+######## SWEEP DONE Wed Aug 19 21:45:48 IST 2026
+######## HARD TIER  dsvl2 -- deepseek-vl2
+Wed Aug 19 21:49:00 IST 2026
+using the already-resident model at window 32768
+---- dsvl2 off arm (reasoning suppressed, greedy) @ window 32768
+  104 to run, 1 concurrent
+  5/104  0.9m elapsed, ~0.3h left
+  10/104  1.4m elapsed, ~0.2h left
+  15/104  2.0m elapsed, ~0.2h left
+  20/104  2.5m elapsed, ~0.2h left
+  25/104  2.7m elapsed, ~0.1h left
+  30/104  3.1m elapsed, ~0.1h left
+  35/104  5.5m elapsed, ~0.2h left
+  40/104  5.8m elapsed, ~0.2h left
+  45/104  6.4m elapsed, ~0.1h left
+  50/104  6.8m elapsed, ~0.1h left
+  55/104  8.5m elapsed, ~0.1h left
+  60/104  9.9m elapsed, ~0.1h left
+  65/104  10.2m elapsed, ~0.1h left
+  70/104  10.8m elapsed, ~0.1h left
+  75/104  11.5m elapsed, ~0.1h left
+  80/104  12.3m elapsed, ~0.1h left
+  85/104  12.3m elapsed, ~0.0h left
+  90/104  12.4m elapsed, ~0.0h left
+  95/104  12.4m elapsed, ~0.0h left
+  100/104  12.5m elapsed, ~0.0h left
+  104/104  12.5m elapsed, ~0.0h left
+saved -> ./results/hard/hb_dsvl2.json
+######## dsvl2 HARD TIER DONE -- arms=off at window 32768
+Wed Aug 19 22:01:31 IST 2026
