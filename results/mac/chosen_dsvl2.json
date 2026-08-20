@@ -1,0 +1,8 @@
+{
+ "model": "deepseek-vl2",
+ "sampling": {
+  "temperature": 0.0
+ },
+ "name": "t0/greedy (matches off arm)",
+ "why": "Not tuned by hardtemp.py, and deliberately so: that tuner exists to escape a non-terminating reasoning trace, and this model has no thinking mode to spiral. Its reasoning arm is the prompted-CoT arm, which changes the prompt and nothing else. Greedy is chosen because it is exactly what the off arm used, so the CoT arm isolates a single variable -- the instruction to reason before answering -- rather than moving prompt and sampling together. Note this model is prompted through /v1/completions with DeepSeek's documented turn format because its chat template is broken in this build (see patch_rawchat.py), and that the raw path is the one place where prompt wording has been measured to matter enormously here: a single trailing space moved its b3 score from 167/600 to 112/600. The CoT suffix is a much larger prompt change than a trailing space, so its result should be read as 'this model with this prompt', not as a clean reasoning delta."
+}

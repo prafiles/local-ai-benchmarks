@@ -75,10 +75,27 @@ if [ "$ARMS" = "off" ] || [ "$ARMS" = "both" ]; then
 fi
 
 if [ "$ARMS" = "on" ] || [ "$ARMS" = "both" ]; then
-  echo "---- $KEY on arm (native thinking, budget $THINK_BUDGET) @ window $WIN"
-  B4_THINK=1 B4_COT=0 B4_BUDGET="$THINK_BUDGET" B4_BUDGET_MULT=1 B4_RETRIES=2 \
-    B4_ESCALATE="${B4_ESCALATE:-1.0,1.15}" \
-    B4_PROFILES="${B5_PROFILES:-$(python3 mkprofiles.py "$KEY=$MODEL" 2>/dev/null || echo '{}')}" \
+  # "On" is not one thing. A model with a trained thinking mode gets it enabled;
+  # a model without one gets the prompted-CoT arm, which b3 reports separately
+  # because asking in the prompt is not the same as a trained mode. Sending
+  # B4_THINK=1 to a model that cannot think produces an arm b5.py labels "plain"
+  # -- a duplicate of the off arm, an hour of GPU for nothing.
+  NATIVE=$(python3 -c "import b3,sys; print(1 if b3.can_think(sys.argv[1]) else 0)" "$MODEL")
+  # A missing chosen_<key>.json must not fall back to default sampling in
+  # silence: for a thinking arm that is the difference between a measured
+  # temperature and an unmeasured one.
+  PROF="${B5_PROFILES:-$(python3 mkprofiles.py "$KEY=$MODEL")}" || {
+    echo "ABORT: no sampling profile for $KEY -- run hardtemp.py and write chosen_$KEY.json"
+    exit 1; }
+  if [ "$NATIVE" = "1" ]; then
+    echo "---- $KEY on arm (NATIVE thinking, budget $THINK_BUDGET) @ window $WIN"
+    ARM_ENV="B4_THINK=1 B4_COT=0"
+  else
+    echo "---- $KEY on arm (prompted CoT -- no native thinking mode) @ window $WIN"
+    ARM_ENV="B4_THINK=0 B4_COT=1"
+  fi
+  env $ARM_ENV B4_BUDGET="$THINK_BUDGET" B4_BUDGET_MULT=1 B4_RETRIES=2 \
+    B4_ESCALATE="${B4_ESCALATE:-1.0,1.15}" B4_PROFILES="$PROF" \
     python3 -u b5.py run "$MODEL" "$OUT/ht_$KEY.json" || exit 1
 fi
 
