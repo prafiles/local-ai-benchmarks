@@ -396,12 +396,25 @@ def fresh(name):
     return d
 
 
-def parse_okbad(stdout, ids):
+def parse_okbad(stdout, ids, label="?"):
+    """Verdicts from a grader container.
+
+    A case that produced NO verdict is not the same thing as a failed case, and
+    silently folding the two together is how this suite once reported 0/50 for
+    six whole categories: the sandbox image was missing, every container died on
+    startup, and every task scored a legitimate-looking zero. Missing verdicts
+    still count as failures -- that is the safe direction -- but they are now
+    said out loud so the number can be distrusted.
+    """
     got = {}
     for ln in stdout.splitlines():
         parts = ln.split()
         if len(parts) == 2 and parts[0] in ("OK", "BAD"):
             got[parts[1]] = parts[0] == "OK"
+    silent = [i for i in ids if i not in got]
+    if silent:
+        print("    WARNING: %d %s cases produced NO verdict (container died?): %s"
+              % (len(silent), label, silent[:6]), flush=True)
     return {i: got.get(i, False) for i in ids}
 
 
@@ -433,7 +446,7 @@ def grade_py(items):
            "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n")
     open(os.path.join(d, "drv.py"), "w").write(drv)
     out, _e = container("bench-py:1", d, "python /w/drv.py\n")
-    return parse_okbad(out, ids)
+    return parse_okbad(out, ids, "python")
 
 
 def grade_django(items):
@@ -461,7 +474,7 @@ def grade_django(items):
            "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n")
     open(os.path.join(d, "drv.py"), "w").write(drv)
     out, _e = container("bench-py:1", d, "cd /w && python /w/drv.py\n")
-    return parse_okbad(out, ids)
+    return parse_okbad(out, ids, "django")
 
 
 def grade_sql(items):
@@ -506,7 +519,7 @@ def grade_js(items):
               "  if (cd /w/cases/$id && timeout 30 node t.js >/dev/null 2>&1); "
               "then echo \"OK $id\"; else echo \"BAD $id\"; fi\ndone\n")
     out, _e = container("bench-node:1", d, script)
-    return parse_okbad(out, ids)
+    return parse_okbad(out, ids, "js")
 
 
 def grade_ts(items):
@@ -525,7 +538,7 @@ def grade_ts(items):
               ">/dev/null 2>&1 && timeout 30 node out/t.js >/dev/null 2>&1); "
               "then echo \"OK $id\"; else echo \"BAD $id\"; fi\ndone\n")
     out, err = container("bench-node:1", d, script, timeout=7200, mem="6g")
-    got = parse_okbad(out, ids)
+    got = parse_okbad(out, ids, "ts")
     missing = [i for i in ids if (" " + i) not in out]
     if missing:
         print("    WARNING: %d ts cases produced NO verdict (container died?): %s"
@@ -553,7 +566,7 @@ def grade_shell(items, rows, name):
               "  if OUT=/tmp/outs/$id sh /w/$id.chk >/dev/null 2>&1; "
               "then echo \"OK $id\"; else echo \"BAD $id\"; fi\ndone\n")
     out, _e = container("bench-sh:1", d, script)
-    return parse_okbad(out, ids)
+    return parse_okbad(out, ids, name)
 
 
 def grade_sshcfg(items):
@@ -643,7 +656,7 @@ def grade_yaml(items):
            "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n")
     open(os.path.join(d, "drv.py"), "w").write(drv)
     out, _e = container("bench-py:1", d, "python /w/drv.py\n")
-    return parse_okbad(out, ids)
+    return parse_okbad(out, ids, "yaml")
 
 
 def grade_rubric(items):
