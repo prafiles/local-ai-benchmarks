@@ -1,1 +1,17 @@
+### writing -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/hardtemp_glm47.json
 ### first-attempt temperature on the hard probes, budget=8000, 2 passes
+
+ t0/greedy  answered 12/12   tokens  18028   wall  405s
+   dj-001 2/2  doc-001 2/2  py-001 2/2  sh-001 2/2  sql-001 2/2  ts-001 2/2
+
+ t0.6/k20   answered 12/12   tokens  20522   wall  450s
+   dj-001 2/2  doc-001 2/2  py-001 2/2  sh-001 2/2  sql-001 2/2  ts-001 2/2
+
+ t0.8/k20   answered 12/12   tokens  15272   wall  330s
+   dj-001 2/2  doc-001 2/2  py-001 2/2  sh-001 2/2  sql-001 2/2  ts-001 2/2
+
+ t1.0/k64   answered 12/12   tokens  29724   wall  662s
+   dj-001 2/2  doc-001 2/2  py-001 2/2  sh-001 2/2  sql-001 2/2  ts-001 2/2
+
+-> first attempt: t0.8/k20  {'temperature': 0.8, 'top_p': 0.95, 'top_k': 20}
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/hardtemp_glm47.json
