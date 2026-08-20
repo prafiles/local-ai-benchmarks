@@ -65,6 +65,12 @@ else
 fi
 echo "$WIN" > "$OUT/window5_$KEY.txt"
 
+# Hand the measured window to the harness so a reasoning budget larger than the
+# window is clamped to what fits instead of being rejected by the server. This
+# is a no-op at 208384/262144; it matters at 32768, where the 20 SQL prompts
+# (~930 tokens of schema each) plus a 32000-token floor overflow by ~170.
+export B4_WINDOW="$WIN"
+
 if [ "$ARMS" = "off" ] || [ "$ARMS" = "both" ]; then
   echo "---- $KEY off arm (reasoning suppressed, greedy) @ window $WIN"
   B4_THINK=0 B4_COT=0 B4_PROFILES='{}' \

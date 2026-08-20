@@ -165,6 +165,38 @@ def budget(mt):
     return max(int(mt * BUDGET_MULT), BUDGET_FLOOR) if THINK else mt
 
 
+# The reasoning floor asks the server for room; it is not a promise the room is
+# there. On this stack the context window is an observed property of the load,
+# not a setting (see serving/macpair5.sh), so a 32000-token floor against a
+# 32768-token window overflows on any task with a long prompt -- and all 20
+# hard-tier SQL prompts carry a schema, running ~930 tokens. Unclamped, the
+# server rejects the request, the retries reject too, and the task grades as an
+# empty answer, which reads as a capability result rather than a serving limit.
+# Clamp to what actually fits and record it, so the shortfall is visible.
+WINDOW = int(os.environ.get("B4_WINDOW", "0"))
+WINDOW_RESERVE = int(os.environ.get("B4_WINDOW_RESERVE", "512"))
+CLAMPED = []
+
+
+def fit(prompt, mt):
+    """budget(mt), reduced to what the context window can actually hold."""
+    want = budget(mt)
+    if not WINDOW:
+        return want
+    # chars/3 deliberately OVER-estimates the prompt, so the clamp errs toward
+    # a request that fits rather than one that is rejected.
+    room = WINDOW - len(prompt) // 3 - WINDOW_RESERVE
+    if room >= want:
+        return want
+    got = max(1024, room)
+    if not CLAMPED:
+        print("    WARNING: window %d too small for budget %d; clamping to %d "
+              "(prompt ~%d tok). Further clamps counted, not printed."
+              % (WINDOW, want, got, len(prompt) // 3), flush=True)
+    CLAMPED.append(got)
+    return got
+
+
 # Measured per model by tune.py, not copied off a model card and hoped for.
 # The entry that matters is the one for thinking mode: greedy decoding sends both
 # reasoning models into a loop that eats the whole budget and returns no answer.
@@ -228,9 +260,10 @@ COMPLETIONS_URL = URL.replace("/chat/completions", "/completions")
 
 def _once_raw(model, prompt, max_tokens, temp=None):
     """One generation through /v1/completions, formatting the turn ourselves."""
+    text = RAW_FMT.format(prompt=with_cot(model, prompt))
     payload = sampling({"model": model,
-                        "prompt": RAW_FMT.format(prompt=with_cot(model, prompt)),
-                        "max_tokens": budget(max_tokens)}, model)
+                        "prompt": text,
+                        "max_tokens": fit(text, max_tokens)}, model)
     # A chat endpoint stops at the turn boundary for us; a raw completion will
     # happily begin a new user turn and answer itself, so the boundary has to be
     # supplied or the graded text ends up containing a whole invented dialogue.
@@ -255,10 +288,10 @@ def _once_raw(model, prompt, max_tokens, temp=None):
 def _once(model, prompt, max_tokens, temp=None):
     if RAW_FMT:
         return _once_raw(model, prompt, max_tokens, temp)
+    content = with_cot(model, prompt)
     payload = sampling({"model": model,
-                        "messages": [{"role": "user",
-                                      "content": with_cot(model, prompt)}],
-                        "max_tokens": budget(max_tokens)}, model)
+                        "messages": [{"role": "user", "content": content}],
+                        "max_tokens": fit(content, max_tokens)}, model)
     if temp is not None:
         payload["temperature"] = temp
     req = urllib.request.Request(URL, data=json.dumps(payload).encode(),
