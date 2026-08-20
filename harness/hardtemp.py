@@ -33,6 +33,8 @@ from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import b3  # noqa: E402
 
+HERE_OUT = os.path.dirname(os.path.abspath(__file__))
+
 URL = os.environ.get("B4_URL",
                      "http://localhost:8000/v1/chat/completions")
 MODEL = sys.argv[1]
@@ -68,6 +70,15 @@ def _parse_configs(spec):
 # can run at identical sampling and the temperature confound disappears.
 if os.environ.get("B4_HARD_CONFIGS"):
     CONFIGS = _parse_configs(os.environ["B4_HARD_CONFIGS"])
+
+# Resolved and CREATED up front. It used to default to a path that does not
+# exist here, and was only touched after the first config finished, so an unset
+# B4_OUT raised FileNotFoundError having already spent a full config -- which is
+# how the glm-4.7-flash tune came to have a log with no results in it.
+OUT_DIR = os.environ.get("B4_OUT") or os.path.join(HERE_OUT, "tune-out")
+os.makedirs(OUT_DIR, exist_ok=True)
+OUT_JSON = os.path.join(OUT_DIR, os.environ.get("B4_TUNE_NAME", "hardtemp.json"))
+print("### writing -> %s" % OUT_JSON, flush=True)
 
 TASKS = {t[0]: t for t in b3.all_tasks()}
 
@@ -118,9 +129,8 @@ for name, samp in CONFIGS:
           flush=True)
     out[name] = {"samp": samp, "answered": ok, "n": n, "tokens": tok, "per": per,
                  "rows": rows}
-    json.dump(out, open(os.path.join(os.environ.get("B4_OUT", "/root/bench2"), "hardtemp.json"), "w"), indent=1)
+    json.dump(out, open(OUT_JSON, "w"), indent=1)
 
 best = max(out.items(), key=lambda kv: (kv[1]["answered"], -kv[1]["tokens"]))
 print("\n-> first attempt: %s  %s" % (best[0], best[1]["samp"]), flush=True)
-print("saved -> %s" % os.path.join(os.environ.get("B4_OUT", "/root/bench2"),
-                                   "hardtemp.json"), flush=True)
+print("saved -> %s" % OUT_JSON, flush=True)
