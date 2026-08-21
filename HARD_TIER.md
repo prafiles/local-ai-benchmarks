@@ -228,26 +228,38 @@ that the raised numbers are sized for the tier rather than tuned to one model.
 
 ### Noise floor, and a correction about greedy
 
-Comparing the two runs gives a noise estimate, and turned up a serving-stack
-detail worth recording.
+Each model's off arm is run twice under identical settings, and the repeat is
+the noise estimate. Three of seven models have repeats so far:
 
-Of the 96 answers not capped in the first run, **90 (94%) are byte-identical**
-across the two runs, and **3 of 104 graded results flipped**, net +1.
+| Model | byte-identical answers | run 1 -> run 2 | graded flips |
+|---|---|---|---|
+| Qwen3.6 27B | 104/104 | 62 -> 62 | **0** |
+| Qwen3.8 27B | 104/104 | 58 -> 58 | **0** |
+| Gemma 4 26B | 101/104 | 53 -> 54 | **1** |
 
-Six uncapped answers differed even though decoding was greedy at a fixed context
-window with the model never unloaded. That contradicts the flat claim recorded
-earlier in this repo — that greedy is deterministic at a fixed window. Probing
-it directly: five back-to-back identical requests reproduce exactly, on every
-task tried (530/530/530/530/530 tokens, one distinct output). But the *first*
-call of a probe produced a third distinct output again, and the benchmark's own
-two runs produced two more. The variable is the **preceding request**: MLX
-prompt-cache state carries across calls, so an identical prompt greedily decoded
-after a different predecessor can diverge — here at character 128, choosing
-`v.split('+', 1)[0]` over `v.split('+')[0]`.
+**One flip in 312 task-repeats.** Two of the three models reproduce perfectly,
+byte for byte, across runs a day apart with the model unloaded and reloaded in
+between. The floor is not a property of the suite; it is a property of the
+model, and for most models here it is zero.
 
-The precise claim is therefore: greedy is reproducible when the request sequence
-is reproducible, not unconditionally. For a suite that runs 104 different prompts
-in order, that puts the floor at roughly **3 tasks, net ~1** — about 3% of this
-tier, against 1% on b3. Proportionally larger, but set against a spread that is
-now 42 tasks of headroom rather than 21, and a best-to-worst gap of 27 tasks
-across the six scoring models — roughly nine times the floor.
+This corrects an earlier figure in this file, which reported 94% byte-identical
+and ~3 flips. That number came from comparing Gemma's budget-3000 run against
+its budget-5000 run -- a settings change measured as though it were repetition.
+It was never a clean repeat, and it overstated the floor by roughly 3x.
+
+Gemma remains the one model that does vary, and its three differing answers
+(hpy-001, hpy-002, hsql-001) are none of them among its six capped answers, so
+the variation is not truncation.
+
+The mechanism recorded earlier still holds and is worth keeping: greedy is
+reproducible when the request *sequence* is reproducible, not unconditionally.
+Five back-to-back identical requests reproduce exactly, but the same prompt
+issued after a different predecessor can diverge -- here at character 128,
+choosing `v.split('+', 1)[0]` over `v.split('+')[0]` -- because MLX prompt-cache
+state carries across calls. A benchmark that runs 104 different prompts in a
+fixed order reproduces that sequence exactly, which is why the measured floor is
+as low as it is. Change the order, or interleave another workload, and this
+guarantee is gone.
+
+Against a best-to-worst spread of 27 tasks across the scoring models, a floor of
+0-1 tasks means the tier's separations are signal, not noise.
