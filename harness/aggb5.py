@@ -143,14 +143,27 @@ for key, label, params, note in MODELS:
 
 ran = list(out["hard"].values())
 if ran:
-    best_key = max(ran, key=lambda x: x["on"] if x["on"] is not None else x["off"])
-    best = best_key["on"] if best_key["on"] is not None else best_key["off"]
-    worst_row = min(ran, key=lambda x: x["on"] if x["on"] is not None else x["off"])
-    worst = worst_row["on"] if worst_row["on"] is not None else worst_row["off"]
+    # Rank on the comparable number. A score reached by resampling hotter than
+    # the profile is not the same measurement as one decoded at the profile, and
+    # ranking on the raw value crowned Gemma at 82 when its own greedy arm
+    # scores 52 -- below its no-thinking result. Where an arm was resampled, its
+    # greedy-only score is the one that is comparable to everyone else's.
+    def cmp_score(x):
+        if x["on"] is None:
+            return x["off"]
+        if x.get("resampled"):
+            return x.get("on_greedy", x["on"])
+        return x["on"]
+    best_key = max(ran, key=cmp_score)
+    best = cmp_score(best_key)
+    worst_row = min(ran, key=cmp_score)
+    worst = cmp_score(worst_row)
     print("\n" + "=" * 78)
     print("  models measured: %d" % len(ran))
-    print("  leader: %s at %d/%d (%.0f%%) -- HEADROOM %d tasks"
-          % (best_key["label"], best, N_TASKS, 100.0 * best / N_TASKS, N_TASKS - best))
+    print("  leader: %s at %d/%d (%.0f%%) -- HEADROOM %d tasks%s"
+          % (best_key["label"], best, N_TASKS, 100.0 * best / N_TASKS, N_TASKS - best,
+             "  [greedy-only; raw resampled score %d]" % best_key["on"]
+             if best_key.get("resampled") and best_key["on"] != best else ""))
     print("  SPREAD best to worst: %d tasks (%.0f%% of the suite)"
           % (best - worst, 100.0 * (best - worst) / N_TASKS))
     print("  for comparison, the b3 tier's leader scored 579/600 = 96.5%, and its")

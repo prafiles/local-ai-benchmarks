@@ -135,6 +135,56 @@
    "off_tokens": 38675,
    "off_capped": 0
   },
+  "q36moe": {
+   "label": "Qwen3.6 35B A3B",
+   "params": "35B MoE / 3B active",
+   "off": 48,
+   "on": 65,
+   "note": "",
+   "delta": 17,
+   "gained": 23,
+   "lost": 6,
+   "tokens": 704800,
+   "empty": 0,
+   "think_answer": 32.6,
+   "resampled": 1,
+   "on_greedy": 64,
+   "greedy_delta": 16,
+   "percat": {
+    "Python": {
+     "off": 12,
+     "n": 30,
+     "on": 18
+    },
+    "JS": {
+     "off": 9,
+     "n": 15,
+     "on": 7
+    },
+    "TS": {
+     "off": 0,
+     "n": 15,
+     "on": 4
+    },
+    "SQL": {
+     "off": 13,
+     "n": 20,
+     "on": 17
+    },
+    "Bash": {
+     "off": 9,
+     "n": 12,
+     "on": 12
+    },
+    "Git": {
+     "off": 5,
+     "n": 12,
+     "on": 7
+    }
+   },
+   "off_tokens": 48813,
+   "off_capped": 1
+  },
   "glm47": {
    "label": "GLM 4.7 Flash",
    "params": "MoE lite, 6-bit",
