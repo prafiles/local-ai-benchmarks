@@ -157,14 +157,21 @@ def run(model, out_path):
                     print("    WARNING: projected %.0fh for this arm -- %d/%d capped, "
                           "%d unanswered. Check for non-termination."
                           % (left, cap, n, mt), flush=True)
-                if left > SPIRAL_ABORT_H:
-                    raise RuntimeError(
-                        "ABORT: projected %.0fh exceeds B5_ABORT_HOURS=%.0f "
-                        "(capped %d/%d, unanswered %d). Fix sampling or budget."
-                        % (left, SPIRAL_ABORT_H, cap, n, mt))
+                # Save BEFORE aborting. The first version of this guard raised
+                # here and threw away three hours of Qwen3.8, because the write
+                # below never ran and the exception also escaped run()'s final
+                # save. An abort should cost the remaining time, not the work
+                # already done.
                 with open(out_path + ".tmp", "w") as f:
                     json.dump(res, f)
                 os.replace(out_path + ".tmp", out_path)
+                if left > SPIRAL_ABORT_H:
+                    raise RuntimeError(
+                        "ABORT: projected %.0fh exceeds B5_ABORT_HOURS=%.0f "
+                        "(capped %d/%d, unanswered %d). Fix sampling or budget. "
+                        "Partial arm saved to %s -- %d tasks."
+                        % (left, SPIRAL_ABORT_H, cap, n, mt, out_path,
+                           len(res["items"])))
 
     if todo:
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
