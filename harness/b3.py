@@ -304,9 +304,16 @@ def _once(model, prompt, max_tokens, temp=None):
     # vLLM 0.22 puts the chain of thought in `reasoning`, NOT `reasoning_content`;
     # `content` is left holding the final answer only, so graders need no change
     think = msg.get("reasoning") or msg.get("reasoning_content") or ""
+    # When a thinking model ends its turn with an empty `content`, two very
+    # different things look identical in the record: the model genuinely
+    # declined to answer, or it never closed its reasoning block so the parser
+    # left the answer sitting in `reasoning`. Keeping the tail of the trace is
+    # what tells them apart -- an answer stranded in the trace ends in code, a
+    # genuine non-answer ends mid-thought.
     return {"text": msg.get("content") or "",
             "tok": d["usage"]["completion_tokens"],
             "think_chars": len(think),
+            "think_tail": think[-400:],
             "finish": ch.get("finish_reason", ""),
             "secs": round(time.time() - t0, 2)}
 
@@ -328,7 +335,8 @@ def ask(model, prompt, max_tokens):
         # cannot be recovered afterwards and the confound can only be declared,
         # not measured. Costs almost nothing: a discarded attempt's text is "".
         tries.append({"temp": temp, "text": r["text"], "finish": r["finish"],
-                      "tok": r["tok"], "think_chars": r["think_chars"]})
+                      "tok": r["tok"], "think_chars": r["think_chars"],
+                      "think_tail": r.get("think_tail", "")})
         if r["text"].strip():
             break
     r["attempts"] = len(used)
