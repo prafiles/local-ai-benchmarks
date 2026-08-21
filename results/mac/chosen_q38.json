@@ -1,8 +1,11 @@
 {
- "model": "qwen/qwen3.8-27b",
- "sampling": {
-  "temperature": 0.0
- },
- "name": "t0/greedy",
- "why": "Measured on the 6 probes that spiral, 2 passes each, budget 8000 (hardtemp_q38.json): t0/greedy 10/12 for 35811 tok; t0.6/k20 10/12 for 38126; t0.8/k20 8/12 for 44489; t1.0/k64 7/12 for 52707. Greedy wins on BOTH reliability and cost, and the degradation is monotonic in temperature -- every step hotter answers the same or fewer probes and burns more tokens doing it. This directly contradicts the vendor recommendation: the model card specifies temperature=1.0, top_p=0.95, top_k=20 for thinking mode, and the nearest settings measured here (t0.8/k20 at 8/12, t1.0/k64 at 7/12) are the two worst of the four. That is the second time a Qwen vendor recommendation has lost to measurement on this suite -- on Qwen3.5-9B their suggested t0.6/k20 answered 4/12 where t1.0/k64 answered 10/12, in the opposite direction. The lesson is not 'vendor defaults run hot' or 'run cold', it is that the recommendation is not evidence about this workload either way.\n\nNote on what the 2 unanswered probes are: ts-001 failed 2/2 at EVERY setting, including both temperatures that answered 10/12. It is not a temperature-escapable spiral -- no sampling change reaches it -- so 10/12 is the ceiling here rather than a sign that a hotter draw would help.\n\nGreedy also matches the off arm exactly, so this model's off/on delta is a genuine single-variable measurement: the only thing that differs between its two arms is whether reasoning was suppressed. Same outcome and same reasoning as its predecessor qwen3.6-27b, reached independently by its own sweep rather than inherited."
+  "model": "qwen/qwen3.8-27b",
+  "name": "vendor thinking (t1.0/p0.95/k20)",
+  "sampling": {
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0
+  },
+  "why": "Replaces the greedy profile, which the vendor explicitly warns against for thinking mode: Qwen3's docs say DO NOT use greedy decoding, as it can lead to performance degradation and endless repetitions. That is precisely what greedy produced here -- the thinking arm burned the whole 32000-token budget on request after request, 28 minutes each, projecting six days for one model. Trace tails cut off mid-expression ('segment[2:2', 'dp[i][j] == dp[i-1') with the model still enumerating edge cases, so this is non-termination, not a stranded answer. Values are the model card's own thinking-mode recommendation: temperature=1.0, top_p=0.95, top_k=20, min_p=0.0, presence_penalty=0.0, repetition_penalty=1.0. MEASURED CAVEAT, recorded because it matters: this config does NOT rescue every task. hpy-002 still capped at 31999 tokens with no answer under it (28.7 min), and again under the vendor's own repetition remedy presence_penalty=1.0 (28.7 min). Those two probes were the suite's worst-behaved tasks, chosen deliberately, so they bound the bad case rather than describe the average. The arm is run with a wall-clock ceiling (B5_ABORT_HOURS) so a projection past a day stops the run instead of consuming the week. The earlier hardtemp pick of greedy (10/12 at budget 8000) was not wrong so much as measured at the wrong budget: a spiral truncated at 8000 tokens is indistinguishable from a cap, so tuning below the run's real budget cannot see non-termination at all."
 }

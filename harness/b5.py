@@ -138,9 +138,30 @@ def run(model, out_path):
             n = done[0]
             if n % 5 == 0 or n == len(todo):
                 el = time.time() - t0
-                print("  %d/%d  %.1fm elapsed, ~%.1fh left"
-                      % (len(res["items"]), len(tasks), el / 60,
-                         (el / n) * (len(todo) - n) / 3600), flush=True)
+                left = (el / n) * (len(todo) - n) / 3600
+                # A model that will not stop reasoning looks exactly like a slow
+                # model until you count how the generations ended. Qwen3.8's
+                # thinking arm burned the entire 32000-token budget on every
+                # request at greedy -- 28 minutes each, a projected six days --
+                # and the only visible symptom was a progress line that said
+                # "elapsed". Report the two numbers that name the cause, and
+                # refuse to spend days on a run whose projection is absurd.
+                cap = sum(1 for v in res["items"].values()
+                          if v.get("finish") == "length")
+                mt = sum(1 for v in res["items"].values()
+                         if not (v.get("text") or "").strip())
+                print("  %d/%d  %.1fm elapsed, ~%.1fh left  [capped %d, no-answer %d]"
+                      % (len(res["items"]), len(tasks), el / 60, left, cap, mt),
+                      flush=True)
+                if left > SPIRAL_WARN_H:
+                    print("    WARNING: projected %.0fh for this arm -- %d/%d capped, "
+                          "%d unanswered. Check for non-termination."
+                          % (left, cap, n, mt), flush=True)
+                if left > SPIRAL_ABORT_H:
+                    raise RuntimeError(
+                        "ABORT: projected %.0fh exceeds B5_ABORT_HOURS=%.0f "
+                        "(capped %d/%d, unanswered %d). Fix sampling or budget."
+                        % (left, SPIRAL_ABORT_H, cap, n, mt))
                 with open(out_path + ".tmp", "w") as f:
                     json.dump(res, f)
                 os.replace(out_path + ".tmp", out_path)
@@ -262,6 +283,11 @@ def grade_ts(items):
 # product terminates, but not before exhausting memory.
 SQL_DEADLINE = float(os.environ.get("B5_SQL_TIMEOUT", "15"))
 SQL_ROW_CAP = int(os.environ.get("B5_SQL_ROW_CAP", "100000"))
+# Wall-clock sanity on a whole arm. A reasoning arm legitimately runs ~10h here;
+# anything projecting past a day means the model is not terminating, not that it
+# is thoughtful.
+SPIRAL_WARN_H = float(os.environ.get("B5_WARN_HOURS", "20"))
+SPIRAL_ABORT_H = float(os.environ.get("B5_ABORT_HOURS", "40"))
 
 
 def _sql_run(con, sql):
