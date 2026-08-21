@@ -313,7 +313,7 @@ def _once(model, prompt, max_tokens, temp=None):
 
 def ask(model, prompt, max_tokens):
     """Resample -- hotter each time -- only when the trace left no answer."""
-    spent, used = 0.0, []
+    spent, used, tries = 0.0, [], []
     r = None
     for attempt in range(RETRIES + 1):
         # attempt 0 uses the profile's own temperature; retries climb ESCALATE
@@ -321,10 +321,19 @@ def ask(model, prompt, max_tokens):
         r = _once(model, prompt, max_tokens, temp)
         spent += r["secs"]
         used.append(temp)
+        # Keep every attempt, not just the one that answered. A resample runs
+        # HOTTER than the profile, so on a model that frequently returns a trace
+        # with no answer, the reported result is not the profile's decode -- and
+        # the arm it is compared against is. Without this the greedy-only score
+        # cannot be recovered afterwards and the confound can only be declared,
+        # not measured. Costs almost nothing: a discarded attempt's text is "".
+        tries.append({"temp": temp, "text": r["text"], "finish": r["finish"],
+                      "tok": r["tok"], "think_chars": r["think_chars"]})
         if r["text"].strip():
             break
     r["attempts"] = len(used)
     r["temps"] = used
+    r["tries"] = tries
     r["secs"] = round(spent, 2)
     return r
 
