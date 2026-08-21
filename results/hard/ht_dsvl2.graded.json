@@ -1,0 +1,630 @@
+{
+ "model": "deepseek-vl2",
+ "tier": "hard",
+ "results": {
+  "hpy-001": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 8.6,
+   "tok": 634
+  },
+  "hpy-002": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 77.43,
+   "tok": 4742
+  },
+  "hpy-003": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 2.76,
+   "tok": 189
+  },
+  "hpy-004": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 2.93,
+   "tok": 212
+  },
+  "hpy-005": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 10.68,
+   "tok": 786
+  },
+  "hpy-006": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 9.13,
+   "tok": 680
+  },
+  "hpy-007": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 3.83,
+   "tok": 278
+  },
+  "hpy-008": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 7.47,
+   "tok": 553
+  },
+  "hpy-009": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 40.13,
+   "tok": 2733
+  },
+  "hpy-010": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 4.29,
+   "tok": 315
+  },
+  "hpy-011": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 4.25,
+   "tok": 310
+  },
+  "hpy-012": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 15.84,
+   "tok": 1138
+  },
+  "hpy-013": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 43.03,
+   "tok": 2879
+  },
+  "hpy-014": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 8.84,
+   "tok": 650
+  },
+  "hpy-015": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 4.64,
+   "tok": 342
+  },
+  "hpy-016": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 17.63,
+   "tok": 1271
+  },
+  "hpy-017": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 6.49,
+   "tok": 477
+  },
+  "hpy-018": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 27.44,
+   "tok": 1929
+  },
+  "hpy-019": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 7.47,
+   "tok": 550
+  },
+  "hpy-020": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 6.9,
+   "tok": 507
+  },
+  "hpy-021": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 82.76,
+   "tok": 4999
+  },
+  "hpy-022": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 3.69,
+   "tok": 271
+  },
+  "hpy-023": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 8.54,
+   "tok": 644
+  },
+  "hpy-024": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 8.82,
+   "tok": 655
+  },
+  "hpy-025": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 6.16,
+   "tok": 464
+  },
+  "hpy-026": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 10.77,
+   "tok": 811
+  },
+  "hpy-027": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 10.43,
+   "tok": 781
+  },
+  "hpy-028": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 7.91,
+   "tok": 591
+  },
+  "hpy-029": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 5.03,
+   "tok": 376
+  },
+  "hpy-030": {
+   "ok": false,
+   "cat": "Python",
+   "secs": 6.64,
+   "tok": 492
+  },
+  "hjs-001": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 12.78,
+   "tok": 960
+  },
+  "hjs-002": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 7.36,
+   "tok": 560
+  },
+  "hjs-003": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 81.91,
+   "tok": 4999
+  },
+  "hjs-004": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 81.83,
+   "tok": 4999
+  },
+  "hjs-005": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 5.43,
+   "tok": 410
+  },
+  "hjs-006": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 5.44,
+   "tok": 405
+  },
+  "hjs-007": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 7.86,
+   "tok": 585
+  },
+  "hjs-008": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 5.52,
+   "tok": 412
+  },
+  "hjs-009": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 10.35,
+   "tok": 785
+  },
+  "hjs-010": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 12.92,
+   "tok": 976
+  },
+  "hjs-011": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 8.36,
+   "tok": 634
+  },
+  "hjs-012": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 19.24,
+   "tok": 1419
+  },
+  "hjs-013": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 82.29,
+   "tok": 4999
+  },
+  "hjs-014": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 10.41,
+   "tok": 793
+  },
+  "hjs-015": {
+   "ok": false,
+   "cat": "JS",
+   "secs": 8.0,
+   "tok": 598
+  },
+  "hts-001": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 12.22,
+   "tok": 917
+  },
+  "hts-002": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 64.13,
+   "tok": 4110
+  },
+  "hts-003": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 8.74,
+   "tok": 660
+  },
+  "hts-004": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 6.3,
+   "tok": 480
+  },
+  "hts-005": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 5.12,
+   "tok": 380
+  },
+  "hts-006": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 66.11,
+   "tok": 4193
+  },
+  "hts-007": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 5.16,
+   "tok": 385
+  },
+  "hts-008": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 81.81,
+   "tok": 4999
+  },
+  "hts-009": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 11.56,
+   "tok": 873
+  },
+  "hts-010": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 26.74,
+   "tok": 1918
+  },
+  "hts-011": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 4.5,
+   "tok": 337
+  },
+  "hts-012": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 81.69,
+   "tok": 4999
+  },
+  "hts-013": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 5.41,
+   "tok": 409
+  },
+  "hts-014": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 14.76,
+   "tok": 1103
+  },
+  "hts-015": {
+   "ok": false,
+   "cat": "TS",
+   "secs": 5.47,
+   "tok": 413
+  },
+  "hsql-001": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 12.78,
+   "tok": 759
+  },
+  "hsql-002": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 4.36,
+   "tok": 285
+  },
+  "hsql-003": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 20.05,
+   "tok": 1312
+  },
+  "hsql-004": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 5.67,
+   "tok": 372
+  },
+  "hsql-005": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 6.63,
+   "tok": 442
+  },
+  "hsql-006": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 5.4,
+   "tok": 356
+  },
+  "hsql-007": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 23.05,
+   "tok": 1499
+  },
+  "hsql-008": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 23.08,
+   "tok": 1499
+  },
+  "hsql-009": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 13.09,
+   "tok": 868
+  },
+  "hsql-010": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 12.23,
+   "tok": 811
+  },
+  "hsql-011": {
+   "ok": true,
+   "cat": "SQL",
+   "secs": 3.57,
+   "tok": 231
+  },
+  "hsql-012": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 4.05,
+   "tok": 262
+  },
+  "hsql-013": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 23.2,
+   "tok": 1499
+  },
+  "hsql-014": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 11.78,
+   "tok": 782
+  },
+  "hsql-015": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 23.18,
+   "tok": 1499
+  },
+  "hsql-016": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 7.95,
+   "tok": 529
+  },
+  "hsql-017": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 23.1,
+   "tok": 1499
+  },
+  "hsql-018": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 23.18,
+   "tok": 1499
+  },
+  "hsql-019": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 15.73,
+   "tok": 1037
+  },
+  "hsql-020": {
+   "ok": false,
+   "cat": "SQL",
+   "secs": 8.62,
+   "tok": 576
+  },
+  "hsh-001": {
+   "ok": false,
+   "cat": "Bash",
+   "secs": 3.86,
+   "tok": 289
+  },
+  "hsh-002": {
+   "ok": false,
+   "cat": "Bash",
+   "secs": 3.58,
+   "tok": 269
+  },
+  "hsh-003": {
+   "ok": false,
+   "cat": "Bash",
+   "secs": 4.92,
+   "tok": 377
+  },
+  "hsh-004": {
+   "ok": false,
+   "cat": "Bash",
+   "secs": 2.13,
+   "tok": 149
+  },
+  "hsh-005": {
+   "ok": false,
+   "cat": "Bash",
+   "secs": 4.28,
+   "tok": 326
+  },
+  "hsh-006": {
+   "ok": false,
+   "cat": "Bash",
+   "secs": 9.43,
+   "tok": 725
+  },
+  "hsh-007": {
+   "ok": false,
+   "cat": "Bash",
+   "secs": 10.42,
+   "tok": 799
+  },
+  "hsh-008": {
+   "ok": false,
+   "cat": "Bash",
+   "secs": 10.43,
+   "tok": 799
+  },
+  "hsh-009": {
+   "ok": false,
+   "cat": "Bash",
+   "secs": 4.03,
+   "tok": 306
+  },
+  "hsh-010": {
+   "ok": false,
+   "cat": "Bash",
+   "secs": 7.86,
+   "tok": 609
+  },
+  "hsh-011": {
+   "ok": false,
+   "cat": "Bash",
+   "secs": 5.49,
+   "tok": 380
+  },
+  "hsh-012": {
+   "ok": false,
+   "cat": "Bash",
+   "secs": 2.18,
+   "tok": 157
+  },
+  "hgit-001": {
+   "ok": false,
+   "cat": "Git",
+   "secs": 5.01,
+   "tok": 387
+  },
+  "hgit-002": {
+   "ok": false,
+   "cat": "Git",
+   "secs": 4.11,
+   "tok": 315
+  },
+  "hgit-003": {
+   "ok": false,
+   "cat": "Git",
+   "secs": 3.92,
+   "tok": 299
+  },
+  "hgit-004": {
+   "ok": false,
+   "cat": "Git",
+   "secs": 3.72,
+   "tok": 283
+  },
+  "hgit-005": {
+   "ok": false,
+   "cat": "Git",
+   "secs": 2.68,
+   "tok": 200
+  },
+  "hgit-006": {
+   "ok": false,
+   "cat": "Git",
+   "secs": 6.03,
+   "tok": 463
+  },
+  "hgit-007": {
+   "ok": false,
+   "cat": "Git",
+   "secs": 3.76,
+   "tok": 285
+  },
+  "hgit-008": {
+   "ok": false,
+   "cat": "Git",
+   "secs": 7.13,
+   "tok": 553
+  },
+  "hgit-009": {
+   "ok": false,
+   "cat": "Git",
+   "secs": 3.0,
+   "tok": 224
+  },
+  "hgit-010": {
+   "ok": false,
+   "cat": "Git",
+   "secs": 13.15,
+   "tok": 999
+  },
+  "hgit-011": {
+   "ok": false,
+   "cat": "Git",
+   "secs": 5.65,
+   "tok": 434
+  },
+  "hgit-012": {
+   "ok": false,
+   "cat": "Git",
+   "secs": 5.01,
+   "tok": 386
+  }
+ }
+}
