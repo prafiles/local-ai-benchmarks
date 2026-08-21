@@ -63,8 +63,24 @@ for key, label, params, note in MODELS:
     on_g = load("ht_%s.graded.json" % key)
     on_raw = load("ht_%s.json" % key)
     off_raw = load("hb_%s.json" % key)
-    if not off_g:
+    # An aborted arm leaves a short graded file behind, and a short file scores
+    # like a catastrophe: GLM's 5-task partial graded 2/104, which read as a
+    # collapse under reasoning rather than a run that stopped early. A score is
+    # only a score when every task ran.
+    def complete(g, what):
+        if not g:
+            return False
+        n = len(g.get("results", {}))
+        if n < N_TASKS:
+            print("  %-24s %s arm PARTIAL (%d/%d tasks) -- not scored"
+                  % (label, what, n, N_TASKS))
+            return False
+        return True
+
+    if not complete(off_g, "off"):
         continue
+    if not complete(on_g, "on"):
+        on_g = None
     offs, cats = scores(off_g)
     off_total = sum(offs.values())
     d = {"label": label, "params": params, "off": off_total, "on": None, "note": note}
@@ -81,6 +97,17 @@ for key, label, params, note in MODELS:
         think = sum(v.get("think_chars", 0) for v in items.values())
         answer = sum(len(v.get("text") or "") for v in items.values())
         d["think_answer"] = round(think / max(answer, 1), 1)
+        # ask() resamples HOTTER than the profile when a trace leaves no answer,
+        # so on a model that often returns no answer the reported score is not
+        # the profile's decode while the off arm it is compared against is.
+        # Gemma scores 82 that way and 52 on its own greedy profile -- one is a
+        # tier lead, the other is two tasks WORSE than not thinking. Report both,
+        # because only the second is a single-variable comparison.
+        d["resampled"] = sum(1 for v in items.values() if v.get("attempts", 1) > 1)
+        if items:
+            d["on_greedy"] = sum(1 for i, ok in ons.items()
+                                 if ok and items.get(i, {}).get("attempts", 1) == 1)
+            d["greedy_delta"] = d["on_greedy"] - d["off"]
 
     d["percat"] = {}
     for c in CATS:
@@ -109,6 +136,10 @@ for key, label, params, note in MODELS:
         print("     on arm: flips +%d / -%d | %s tokens | think:answer %.1fx | empty %d"
               % (d["gained"], d["lost"], format(d["tokens"], ","),
                  d["think_answer"], d["empty"]))
+        if d.get("resampled"):
+            print("     CONFOUND: %d/%d answers came from a HOTTER resample, not the "
+                  "profile. Greedy-only: %d/%d (%+d vs off) -- the single-variable number."
+                  % (d["resampled"], N_TASKS, d["on_greedy"], N_TASKS, d["greedy_delta"]))
 
 ran = list(out["hard"].values())
 if ran:

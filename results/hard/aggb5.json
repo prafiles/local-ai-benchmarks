@@ -3,36 +3,51 @@
   "gemma26": {
    "label": "Gemma 4 26B A4B QAT",
    "params": "26B MoE / 4B active",
-   "off": 53,
-   "on": null,
+   "off": 54,
+   "on": 82,
    "note": "",
+   "delta": 28,
+   "gained": 29,
+   "lost": 1,
+   "tokens": 629340,
+   "empty": 0,
+   "think_answer": 24.6,
+   "resampled": 47,
+   "on_greedy": 52,
+   "greedy_delta": -2,
    "percat": {
     "Python": {
-     "off": 16,
-     "n": 30
+     "off": 17,
+     "n": 30,
+     "on": 23
     },
     "JS": {
      "off": 5,
-     "n": 15
+     "n": 15,
+     "on": 14
     },
     "TS": {
      "off": 3,
-     "n": 15
+     "n": 15,
+     "on": 8
     },
     "SQL": {
      "off": 16,
-     "n": 20
+     "n": 20,
+     "on": 18
     },
     "Bash": {
      "off": 9,
-     "n": 12
+     "n": 12,
+     "on": 12
     },
     "Git": {
      "off": 4,
-     "n": 12
+     "n": 12,
+     "on": 7
     }
    },
-   "off_tokens": 65917,
+   "off_tokens": 67475,
    "off_capped": 6
   },
   "q38": {
@@ -74,71 +89,51 @@
    "label": "Qwen3.6 27B",
    "params": "27B dense",
    "off": 62,
-   "on": null,
+   "on": 75,
    "note": "",
+   "delta": 13,
+   "gained": 19,
+   "lost": 6,
+   "tokens": 624358,
+   "empty": 0,
+   "think_answer": 28.7,
+   "resampled": 1,
+   "on_greedy": 75,
+   "greedy_delta": 13,
    "percat": {
     "Python": {
      "off": 17,
-     "n": 30
+     "n": 30,
+     "on": 21
     },
     "JS": {
      "off": 7,
-     "n": 15
+     "n": 15,
+     "on": 12
     },
     "TS": {
      "off": 5,
-     "n": 15
+     "n": 15,
+     "on": 5
     },
     "SQL": {
      "off": 15,
-     "n": 20
+     "n": 20,
+     "on": 19
     },
     "Bash": {
      "off": 10,
-     "n": 12
+     "n": 12,
+     "on": 11
     },
     "Git": {
      "off": 8,
-     "n": 12
+     "n": 12,
+     "on": 7
     }
    },
    "off_tokens": 38675,
    "off_capped": 0
-  },
-  "q36moe": {
-   "label": "Qwen3.6 35B A3B",
-   "params": "35B MoE / 3B active",
-   "off": 48,
-   "on": null,
-   "note": "",
-   "percat": {
-    "Python": {
-     "off": 12,
-     "n": 30
-    },
-    "JS": {
-     "off": 9,
-     "n": 15
-    },
-    "TS": {
-     "off": 0,
-     "n": 15
-    },
-    "SQL": {
-     "off": 13,
-     "n": 20
-    },
-    "Bash": {
-     "off": 9,
-     "n": 12
-    },
-    "Git": {
-     "off": 5,
-     "n": 12
-    }
-   },
-   "off_tokens": 48813,
-   "off_capped": 1
   },
   "glm47": {
    "label": "GLM 4.7 Flash",
@@ -174,76 +169,6 @@
    },
    "off_tokens": 33230,
    "off_capped": 3
-  },
-  "qcn": {
-   "label": "Qwen3-Coder-Next",
-   "params": "80B MoE / 3B active",
-   "off": 53,
-   "on": null,
-   "note": "",
-   "percat": {
-    "Python": {
-     "off": 14,
-     "n": 30
-    },
-    "JS": {
-     "off": 6,
-     "n": 15
-    },
-    "TS": {
-     "off": 3,
-     "n": 15
-    },
-    "SQL": {
-     "off": 14,
-     "n": 20
-    },
-    "Bash": {
-     "off": 10,
-     "n": 12
-    },
-    "Git": {
-     "off": 6,
-     "n": 12
-    }
-   },
-   "off_tokens": 30825,
-   "off_capped": 0
-  },
-  "dsvl2": {
-   "label": "DeepSeek VL2",
-   "params": "27B MoE / 4B active, vision-language",
-   "off": 1,
-   "on": null,
-   "note": "raw /v1/completions, broken chat template",
-   "percat": {
-    "Python": {
-     "off": 0,
-     "n": 30
-    },
-    "JS": {
-     "off": 0,
-     "n": 15
-    },
-    "TS": {
-     "off": 0,
-     "n": 15
-    },
-    "SQL": {
-     "off": 0,
-     "n": 20
-    },
-    "Bash": {
-     "off": 1,
-     "n": 12
-    },
-    "Git": {
-     "off": 0,
-     "n": 12
-    }
-   },
-   "off_tokens": 50820,
-   "off_capped": 4
   }
  },
  "meta": {
