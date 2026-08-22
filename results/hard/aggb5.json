@@ -183,42 +183,66 @@
     }
    },
    "off_tokens": 48813,
-   "off_capped": 1
+   "off_capped": 1,
+   "on_sampling": {
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 64
+   }
   },
   "glm47": {
    "label": "GLM 4.7 Flash",
    "params": "MoE lite, 6-bit",
    "off": 35,
-   "on": null,
+   "on": 47,
    "note": "",
+   "delta": 12,
+   "gained": 20,
+   "lost": 8,
+   "tokens": 869768,
+   "empty": 8,
+   "think_answer": 43.9,
+   "resampled": 0,
+   "on_greedy": 47,
+   "greedy_delta": 12,
    "percat": {
     "Python": {
      "off": 10,
-     "n": 30
+     "n": 30,
+     "on": 14
     },
     "JS": {
      "off": 3,
-     "n": 15
+     "n": 15,
+     "on": 4
     },
     "TS": {
      "off": 3,
-     "n": 15
+     "n": 15,
+     "on": 1
     },
     "SQL": {
      "off": 9,
-     "n": 20
+     "n": 20,
+     "on": 14
     },
     "Bash": {
      "off": 5,
-     "n": 12
+     "n": 12,
+     "on": 9
     },
     "Git": {
      "off": 5,
-     "n": 12
+     "n": 12,
+     "on": 5
     }
    },
    "off_tokens": 33230,
-   "off_capped": 3
+   "off_capped": 3,
+   "on_sampling": {
+    "temperature": 1.0,
+    "top_p": 0.95
+   }
   },
   "qcn": {
    "label": "Qwen3-Coder-Next",

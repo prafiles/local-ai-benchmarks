@@ -136,10 +136,31 @@ for key, label, params, note in MODELS:
         print("     on arm: flips +%d / -%d | %s tokens | think:answer %.1fx | empty %d"
               % (d["gained"], d["lost"], format(d["tokens"], ","),
                  d["think_answer"], d["empty"]))
+        # The other way an arm stops being single-variable: its profile is not
+        # the greedy the off arm always uses. Every off arm runs B4_PROFILES='{}'
+        # -> temperature 0, so a thinking arm with any other sampling differs
+        # from it in two ways at once. Qwen3.6-MoE (t1.0/p0.95/k64) and GLM
+        # (t1.0/p0.95) both do, and neither was visibly flagged before.
+        chosen = os.path.join(os.environ.get("B4_CHOSEN_DIR", ""),
+                              "chosen_%s.json" % key)
+        try:
+            samp = json.load(open(chosen)).get("sampling", {})
+        except Exception:  # noqa: BLE001
+            samp = None
+        if samp is not None and samp != {"temperature": 0.0}:
+            d["on_sampling"] = samp
+            print("     CONFOUND: on arm sampled at %s, off arm at greedy -- the arms "
+                  "differ in sampling as well as reasoning." % samp)
         if d.get("resampled"):
+            # "greedy-only" is the wrong word when the profile is not greedy --
+            # Qwen3.6-MoE runs t1.0/p0.95/k64, so its first-attempt score is
+            # profile-only, not greedy-only. Say which one it actually is.
+            word = ("greedy-only" if samp == {"temperature": 0.0}
+                    else "profile-only")
             print("     CONFOUND: %d/%d answers came from a HOTTER resample, not the "
-                  "profile. Greedy-only: %d/%d (%+d vs off) -- the single-variable number."
-                  % (d["resampled"], N_TASKS, d["on_greedy"], N_TASKS, d["greedy_delta"]))
+                  "profile. %s: %d/%d (%+d vs off) -- the resample-free number."
+                  % (d["resampled"], N_TASKS, word.capitalize(), d["on_greedy"],
+                     N_TASKS, d["greedy_delta"]))
 
 ran = list(out["hard"].values())
 if ran:
