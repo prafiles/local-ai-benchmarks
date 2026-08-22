@@ -1,0 +1,8 @@
+{
+  "model": "voves/Mellum2-12B-A2.5B-Instruct-FP8",
+  "name": "t0/greedy",
+  "sampling": {
+    "temperature": 0.0
+  },
+  "why": "Prompted-CoT arm. Greedy, matching this model own off arm, so the two arms differ only in the prompt -- the single-variable comparison that the native-thinking arms on this node cannot offer, since Qwen3.5 greedy does not terminate and Gemma 4 is tuned to t0.6/k20. Same treatment as Qwen3-Coder-Next and DeepSeek VL2 on the Mac node."
+}

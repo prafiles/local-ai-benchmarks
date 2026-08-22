@@ -1,0 +1,8 @@
+{
+  "model": "google/gemma-4-12B-it-qat-w4a16-ct",
+  "name": "t0/greedy",
+  "sampling": {
+    "temperature": 0.0
+  },
+  "why": "Greedy thinking arm, to sit beside the t0.6/k20 one. Every off arm in this suite runs greedy, so a thinking arm at t0.6/k20 differs from its own off arm in sampling as well as reasoning -- the same confound that affects Qwen3.6-MoE and GLM on the Mac node. If greedy terminates here it gives the clean single-variable number; if it does not, that is itself the finding, and the runtime ceiling bounds the cost."
+}
