@@ -113,6 +113,9 @@ THINK_CAPABLE += tuple(x.strip().lower() for x in
 # MLX engine) and where the model thinks by default -- there the ON arm sends
 # nothing and the OFF arm is the one carrying the flag.
 OFF_MECH = os.environ.get("B4_OFF_MECH", "template")
+# Explicit reasoning effort for the ON arm. Empty means "send nothing", which is
+# the model's default -- fine unless that default is the maximum setting.
+THINK_EFFORT = os.environ.get("B4_THINK_EFFORT", "")
 
 # --------------------------------------------------------------- CoT arm
 # For models with no reasoning mode of their own. Asking in the prompt is not the
@@ -226,6 +229,15 @@ def sampling(payload, model):
             # on the ON arm is deliberate: it is the model's own default mode.
             if not THINK:
                 payload["reasoning_effort"] = "none"
+            elif THINK_EFFORT:
+                # Sending nothing on the ON arm means "the model's own default",
+                # which is right for a model whose default is ordinary thinking
+                # and WRONG for one shipping a graduated scale. Qwen3.8 defaults
+                # to xhigh, so the arm silently ran at maximum effort and burned
+                # the whole 32000-token budget without answering -- 28 minutes a
+                # request, a projected 79h. At reasoning_effort=medium the same
+                # task finishes in 10137 tokens with a real answer, at greedy.
+                payload["reasoning_effort"] = THINK_EFFORT
         else:
             # explicit either way: the flag is what separates the two arms
             tmpl = {"enable_thinking": bool(THINK)}

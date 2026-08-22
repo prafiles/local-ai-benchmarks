@@ -1,0 +1,8 @@
+{
+  "model": "google/gemma-4-26b-a4b",
+  "name": "t0/greedy",
+  "sampling": {
+    "temperature": 0.0
+  },
+  "why": "GGUF build of Gemma 4 26B A4B, run because the MLX build's thinking arm is broken by a known open engine bug: lmstudio-ai/mlx-engine#337, 'Gemma 4 (26B-A4B) reasoning never terminates on MLX -- fills max_tokens with reasoning_content, empty content (GGUF terminates fine)'. That is exactly what was measured here: the MLX thinking arm returned no answer on 47 of 104 tasks, every one rescued by a resample at temperature 1.0, which left the arm non-comparable to its own greedy off arm -- 82/104 raw against 52/104 on the profile, where 52 is two tasks WORSE than not thinking at all. Greedy for both arms, so this run differs from its own off arm in reasoning alone. NOT a clean engine A/B against the MLX numbers: this build is Q4_K_M while the MLX one is 4-bit QAT, so quantisation moves along with the engine. It is the upstream-documented workaround and a self-contained comparison, not an isolation of the engine variable."
+}
