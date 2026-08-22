@@ -1,0 +1,8 @@
+{
+  "model": "qwen/qwen3.8-27b",
+  "name": "t0/greedy + reasoning_effort=medium",
+  "sampling": {
+    "temperature": 0.0
+  },
+  "why": "Thinking arm at the model's MEDIUM reasoning effort rather than its default. Qwen3.8 ships a low/medium/xhigh scale and defaults to xhigh, and the harness sent nothing on the on arm -- so the arm silently ran at maximum effort, burned the full 32000-token budget on request after request without answering, and was written off at a projected 79 hours. Measured on hpy-002, the task that defeated greedy, t1.0, t1.15, the vendor's t1.0/p0.95/k20 and the vendor's presence_penalty remedy -- every one capping at 31999 tokens with no answer: at reasoning_effort=medium it finishes in 10137 tokens with a 2122-character answer, in 8.5 minutes. Greedy, so this pairs directly against the existing hb_q38.json off arm (58/104, also greedy, same MLX build) and the two arms differ in REASONING ALONE. That is the single-variable comparison only Qwen3.6-27B otherwise has in this tier."
+}
