@@ -60,24 +60,52 @@ model.
 
 | | b3 | hard tier |
 |---|---|---|
-| Python | 900 | **3000** |
-| JS / TS | 800 | **3000** |
-| SQL | 400 | **1200** |
-| Bash / Git | 220 | **700** |
+| Python | 900 | **5000** |
+| JS / TS | 800 | **5000** |
+| SQL | 400 | **1500** |
+| Bash | 220 | **800** |
+| Git | 220 | **1000** |
 | reasoning floor | 8000 | **32000** |
 | request timeout | 1800s | **5400s** |
 
-Two pieces of evidence drove this. Qwen3.8-27B spent its entire 8000-token
-reasoning budget on 24 of the 600 b3 tasks and returned no answer at all; on the
-576 it did answer it scored 535 → 556, so those 24 were a budget artefact rather
-than a capability result. And the hard tasks are simply longer — a streaming RFC
-4180 parser or a recursive template-literal type does not fit in 900 tokens even
-written perfectly. The grader now records how many answers hit the cap
-(`off_capped`), so a future budget being too small is visible rather than
-inferred.
+The per-task numbers are justified: the hard tasks are simply longer, and a
+streaming RFC 4180 parser or a recursive template-literal type does not fit in
+900 tokens even written perfectly. The grader records how many answers hit the
+cap, so a budget that is too small is visible rather than inferred.
 
-The cost is real: roughly 4× the wall clock per reasoning task. That is
-affordable only because the tier is 104 tasks rather than 600.
+**The reasoning floor of 32000 was justified on a premise that turned out to be
+false, and this is worth stating plainly because it shaped the tier.** The
+original argument was that Qwen3.8-27B spent its whole 8000-token reasoning
+budget on 24 of the 600 b3 tasks and returned no answer, so those 24 were a
+budget artefact rather than a capability result. Four times the budget disproves
+it. At 32000 the same model still does not answer — it deliberates four times
+longer and is cut off in the same state, mid-expression, still enumerating edge
+cases. Its thinking arm projected 79 hours and was stopped at a runtime ceiling.
+The extra budget did not convert non-answers into answers; it made each
+non-answer four times more expensive.
+
+**The floor is also not applied evenly.** `b3.budget()` raises the per-task
+budget to the floor only when `B4_THINK=1`, so a model with a trained thinking
+mode gets 32000 on a Bash task while a model reasoning by prompt gets 800 on the
+same task — a 40x difference. A prompted chain of thought is emitted as part of
+the answer and consumes the same allowance, so the CoT arm is measurably
+starved: DeepSeek VL2 truncated 15 answers against 4 on its own off arm, with 6
+of 20 SQL answers cut off inside a 1500-token budget, and its median answer grew
+940 -> 2327 characters. Qwen3-Coder-Next lost exactly one task this way. Any
+CoT-vs-native comparison here is biased against CoT, and should say so.
+
+**A budget also cannot be tuned below the budget it will be used at.** The
+sampling profiles were measured by `hardtemp.py` at budget 8000, where a
+generation that would never terminate is truncated into something
+indistinguishable from a legitimate cap. Two models — Qwen3.8-27B and GLM 4.7
+Flash — were assigned greedy thinking profiles on that evidence, and both
+vendors explicitly recommend against greedy for thinking mode. Both arms then
+failed to terminate at 32000. Tune at the budget the run will use, or the tuner
+cannot see the failure it most needs to see.
+
+The cost is real: roughly 4x the wall clock per reasoning task. That is
+affordable only because the tier is 104 tasks rather than 600 — and for two of
+the seven models it was not affordable at all.
 
 ## Validation
 
