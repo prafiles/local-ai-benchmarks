@@ -100,7 +100,12 @@ if [ "$ARMS" = "on" ] || [ "$ARMS" = "both" ]; then
     echo "---- $KEY on arm (prompted CoT -- no native thinking mode) @ window $WIN"
     ARM_ENV="B4_THINK=0 B4_COT=1"
   fi
-  env $ARM_ENV B4_BUDGET="$THINK_BUDGET" B4_BUDGET_MULT=1 B4_RETRIES=2 \
+  # Retries are per-model, not a constant. One resample of a non-terminating
+  # task costs a full budget of generation, so on a model that will not stop,
+  # RETRIES=2 triples the arm. It was hardcoded here, which silently overrode
+  # the caller and made a "0 retries" re-run of GLM run 3 attempts anyway.
+  env $ARM_ENV B4_BUDGET="$THINK_BUDGET" B4_BUDGET_MULT=1 \
+    B4_RETRIES="${B4_RETRIES:-2}" \
     B4_ESCALATE="${B4_ESCALATE:-1.0,1.15}" B4_PROFILES="$PROF" \
     python3 -u b5.py run "$MODEL" "$OUT/ht_$KEY.json" || exit 1
 fi
