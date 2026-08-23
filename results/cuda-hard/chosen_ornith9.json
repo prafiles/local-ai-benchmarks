@@ -1,0 +1,12 @@
+{
+  "model": "ornith-9b",
+  "name": "t0.6/p0.95/k20 (Ornith coding profile)",
+  "sampling": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 0.0
+  },
+  "why": "Ornith-1.5 recommended sampling for PRECISE CODING tasks, which is what this tier is: temperature=0.6, top_p=0.95, top_k=20, min_p=0.0, presence_penalty=0.0. The general-task profile the card also lists (t=1.0, presence_penalty=1.5) is for open-ended use. GREEDY IS EXPLICITLY UNSAFE HERE and is not used: the vendor guide warns that 'the repository ships no default sampling, so the engine falls back to its own defaults, and near-greedy settings make the model repeat itself', and that in thinking mode 'the model loops or repeats itself'. That is the same non-termination that cost this project days on Qwen3.8 and GLM -- documented up front this time, so it is designed around rather than discovered. THINKING ARM ONLY. Ornith-1.5 is a thinking-only model: the assistant turn opens with a <think> block by default and neither model card documents any way to disable it, so there is no off arm to compare against. The score therefore stands alone rather than as a delta. Reasoning budget is raised from the tier's 32000 to 65536 because these are high-reasoning models, with the window raised to 73728 to hold it. 9B dense, served by vLLM at FP8. BF16 is 17.9 GB against a 16 GB card, and FP8 weight quantisation lands near 9 GB while staying closer to the reference than any GGUF quant that would fit."
+}

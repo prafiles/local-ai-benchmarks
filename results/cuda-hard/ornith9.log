@@ -1,0 +1,71 @@
+waiting for the model download...
+download: exit=0 shards=4/4 incomplete=0
+ Container gemma4-vllm Stopping 
+ Container gemma4-vllm Stopped 
+ Container gemma4-vllm Removing 
+ Container gemma4-vllm Removed 
+ Network gemma4-vllm-aio_default Removing 
+ Network gemma4-vllm-aio_default Removed 
+(EngineCore pid=111) INFO 08-23 07:25:28 [kv_cache_utils.py:1733] GPU KV cache size: 100,997 tokens
+(EngineCore pid=111) INFO 08-23 07:25:28 [kv_cache_utils.py:1734] Maximum concurrency for 73,728 tokens per request: 1.37x
+ornith-9b -> {'temperature': 0.6, 'top_p': 0.95, 'top_k': 20, 'min_p': 0.0, 'presence_penalty': 0.0}
+            Ornith-1.5 recommended sampling for PRECISE CODING tasks, which is what this tier is: temperature=0.6, top_p=0.95, top_k=20, min_p=0.0, presence_penalty=0.0. The general-task profile the card also lists (t=1.0, presence_penalty=1.5) is for open-ended use. GREEDY IS EXPLICITLY UNSAFE HERE and is not used: the vendor guide warns that 'the repository ships no default sampling, so the engine falls back to its own defaults, and near-greedy settings make the model repeat itself', and that in thinking mode 'the model loops or repeats itself'. That is the same non-termination that cost this project days on Qwen3.8 and GLM -- documented up front this time, so it is designed around rather than discovered. THINKING ARM ONLY. Ornith-1.5 is a thinking-only model: the assistant turn opens with a <think> block by default and neither model card documents any way to disable it, so there is no off arm to compare against. The score therefore stands alone rather than as a delta. Reasoning budget is raised from the tier's 32000 to 65536 because these are high-reasoning models, with the window raised to 73728 to hold it. 9B dense, served by vLLM at FP8. BF16 is 17.9 GB against a 16 GB card, and FP8 weight quantisation lands near 9 GB while staying closer to the reference than any GGUF quant that would fit.
+---- ornith9 THINKING arm (budget 65536) @ window 73728, 4 workers
+  104 to run, 4 concurrent
+  5/104  8.3m elapsed, ~2.8h left  [capped 0, no-answer 0]
+  10/104  75.8m elapsed, ~11.9h left  [capped 2, no-answer 2]
+    WARNING: projected 12h for this arm -- 2/10 capped, 2 unanswered. Check for non-termination.
+  15/104  145.1m elapsed, ~14.3h left  [capped 5, no-answer 5]
+    WARNING: projected 14h for this arm -- 5/15 capped, 5 unanswered. Check for non-termination.
+  20/104  186.7m elapsed, ~13.1h left  [capped 7, no-answer 7]
+    WARNING: projected 13h for this arm -- 7/20 capped, 7 unanswered. Check for non-termination.
+  25/104  234.8m elapsed, ~12.4h left  [capped 9, no-answer 9]
+    WARNING: projected 12h for this arm -- 9/25 capped, 9 unanswered. Check for non-termination.
+  30/104  309.4m elapsed, ~12.7h left  [capped 12, no-answer 12]
+    WARNING: projected 13h for this arm -- 12/30 capped, 12 unanswered. Check for non-termination.
+  35/104  341.6m elapsed, ~11.2h left  [capped 13, no-answer 13]
+    WARNING: projected 11h for this arm -- 13/35 capped, 13 unanswered. Check for non-termination.
+  40/104  379.7m elapsed, ~10.1h left  [capped 14, no-answer 14]
+    WARNING: projected 10h for this arm -- 14/40 capped, 14 unanswered. Check for non-termination.
+  45/104  430.5m elapsed, ~9.4h left  [capped 15, no-answer 15]
+  50/104  526.8m elapsed, ~9.5h left  [capped 19, no-answer 19]
+  55/104  581.1m elapsed, ~8.6h left  [capped 21, no-answer 21]
+  60/104  632.7m elapsed, ~7.7h left  [capped 23, no-answer 23]
+  65/104  635.3m elapsed, ~6.4h left  [capped 23, no-answer 23]
+  70/104  637.7m elapsed, ~5.2h left  [capped 23, no-answer 23]
+  75/104  643.1m elapsed, ~4.1h left  [capped 23, no-answer 23]
+  80/104  662.7m elapsed, ~3.3h left  [capped 24, no-answer 24]
+  85/104  670.4m elapsed, ~2.5h left  [capped 24, no-answer 24]
+  90/104  688.6m elapsed, ~1.8h left  [capped 25, no-answer 25]
+  95/104  690.9m elapsed, ~1.1h left  [capped 25, no-answer 25]
+  100/104  692.8m elapsed, ~0.5h left  [capped 25, no-answer 25]
+  104/104  733.7m elapsed, ~0.0h left  [capped 26, no-answer 26]
+saved -> /root/b5out/ht_ornith9.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== ornith-9b  (hard tier)
+  Bash            8/12
+  Git             6/12
+  JS              3/15
+  Python          9/30
+  SQL            11/20
+  TS              2/15
+  TOTAL          39/104
+  decode: 2297444 tok / 169617s = 13.5 tok/s
+graded -> /root/b5out/ht_ornith9.graded.json
+######## ORNITH 9B DONE Sun Aug 23 19:41:40 UTC 2026
+
+######## restoring gemma4-vllm
+time="2026-08-23T19:41:41Z" level=warning msg="No services to build"
+ Network gemma4-vllm-aio_default Creating 
+ Network gemma4-vllm-aio_default Created 
+ Container gemma4-vllm Creating 
+ Container gemma4-vllm Created 
+ Container gemma4-vllm Starting 
+ Container gemma4-vllm Started 
+gemma4-vllm	Up 5 seconds (health: starting)

@@ -116,6 +116,8 @@ OFF_MECH = os.environ.get("B4_OFF_MECH", "template")
 # Explicit reasoning effort for the ON arm. Empty means "send nothing", which is
 # the model's default -- fine unless that default is the maximum setting.
 THINK_EFFORT = os.environ.get("B4_THINK_EFFORT", "")
+# Optional system message. Empty by default, so every existing result stands.
+SYSTEM = os.environ.get("B4_SYSTEM", "")
 
 # --------------------------------------------------------------- CoT arm
 # For models with no reasoning mode of their own. Asking in the prompt is not the
@@ -301,8 +303,16 @@ def _once(model, prompt, max_tokens, temp=None):
     if RAW_FMT:
         return _once_raw(model, prompt, max_tokens, temp)
     content = with_cot(model, prompt)
+    # Some models take their reasoning setting through the SYSTEM PROMPT rather
+    # than an API field -- Muse-Glimmer-30B documents `Reasoning strength: high`
+    # that way, and its other route, chat_template_kwargs, is dropped outright by
+    # LM Studio. A system message is the one mechanism that works on every engine
+    # here, so it has to be expressible.
+    msgs = [{"role": "user", "content": content}]
+    if SYSTEM:
+        msgs.insert(0, {"role": "system", "content": SYSTEM})
     payload = sampling({"model": model,
-                        "messages": [{"role": "user", "content": content}],
+                        "messages": msgs,
                         "max_tokens": fit(content, max_tokens)}, model)
     if temp is not None:
         payload["temperature"] = temp

@@ -1,0 +1,10 @@
+{
+  "model": "bartowski/muse-glimmer-30b-gguf/muse-glimmer-30b-q8_0.gguf",
+  "name": "t1.0/p0.95/k64 + Reasoning strength: high",
+  "sampling": {
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 64
+  },
+  "why": "Vendor best-practice sampling for Muse-Glimmer-30B: temperature=1.0, top_p=0.95, top_k=64. Not greedy -- no model in this project has survived greedy in thinking mode, and this one ships no greedy recommendation either. REASONING STRENGTH: high, set through the SYSTEM PROMPT ('Reasoning strength: high'), which is the mechanism the model card documents. The card's other route, chat_template_kwargs {'reasoning_strength': ...}, is useless here: LM Studio drops chat_template_kwargs entirely (measured on qwen3.6-35b -- absent/false/true all gave byte-identical output). 'high' rather than 'xhigh' although the card recommends 'high or xhigh' for coding: xhigh is exactly what silently wrecked Qwen3.8's arm in this project, where the harness sent nothing, the model defaulted to its maximum, and every request burned the whole budget without answering. high is the recommended setting that leaves headroom. THINKING ONLY: the scale bottoms out at 'low', not 'off', so there is no reasoning-suppressed arm to compare against and the score stands alone. Q8_0 (29.6 GB) from bartowski: the official repo ships only Q4_K_M (16.8 GB) and Q4_K_XL (19.7 GB). Note the repo also contains an mmproj perception encoder and a DFlash drafter -- selecting by quant alone matched the DRAFTER (6.58 GB), so the model was fetched by its exact filename. mmproj is not needed: 'Both text builds are text-only on their own'."
+}
