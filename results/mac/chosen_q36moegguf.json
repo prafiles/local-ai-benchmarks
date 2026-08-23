@@ -1,0 +1,8 @@
+{
+  "model": "qwen/qwen3.6-35b-a3b",
+  "name": "t0/greedy",
+  "sampling": {
+    "temperature": 0.0
+  },
+  "why": "GGUF build, run because the MLX engine has open non-termination bugs for this model family: lmstudio-ai/mlx-engine#337 (Gemma 4 fills max_tokens with reasoning and returns empty content, 'GGUF terminates fine'), lmstudio-ai/lmstudio-bug-tracker#1018 (reasoning never ends in qwen3 thinking models on MLX), #1907 and jundot/omlx#934 (qwen3.6-27b and qwen3.6-35b-a3b infinite loops). Greedy on BOTH arms, so the comparison is reasoning alone -- which the MLX runs could not offer, being confounded either by hot resamples or by a non-greedy thinking profile. GGUF also honours --context-length, which MLX ignores (lmstudio-bug-tracker#2250), so the window is a control here rather than an observed variable. NOT a clean engine A/B against the MLX numbers: quantisation differs between the builds."
+}
