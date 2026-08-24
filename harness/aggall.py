@@ -80,7 +80,7 @@ def percat(ok, cat):
                 sum(1 for i in cat if cat[i] == c)) for c in CATS}
 
 
-def confounds(raw, key, profdir):
+def confounds(raw, key, profdir, stack_workers=1):
     """Why this arm is or is not a single-variable measurement of reasoning.
 
     profdir matters: the CUDA profiles live beside the CUDA results, not in
@@ -93,6 +93,18 @@ def confounds(raw, key, profdir):
     resampled = sum(1 for v in items.values() if v.get("attempts", 1) > 1)
     if resampled:
         out.append("%d/%d answers came from a HOTTER resample" % (resampled, N))
+    # Prefer the controls the run recorded about itself. Files written before
+    # 2026-08-24 have no res["run"], so those still need the sibling profile --
+    # but a new run is audited from its own bytes, which is the point.
+    run = (raw or {}).get("run")
+    if run:
+        temps = [v.get("temperature", 0.0)
+                 for v in json.loads(run.get("profiles") or "{}").values()]
+        if any(t != 0.0 for t in temps):
+            out.append("profile is t%.2f, not greedy" % max(temps))
+        if run.get("workers", 1) != 1:
+            out.append("%d concurrent workers -- not reproducible" % run["workers"])
+        return out
     prof = os.path.join(profdir, "chosen_%s.json" % key)
     if not os.path.exists(prof):
         out.append("no chosen_%s.json found -- sampling UNVERIFIED" % key)
@@ -100,10 +112,21 @@ def confounds(raw, key, profdir):
         smp = json.load(open(prof)).get("sampling", {})
         if smp.get("temperature", 0.0) != 0.0:
             out.append("profile is t%.2f, not greedy" % smp["temperature"])
+    # No res["run"] means a pre-2026-08-24 file, but the worker count is still
+    # knowable from the driver that produced it, so do not report it unknown:
+    #   macpair5.sh:37   export B4_OUT="$OUT" B4_WORKERS=1      -- always serial
+    #   cudapair5.sh     run_arms <key> <model> 32768 4         -- W=4
+    #   cuda_phase2.sh   export B4_WORKERS=4
+    # 4 workers is not a footnote on this node: at 4 it reproduced 46/104 of its
+    # own greedy run, and the 1-worker control (q35.w1a/w1b) scored 37 twice
+    # against 36 and 34 for the same model at 4.
+    if stack_workers and stack_workers != 1:
+        out.append("%d concurrent workers -- this node reproduced only 46/104 "
+                   "of its own greedy run at this setting" % stack_workers)
     return out
 
 
-def report(title, here, models, profdir):
+def report(title, here, models, profdir, stack_workers=1):
     print("\n" + "=" * 78)
     print(title)
     print("=" * 78)
@@ -135,7 +158,7 @@ def report(title, here, models, profdir):
             gained = sum(1 for i in o if not o[i] and n_[i])
             lost = sum(1 for i in o if o[i] and not n_[i])
             print("     flips +%d / -%d" % (gained, lost), end="")
-            cf = confounds(on_raw, key, profdir)
+            cf = confounds(on_raw, key, profdir, stack_workers)
             print(" | CONFOUNDED: " + "; ".join(cf) if cf
                   else " | clean: greedy, unresampled")
         elif on_g and key in THINK_ONLY:
@@ -156,5 +179,5 @@ MACPROF = os.path.join(REPO, "results", "mac")
 CUOUT = os.path.join(REPO, "results", "cuda-hard")
 report("MAC / LM STUDIO / MLX -- Apple M2 Max 64GB", MACOUT, MAC_MLX, MACPROF)
 report("MAC / LM STUDIO / GGUF -- Apple M2 Max 64GB", MACOUT, MAC_GGUF, MACPROF)
-report("CUDA / vLLM 0.22.1 -- RTX 4060 Ti 16GB", CUOUT, CUDA, CUOUT)
+report("CUDA / vLLM 0.22.1 -- RTX 4060 Ti 16GB", CUOUT, CUDA, CUOUT, stack_workers=4)
 print()
