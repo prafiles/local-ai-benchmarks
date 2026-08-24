@@ -167,7 +167,17 @@ def can_think(model):
 
 
 def budget(mt):
-    return max(int(mt * BUDGET_MULT), BUDGET_FLOOR) if THINK else mt
+    # BUDGET_MULT used to apply only on the thinking arm, so an off arm could
+    # not be given more room by any knob the harness had. That made a specific
+    # failure invisible: GLM-4.7-Flash on GGUF capped 47% of its OFF-arm tasks
+    # at the per-task budgets while its thinking arm ran with 32000, so the gap
+    # between the arms was partly budget and not reasoning at all. Every other
+    # model caps 0-3 times, which is why it never surfaced.
+    #
+    # At the default MULT=1 this is exactly the old behaviour -- int(mt * 1) is
+    # mt -- so no existing result changes. BUDGET_FLOOR still applies only to
+    # the thinking arm; the floor is a reasoning allowance, not an answer one.
+    return max(int(mt * BUDGET_MULT), BUDGET_FLOOR) if THINK else int(mt * BUDGET_MULT)
 
 
 # The reasoning floor asks the server for room; it is not a promise the room is
