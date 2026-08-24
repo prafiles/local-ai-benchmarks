@@ -183,12 +183,7 @@
     }
    },
    "off_tokens": 48813,
-   "off_capped": 1,
-   "on_sampling": {
-    "temperature": 1.0,
-    "top_p": 0.95,
-    "top_k": 64
-   }
+   "off_capped": 1
   },
   "glm47": {
    "label": "GLM 4.7 Flash",
@@ -238,11 +233,7 @@
     }
    },
    "off_tokens": 33230,
-   "off_capped": 3,
-   "on_sampling": {
-    "temperature": 1.0,
-    "top_p": 0.95
-   }
+   "off_capped": 3
   },
   "qcn": {
    "label": "Qwen3-Coder-Next",
