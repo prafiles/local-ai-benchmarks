@@ -121,6 +121,27 @@ def run(model, out_path):
     workers = int(os.environ.get("B4_WORKERS", "1"))
     print("  %d to run, %d concurrent" % (len(todo), workers), flush=True)
 
+    # Concurrency is not a neutral setting on this tier: the CUDA node
+    # reproduced 104/104 of its own greedy run at 1 worker and 46/104 at 4. Yet
+    # every result file written before 2026-08-24 records no worker count, so
+    # none of those runs can be checked for it retroactively -- the control is
+    # simply missing. Same for the sampling knobs: the confound audit had to
+    # read a sibling chosen_*.json, which is not necessarily in the directory
+    # anyone looks in, and a missing file silently read as "greedy".
+    #
+    # So a result file now carries its own controls. On a resumed arm this
+    # describes the invocation that FINISHED it, which is the honest thing to
+    # record but is not the same as "these settings produced every task".
+    res["run"] = {"workers": workers,
+                  "window": int(os.environ.get("B4_WINDOW", "0")),
+                  "budget": int(os.environ.get("B4_BUDGET", "0")),
+                  "retries": int(os.environ.get("B4_RETRIES", "0")),
+                  "escalate": os.environ.get("B4_ESCALATE", ""),
+                  "off_mech": os.environ.get("B4_OFF_MECH", ""),
+                  "think_effort": os.environ.get("B4_THINK_EFFORT", ""),
+                  "profiles": os.environ.get("B4_PROFILES", "")[:400],
+                  "resumed_from": len(res["items"])}
+
     lock = threading.Lock()
     t0 = time.time()
     done = [0]
