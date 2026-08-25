@@ -1,7 +1,9 @@
 # local-ai-benchmarks
 
-Execution-graded benchmarks for local coding models. **Eleven models, twenty-one runs, two serving
-stacks** — an RTX 4060 Ti (16 GB) under vLLM, and an Apple M2 Max (64 GB) under LM Studio / MLX.
+Execution-graded benchmarks for local coding models. **Fourteen models across two machines and
+three serving backends** — an RTX 4060 Ti (16 GB) under vLLM 0.22.1, and an Apple M2 Max (64 GB)
+under LM Studio on both MLX and GGUF. The 600-task suite covers eleven of those models in
+twenty-one runs; the hard tier adds Ornith 1.5 (35B and 9B) and Muse Glimmer 30B.
 
 Every model runs the same 600 tasks **twice**: once with reasoning suppressed, once with it
 enabled. Nothing is scored by an LLM judge. Python, Django, JS, TS and SQL answers are
@@ -30,34 +32,49 @@ RFC 6901, RFC 4180, gitignore globs, unified diff), a near-miss trap on a famous
 scale-gated so the quadratic answer cannot finish in the grader's timeout. Output budgets are 4–6×
 larger and the reasoning floor moves 8000 → 32000.
 
-All seven Mac models measured, reasoning off:
+### Does reasoning help? Only the trained kind, and only when measured cleanly
 
-| Model | b3 | hard tier | TS |
-|---|---|---|---|
-| Qwen3.6 27B | 572/600 (95.3%) | **62/104** (60%) | 5/15 |
-| Qwen3.8 27B | 556/600 (92.7%) | **58/104** (56%) | 3/15 |
-| Qwen3-Coder-Next | 558/600 (93.0%) | **53/104** (51%) | 3/15 |
-| Gemma 4 26B A4B QAT | 579/600 (96.5%) | **53/104** (51%) | 3/15 |
-| Qwen3.6 35B A3B | 568/600 (94.7%) | **48/104** (46%) | 0/15 |
-| GLM 4.7 Flash | 521/600 (86.8%) | **35/104** (34%) | 3/15 |
-| DeepSeek VL2 | 167/600 (27.8%) | **1/104** (1%) | 0/15 |
+An off/on pair measures reasoning only if **nothing else** differs between the arms. Enforcing that
+disqualifies most of the deltas this project has produced. What survives:
 
-**The b3 ranking does not survive.** Rank correlation between the tiers is **Spearman ρ = 0.49**
-and only **9 of 14** pairwise orderings hold: b3's first-place model finishes tied for third, and
-the model b3 ranked last in its leading cluster finishes second. What b3 got right it still gets
-right — GLM 4.7 Flash is last on both tiers — but the ordering *inside* the leading cluster was
-reporting a confidence its 11-task spread never supported.
+| Model | stack | off | on | Δ |
+|---|---|---|---|---|
+| **Qwen3.8 27B @ medium** | MLX | 58 | **82/104** | **+24** |
+| Gemma 4 26B A4B | GGUF | 58 | **80/104** | +22 |
+| Muse Glimmer 30B | GGUF | — | **80/104** | thinking-only |
+| Qwen3.6 27B | GGUF | 61 | 75/104 | +14 |
+| Qwen3.6 35B A3B | GGUF | 54 | 67/104 | +13 |
+| Ornith 1.5 35B A3B | GGUF | — | 66/104 | thinking-only |
+| Qwen3-Coder-Next 80B | MLX | 53 | 52/104 | −1 *(prompted CoT)* |
+| Ornith 1.5 9B | vLLM | — | 39/104 | thinking-only |
+| DeepSeek VL2 | MLX | 1 | 1/104 | 0 *(prompted CoT)* |
 
-**It discriminates.** 64 of the 104 tasks split the field, against 20 solved by every model and 20
-by none. Best-to-worst spread is 27 tasks, **26% of the suite**, where b3's was 9.7%.
+**Every clean native-thinking arm is positive (+13 to +24). No prompted-CoT arm anywhere in this
+project has ever been positive** — −9, −5, −1 and 0 here, and −3, −5, −9 on the 600-task tier.
 
-**TypeScript is where the old suite was blindest.** Every model above scores 49 or 50 out of 50 on
-b3's TS category; here the best is 5/15 and one model scores zero. **Eight of the fifteen
-type-level tasks are solved by no model at all** — the largest untouched block in the tier.
+**Removing a confound always shrinks the gain.** Gemma reads +28 with hot resampling and +22
+measured cleanly; Qwen3.6 35B reads +17 at t1.00 and +13 at greedy. Six of this project's headline
+deltas fail the single-variable test — through hot resampling, a non-greedy profile, or 4-way
+request concurrency — and are reported as confounded rather than quietly ranked.
 
-> **See [HARD_TIER.md](HARD_TIER.md)** for the design, the budget evidence, the validation gates,
-> and a correction to this repo's earlier claim that greedy decoding is unconditionally
-> deterministic at a fixed context window.
+**Headroom is 22 tasks.** The leader takes 79% of the suite where b3's took 96.5%.
+
+### Three findings that were harness bugs, not model behaviour
+
+- **Qwen3.8 "could not finish thinking" in 79 hours.** It was inheriting the model's `xhigh`
+  default because the harness sent no `reasoning_effort`. At `medium` it finishes normally and
+  leads the tier at 82/104.
+- **Gemma's "broken reasoning mode"** is [mlx-engine#337](https://github.com/lmstudio-ai/mlx-engine/issues/337).
+  On GGUF the same model gains +22 cleanly.
+- **The CUDA node's numbers** were all produced at 4 concurrent workers — the setting at which it
+  reproduces only 46/104 of its own greedy run, against 104/104 at 1 worker. It contributes no
+  clean native-thinking measurement.
+
+**TypeScript** was b3's blindest spot: every model scored 49–50 out of 50 there, and 0–5 out of 15
+here. Reasoning moves it in three of four clean arms (3→7, 3→6, 1→5, and 3→3).
+
+> **See [HARD_TIER.md](HARD_TIER.md)** for the design, the validation gates, the confound
+> taxonomy, the per-stack noise floors, and a list of the claims this project has had to retract.
 
 ---
 
@@ -637,7 +654,15 @@ Each of these was measured, and each would have produced a quietly wrong result 
 
 ## Caveats
 
-- **Single run, no repeats.** Per-task variance is unmeasured. The no-reasoning runs are
+*These apply to the 600-task suite. The hard tier's own caveats — and the claims it forced this
+repo to retract — are in [HARD_TIER.md](HARD_TIER.md).*
+
+- **Per-task variance is measured on the hard tier, not here.** On the Mac at 1 worker it is
+  1 graded flip in 312 task-repeats, with 725 of 728 answers byte-identical; on the CUDA node at
+  4 workers it is 8 flips and 76.7% identical. That second number applies to **every CUDA figure
+  in this README**, since all of them were produced at 4 workers. Read the CUDA deltas below with
+  a floor of roughly 8 tasks, not the ~6 quoted for the Mac.
+- **Single run, no repeats.** Per-task variance is unmeasured on this suite. The no-reasoning runs are
   temperature 0; the reasoning runs are not, and cannot be. Gemma, Qwen2.5 and Mellum2 sit within
   16 tasks of each other in 600 — close enough that a handful of coin-flips could reorder them.
 - **The reasoning arm changes two variables, not one.** Thinking mode cannot run at temperature 0
