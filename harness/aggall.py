@@ -65,6 +65,12 @@ CUDA = [
 THINK_ONLY = {"muse", "ornith35", "ornith9"}
 
 
+def ran(g):
+    """Tasks actually executed. grade() pads an aborted arm to full length with
+    zeros, so len(results) is not the run size -- it is always 104."""
+    return g.get("ran", len(g.get("results", {})))
+
+
 def load(here, p):
     f = os.path.join(here, p)
     return json.load(open(f)) if os.path.exists(f) else None
@@ -134,11 +140,11 @@ def report(title, here, models, profdir, stack_workers=1):
         off_g, on_g = load(here, "hb_%s.graded.json" % key), load(here, "ht_%s.graded.json" % key)
         on_raw = load(here, "ht_%s.json" % key)
         for g, what in ((off_g, "off"), (on_g, "on")):
-            if g and len(g.get("results", {})) < N:
-                print("  %-24s %s arm PARTIAL (%d/%d) -- not scored"
-                      % (label, what, len(g["results"]), N))
-        off_g = off_g if off_g and len(off_g["results"]) == N else None
-        on_g = on_g if on_g and len(on_g["results"]) == N else None
+            if g and ran(g) < N:
+                print("  %-24s %s arm PARTIAL (%d/%d ran) -- not scored"
+                      % (label, what, ran(g), N))
+        off_g = off_g if off_g and ran(off_g) >= N else None
+        on_g = on_g if on_g and ran(on_g) >= N else None
 
         if not off_g and not on_g:
             print("  %-24s not run" % label)

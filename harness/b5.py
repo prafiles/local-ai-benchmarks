@@ -410,7 +410,14 @@ def grade(path):
         print("  grading %s ..." % name, flush=True)
         ok.update(fn())
 
-    out = {"model": data["model"], "tier": "hard", "results": {}}
+    # How many tasks were ACTUALLY run. An aborted arm is padded to full
+    # length here with the absent tasks scored 0, which is right for the
+    # file but lethal downstream: a 5-task arm becomes a 104-entry graded
+    # file reading 0/104, and every completeness check in the aggregators
+    # tests len(results) == 104, so it passes as a capability result.
+    # Record the real count so a reader can tell a bad model from a dead run.
+    out = {"model": data["model"], "tier": "hard", "results": {},
+           "ran": len(have), "absent": len(missing)}
     for tid, cat, _k, _p, _m in all_tasks():
         it = items.get(tid, {})
         out["results"][tid] = {"ok": bool(ok.get(tid, False)), "cat": cat,

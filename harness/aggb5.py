@@ -70,7 +70,10 @@ for key, label, params, note in MODELS:
     def complete(g, what):
         if not g:
             return False
-        n = len(g.get("results", {}))
+        # grade() pads an aborted arm to full length with zeros, so
+        # len(results) is always 104 and cannot detect a short run. "ran"
+        # is the count actually executed.
+        n = g.get("ran", len(g.get("results", {})))
         if n < N_TASKS:
             print("  %-24s %s arm PARTIAL (%d/%d tasks) -- not scored"
                   % (label, what, n, N_TASKS))
