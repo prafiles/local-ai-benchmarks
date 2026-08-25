@@ -32,32 +32,61 @@ RFC 6901, RFC 4180, gitignore globs, unified diff), a near-miss trap on a famous
 scale-gated so the quadratic answer cannot finish in the grader's timeout. Output budgets are 4–6×
 larger and the reasoning floor moves 8000 → 32000.
 
+### Every model from the 600-task suite, re-run on the hard tier
+
+All eleven, plus three that were not in the old suite. Best arm per model; `†` marks a score that
+is **not** a single-variable measurement of reasoning — hot resampling, a non-greedy profile, or
+4-way request concurrency.
+
+| Model | orig. | stack | off | on | best |
+|---|---|---|---|---|---|
+| **Qwen3.8 27B @ medium** | b3 | MLX | 58 | **82** | **82** |
+| Gemma 4 26B A4B QAT | b3 | MLX | 54 | 82 † | 82 † |
+| **Gemma 4 26B A4B** | b3 | GGUF | 58 | **80** | **80** |
+| **Muse Glimmer 30B** | new | GGUF | — | **80** | **80** |
+| **Qwen3.6 27B** | b3 | GGUF | 61 | **75** | **75** |
+| Qwen3.6 27B | b3 | MLX | 62 | 75 † | 75 † |
+| **Qwen3.6 35B A3B** | b3 | GGUF | 54 | **67** | **67** |
+| Gemma 4 12B QAT | b3 | vLLM | 46 | 66 † | 66 † |
+| Ornith 1.5 35B A3B | new | GGUF | — | 66 | 66 |
+| Qwen3.6 35B A3B | b3 | MLX | 48 | 65 † | 65 † |
+| Qwen3.8 27B | b3 | GGUF | 60 | — | 60 |
+| Qwen3-Coder-Next 80B | b3 | MLX | 53 | 52 | 53 |
+| Qwen3.5 9B FP8 | b3 | vLLM | 36 | 52 † | 52 † |
+| GLM 4.7 Flash | b3 | MLX | 35 | 47 † | 47 † |
+| Mellum2 12B A2.5B | b3 | vLLM | 45 | 36 † | 45 † |
+| Ornith 1.5 9B | new | vLLM | — | 39 | 39 |
+| Qwen2.5-Coder 14B | b3 | vLLM | 36 | 31 † | 36 † |
+| GLM 4.7 Flash | b3 | GGUF | 5 | — | 5 |
+| DeepSeek VL2 | b3 | MLX | 1 | 1 | 1 |
+
+**Headroom is 22 tasks.** The leader takes 79% of the suite where b3's took 96.5%.
+
+Two rows read oddly for a reason. **Qwen3.8 on GGUF has no thinking arm**, because
+`reasoning_effort` is ignored there and it is the only knob that makes this model's thinking arm
+terminate. **GLM 4.7 Flash on GGUF at 5/104** is a degenerate build, not a capability result.
+
 ### Does reasoning help? Only the trained kind, and only when measured cleanly
 
-An off/on pair measures reasoning only if **nothing else** differs between the arms. Enforcing that
-disqualifies most of the deltas this project has produced. What survives:
+Strip out every arm that is not single-variable and six remain out of nineteen:
 
 | Model | stack | off | on | Δ |
 |---|---|---|---|---|
-| **Qwen3.8 27B @ medium** | MLX | 58 | **82/104** | **+24** |
-| Gemma 4 26B A4B | GGUF | 58 | **80/104** | +22 |
-| Muse Glimmer 30B | GGUF | — | **80/104** | thinking-only |
-| Qwen3.6 27B | GGUF | 61 | 75/104 | +14 |
-| Qwen3.6 35B A3B | GGUF | 54 | 67/104 | +13 |
-| Ornith 1.5 35B A3B | GGUF | — | 66/104 | thinking-only |
-| Qwen3-Coder-Next 80B | MLX | 53 | 52/104 | −1 *(prompted CoT)* |
-| Ornith 1.5 9B | vLLM | — | 39/104 | thinking-only |
-| DeepSeek VL2 | MLX | 1 | 1/104 | 0 *(prompted CoT)* |
+| **Qwen3.8 27B @ medium** | MLX | 58 | **82** | **+24** |
+| Gemma 4 26B A4B | GGUF | 58 | **80** | +22 |
+| Qwen3.6 27B | GGUF | 61 | 75 | +14 |
+| Qwen3.6 35B A3B | GGUF | 54 | 67 | +13 |
+| Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 *(prompted CoT)* |
+| DeepSeek VL2 | MLX | 1 | 1 | 0 *(prompted CoT)* |
 
 **Every clean native-thinking arm is positive (+13 to +24). No prompted-CoT arm anywhere in this
 project has ever been positive** — −9, −5, −1 and 0 here, and −3, −5, −9 on the 600-task tier.
 
 **Removing a confound always shrinks the gain.** Gemma reads +28 with hot resampling and +22
-measured cleanly; Qwen3.6 35B reads +17 at t1.00 and +13 at greedy. Six of this project's headline
-deltas fail the single-variable test — through hot resampling, a non-greedy profile, or 4-way
-request concurrency — and are reported as confounded rather than quietly ranked.
+measured cleanly; Qwen3.6 35B reads +17 at t1.00 and +13 at greedy.
 
-**Headroom is 22 tasks.** The leader takes 79% of the suite where b3's took 96.5%.
+**Every model that exists only on the CUDA node is absent from the clean table**, because all four
+of its b3 models ran at 4 concurrent workers and both its native arms additionally ran non-greedy.
 
 ### Three findings that were harness bugs, not model behaviour
 

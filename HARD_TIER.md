@@ -225,26 +225,64 @@ biased *against* CoT by the budget asymmetry described above, so the honest
 statement is "prompted CoT does not help here, and part of why is that this
 harness starves it" — not "prompted CoT is useless."
 
-### The leaderboard, clean arms only
+### The full roster
+
+Every model from the 600-task suite has been run on this tier, plus three that
+were not in it. Best arm per model; `†` marks a score that is not a
+single-variable measurement of reasoning, for the reasons in the table above.
+
+| # | Model | orig. suite | stack | off | on | best |
+|---|---|---|---|---|---|---|
+| 1 | Qwen3.8 27B @ medium | b3 | MLX | 58 | **82** | **82** |
+| 1 | Gemma 4 26B A4B QAT | b3 | MLX | 54 | 82 † | 82 † |
+| 3 | Gemma 4 26B A4B | b3 | GGUF | 58 | **80** | **80** |
+| 3 | Muse Glimmer 30B | new | GGUF | — | **80** | **80** |
+| 5 | Qwen3.6 27B | b3 | GGUF | 61 | **75** | **75** |
+| 5 | Qwen3.6 27B | b3 | MLX | 62 | 75 † | 75 † |
+| 7 | Qwen3.6 35B A3B | b3 | GGUF | 54 | **67** | **67** |
+| 8 | Gemma 4 12B QAT | b3 | vLLM | 46 | 66 † | 66 † |
+| 8 | Ornith 1.5 35B A3B | new | GGUF | — | 66 | 66 |
+| 10 | Qwen3.6 35B A3B | b3 | MLX | 48 | 65 † | 65 † |
+| 11 | Qwen3.8 27B | b3 | GGUF | 60 | — | 60 |
+| 12 | Qwen3-Coder-Next 80B | b3 | MLX | 53 | 52 | 53 |
+| 13 | Qwen3.5 9B FP8 | b3 | vLLM | 36 | 52 † | 52 † |
+| 14 | GLM 4.7 Flash | b3 | MLX | 35 | 47 † | 47 † |
+| 15 | Mellum2 12B A2.5B | b3 | vLLM | 45 | 36 † | 45 † |
+| 16 | Ornith 1.5 9B | new | vLLM | — | 39 | 39 |
+| 17 | Qwen2.5-Coder 14B | b3 | vLLM | 36 | 31 † | 36 † |
+| 18 | GLM 4.7 Flash | b3 | GGUF | 5 | — | 5 |
+| 19 | DeepSeek VL2 | b3 | MLX | 1 | 1 | 1 |
+
+**Headroom is 22 tasks.** The leader takes 79% of the suite, against b3's 96.5% —
+the tier still discriminates, which is what it was built for.
+
+Two rows need reading carefully. **Qwen3.8 on GGUF has no thinking arm at all**
+because `reasoning_effort` is silently ignored there, and it is the only knob
+that makes this model's thinking arm terminate; its 60 is an off-arm score.
+**GLM 4.7 Flash on GGUF at 5/104** is a degenerate build, not a capability
+result — see below.
+
+Muse Glimmer is worth singling out for something other than its score: **0 capped
+and 0 unanswered across all 104 tasks**. Every other thinking arm in the tier
+hits the token ceiling somewhere. It ended every trace on its own.
+
+### The same list, clean arms only
+
+Strip out every arm that is not single-variable and the tier is much smaller —
+which is the honest picture of what has actually been measured:
 
 | Model | stack | off | on | Δ |
 |---|---|---|---|---|
 | **Qwen3.8 27B @ medium** | MLX | 58 | **82** | **+24** |
 | Gemma 4 26B A4B | GGUF | 58 | **80** | +22 |
-| Muse Glimmer 30B | GGUF | — | **80** | thinking-only |
 | Qwen3.6 27B | GGUF | 61 | 75 | +14 |
 | Qwen3.6 35B A3B | GGUF | 54 | 67 | +13 |
-| Ornith 1.5 35B A3B | GGUF | — | 66 | thinking-only |
 | Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 (CoT) |
-| Ornith 1.5 9B | vLLM | — | 39 | thinking-only |
 | DeepSeek VL2 | MLX | 1 | 1 | 0 (CoT) |
 
-**Headroom is 22 tasks.** The leader takes 79% of the suite, against b3's 96.5% —
-the tier still discriminates, which is what it was built for.
-
-Muse Glimmer is worth singling out for something other than its score: **0 capped
-and 0 unanswered across all 104 tasks**. Every other thinking arm in the tier
-hits the token ceiling somewhere. It ended every trace on its own.
+Six arms out of nineteen. **Every model that only exists on the CUDA node is
+absent from this table**, because all four of its b3 models ran at 4 concurrent
+workers and both of its native arms additionally ran non-greedy.
 
 ### Qwen3.8 was never unmeasurable — it was inheriting `xhigh`
 
