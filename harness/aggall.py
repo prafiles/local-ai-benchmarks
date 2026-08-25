@@ -55,12 +55,19 @@ MAC_GGUF = [
 # 9B, not a 32B. Guessing from the key produced a table that compared the Mac's
 # Qwen3.6-27B against a completely different model on CUDA.
 CUDA = [
-    ("gemma",       "Gemma 4 12B QAT",          "vLLM w4a16"),
-    ("gemmagreedy", "Gemma 4 12B QAT",          "vLLM, greedy -- does not terminate"),
-    ("q35",         "Qwen3.5 9B FP8",           "vLLM"),
-    ("qwen",        "Qwen2.5-Coder 14B AWQ",    "vLLM"),
-    ("mellum",      "Mellum2 12B A2.5B FP8",    "vLLM"),
-    ("ornith9",     "Ornith 1.5 9B",            "vLLM, thinking-only"),
+    ("gemma",       "Gemma 4 12B QAT",          "vLLM w4a16, 4 workers"),
+    ("gemmagreedy", "Gemma 4 12B QAT",          "vLLM, greedy @4w -- does not terminate"),
+    ("q35",         "Qwen3.5 9B FP8",           "vLLM, 4 workers"),
+    ("qwen",        "Qwen2.5-Coder 14B AWQ",    "vLLM, 4 workers"),
+    ("mellum",      "Mellum2 12B A2.5B FP8",    "vLLM, 4 workers"),
+    ("ornith9",     "Ornith 1.5 9B",            "vLLM, thinking-only, 4 workers"),
+    # The 1-worker re-run: greedy on BOTH arms, so these are the only CUDA arms
+    # that could ever have been single-variable. Both native thinking arms abort
+    # at greedy regardless of worker count, which is itself the result.
+    ("q35.w1",      "Qwen3.5 9B FP8",           "vLLM, 1 worker, greedy both arms"),
+    ("gemma.w1",    "Gemma 4 12B QAT",          "vLLM, 1 worker, greedy both arms"),
+    ("mellum.w1",   "Mellum2 12B A2.5B FP8",    "vLLM, 1 worker, greedy both arms"),
+    ("qwen.w1",     "Qwen2.5-Coder 14B AWQ",    "vLLM, 1 worker, greedy both arms"),
 ]
 THINK_ONLY = {"muse", "ornith35", "ornith9"}
 

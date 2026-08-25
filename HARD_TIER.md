@@ -199,31 +199,41 @@ The direction of the error is consistent: **every time a confound is removed the
 gain shrinks.** Gemma goes +28 → +22 measured cleanly on GGUF; Qwen3.6 35B goes
 +17 → +13. Confounding inflates.
 
-### Native thinking helps; prompted CoT never does
+### Native thinking helps; prompted CoT does essentially nothing
 
 Across the four clean native arms the gain is **+13 to +24**, and every one is
-positive. Across the four prompted-CoT arms the results are **−9, −5, −1, 0**,
-and not one is positive.
+positive. Prompted CoT, measured without concurrency, lands within **±2 of
+zero**:
 
-Those two sets are not equally well established, and the difference matters:
-
-| CoT arm | Δ | status |
+| CoT arm | stack | Δ |
 |---|---|---|
-| Qwen3-Coder-Next 80B | −1 | clean |
-| DeepSeek VL2 | 0 | clean |
-| Qwen2.5-Coder 14B | −5 | confounded — 4 workers |
-| Mellum2 12B A2.5B | −9 | confounded — 4 workers |
+| Qwen2.5-Coder 14B | vLLM, 1 worker | −2 |
+| Qwen3-Coder-Next 80B | MLX | −1 |
+| DeepSeek VL2 | MLX | 0 |
+| Mellum2 12B A2.5B | vLLM, 1 worker | **+1** |
 
-So the *clean* CoT evidence is two arms at −1 and 0, not four. The b3 tier
-independently produced −3, −5 and −9 on its own three CoT arms, which
-corroborates the direction across a different suite — but it is a different
-suite, and quoting its numbers beside these ones would overstate the sample.
+**This is a retraction.** This file previously said that no prompted-CoT arm had
+ever been positive, citing −9, −5, −1 and 0. Two of those four numbers were
+serving artefacts. Re-run at 1 worker with everything else identical:
 
-The asymmetry is still the tier's clearest finding: no CoT arm anywhere in this
-project has ever been positive, while every clean native arm has. It is also
-biased *against* CoT by the budget asymmetry described above, so the honest
-statement is "prompted CoT does not help here, and part of why is that this
-harness starves it" — not "prompted CoT is useless."
+  Mellum2      −9 → **+1**
+  Qwen2.5-Coder −5 → **−2**
+
+Mellum's *off* arm moved 2 tasks between worker counts while its *CoT* arm moved
+8. Concurrency hits the reasoning arm about four times harder, which is what you
+would expect if longer generations give divergence more room to accumulate — and
+it means the old −9 was measuring the serving stack at least as much as the
+model.
+
+The supported claim is now that prompted CoT does **nothing** here, not that it
+harms. That is weaker as a headline and much better founded: it no longer rests
+on numbers that move by 9 when a serving parameter changes. The native-vs-CoT
+asymmetry survives intact, because +13..+24 against −2..+1 does not depend on
+which end of that second range is right.
+
+The measurement is still biased against CoT by the budget asymmetry above: a
+prompted trace shares the answer's per-task budget while a native trace gets a
+32000-token floor.
 
 ### The full roster
 
@@ -347,27 +357,42 @@ GLM 4.7 Flash therefore has **no single-variable thinking measurement on either
 backend**. Its only complete thinking arm is the MLX one at t1.00, which is
 confounded.
 
-### The CUDA node contributes no clean reasoning number
+### The CUDA node: re-run at 1 worker, and what it settled
 
-Every CUDA hard-tier score was produced at **4 concurrent workers**
-(`cudapair5.sh` call sites pass `W=4`; `cuda_phase2.sh` exports `B4_WORKERS=4`),
-and both of its native arms additionally ran non-greedy. Concurrency is not a
-footnote on this node:
+Every CUDA score before 2026-08-25 was produced at **4 concurrent workers**
+(`cudapair5.sh` passes `W=4`; `cuda_phase2.sh` exports `B4_WORKERS=4`), and both
+native arms additionally ran non-greedy. All four models were therefore re-run at
+1 worker with greedy on both arms — the only configuration that could ever be
+single-variable on this node.
 
-| | reproducibility | q35 off arm |
-|---|---|---|
-| 4 workers | 46/104 answers reproduced | 36, then 34 |
-| 1 worker | 104/104 | 37, then 37 |
+| model | 4 workers | 1 worker | arm |
+|---|---|---|---|
+| Qwen3.5 9B FP8 | 36 → 52 (+16) | 36 → **abort** | native |
+| Gemma 4 12B QAT | 46 → 66 (+20) | 44 → **abort** | native |
+| Mellum2 12B A2.5B | 45 → 36 (−9) | 43 → 44 (**+1**) | CoT |
+| Qwen2.5-Coder 14B | 36 → 31 (−5) | 37 → 35 (**−2**) | CoT |
 
-Its only two clean arms are prompted CoT, and both are negative. So the node
-whose entire purpose was to be a second stack currently confirms the CoT finding
-and contributes nothing to the native-thinking one.
+**Both native arms abort at greedy regardless of worker count.** Qwen3.5
+projected 39h with 5/5 tasks capped and no answers (47k–123k think chars each);
+Gemma projected 38h with 4/5 capped, though one task did terminate normally at
+1765 tokens. Removing concurrency rescued neither. So the greedy non-termination
+belongs to the models, not to the serving concurrency — which is what the re-run
+was built to find out, and the answer is negative.
 
-Result files written before 2026-08-24 record no worker count, so this could not
-be checked from the data — it had to be recovered from the drivers. `b5.py` now
-writes a `res["run"]` block (workers, window, budget, retries, escalate,
-off-mechanism, think-effort, the profile JSON, and `resumed_from`) so that a
-result is auditable from itself.
+The node therefore now has **two clean arms, both prompted CoT**, and still no
+single-variable measurement of native thinking. Its +16 and +20 remain
+confounded twice over, by t1.00/t0.60 sampling and by 4-way concurrency, and
+they cannot be cleaned by re-running because the clean configuration does not
+terminate.
+
+Off-arm scores move only 2–4 tasks across worker counts (q35 36/34 at 4 vs
+37/37/36 at 1; Gemma 46/48 vs 44), and the 1-worker runs are not systematically
+higher — Gemma's is the lowest of its three. Concurrency adds noise rather than
+bias.
+
+Result files written before 2026-08-24 record no worker count, so none of this
+could be checked from the data; it had to be recovered from the drivers. `b5.py`
+now writes a `res["run"]` block so a result is auditable from itself.
 
 ### Noise floor, per stack
 
@@ -424,6 +449,12 @@ Claims this file or its commits previously made, and what replaced them:
   repetition. The real Mac floor is 1 flip in 312.
 - ~~"reasoning_effort is how the arms are switched"~~ → true on MLX only; GGUF
   ignores it silently.
+- ~~"No prompted-CoT arm has ever been positive"~~ → two of the four numbers
+  behind that were 4-worker serving artefacts. At 1 worker Mellum2 goes −9 →
+  **+1** and Qwen2.5-Coder −5 → −2. CoT does nothing; it does not harm.
+- ~~"Running at 1 worker is what makes a CUDA arm clean"~~ → necessary but not
+  sufficient: both native arms still abort at greedy, so two of the four models
+  cannot produce a clean arm at any concurrency.
 
 ### What is still open
 

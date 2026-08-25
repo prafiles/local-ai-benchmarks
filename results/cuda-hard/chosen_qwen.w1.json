@@ -1,0 +1,8 @@
+{
+ "model": "Qwen/Qwen2.5-Coder-14B-Instruct-AWQ",
+ "name": "t0/greedy",
+ "sampling": {
+  "temperature": 0.0
+ },
+ "why": "1-worker re-run. Every CUDA hard-tier score before 2026-08-25 was produced at B4_WORKERS=4, the setting at which this node reproduced only 46/104 answers of its own greedy run against 104/104 at 1 worker. Concurrency was therefore a confound on all of them. Greedy on BOTH arms here, so the off/on difference is reasoning alone -- which no CUDA arm has ever been able to claim: gemma ran t0.6/k20 and q35 t1.0/k64 against greedy off arms, differing twice over. Greedy thinking is the risk: gemmagreedy scored 1/104 at 4 workers by not terminating, and whether that was the model or the concurrency is exactly what this run tests. The runtime ceiling bounds the downside."
+}

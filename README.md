@@ -79,14 +79,25 @@ Strip out every arm that is not single-variable and six remain out of nineteen:
 | Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 *(prompted CoT)* |
 | DeepSeek VL2 | MLX | 1 | 1 | 0 *(prompted CoT)* |
 
-**Every clean native-thinking arm is positive (+13 to +24). No prompted-CoT arm anywhere in this
-project has ever been positive** — −9, −5, −1 and 0 here, and −3, −5, −9 on the 600-task tier.
+**Every clean native-thinking arm is positive (+13 to +24). Prompted CoT lands within ±2 of
+zero** — −2, −1, 0 and +1 once concurrency is removed.
+
+**That second sentence is a correction.** This README previously said no CoT arm had ever been
+positive, citing −9, −5, −1 and 0. Re-running the CUDA models at 1 worker with nothing else changed
+moved **Mellum2 from −9 to +1** and Qwen2.5-Coder from −5 to −2. Mellum's *off* arm shifted 2 tasks
+between worker counts while its *CoT* arm shifted 8 — concurrency hits the longer generations
+about four times harder. So prompted CoT does **nothing** here rather than harm. The
+native-vs-CoT asymmetry is unaffected: +13..+24 against −2..+1 does not depend on which end of
+that second range is right.
 
 **Removing a confound always shrinks the gain.** Gemma reads +28 with hot resampling and +22
 measured cleanly; Qwen3.6 35B reads +17 at t1.00 and +13 at greedy.
 
-**Every model that exists only on the CUDA node is absent from the clean table**, because all four
-of its b3 models ran at 4 concurrent workers and both its native arms additionally ran non-greedy.
+**The CUDA node has two clean arms, both CoT, and no clean native measurement.** All four of its
+models were re-run at 1 worker with greedy on both arms. The two CoT models completed. Both native
+models' thinking arms **abort at greedy regardless of worker count** — Qwen3.5 projecting 39h and
+Gemma 38h, with 4–5 of 5 tasks capped and no answers. Their +16 and +20 therefore stay confounded
+and cannot be cleaned by re-running, because the clean configuration does not terminate.
 
 ### Three findings that were harness bugs, not model behaviour
 

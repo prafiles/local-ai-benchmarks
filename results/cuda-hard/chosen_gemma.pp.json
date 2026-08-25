@@ -1,0 +1,9 @@
+{
+ "model": "google/gemma-4-12B-it-qat-w4a16-ct",
+ "name": "t0/greedy + presence_penalty 1.5",
+ "sampling": {
+  "temperature": 0.0,
+  "presence_penalty": 1.5
+ },
+ "why": "Greedy + presence_penalty, applied to BOTH arms so the pair stays single-variable. Greedy thinking spirals on this model: at 1 worker, with no concurrency to blame, all 5 tasks burned the full 32000 tokens on reasoning alone (47k-123k think chars) and returned no answer, projecting 39h. That is the model, not the serving. The vendor documents presence_penalty 0-2 as the knob for exactly this failure ('reduce endless repetitions'), and chosen_q35.json records that the obvious alternatives -- reasoning_effort, max_thinking_tokens, template thinking_budget -- are all accepted and silently ignored, so this is the only brake available. Applying it to the OFF arm too is the point: the alternative clean-ish arm is t1.0/k64, which changes temperature, top_k and top_p at once. presence_penalty at temperature 0 keeps decoding deterministic argmax, so reproducibility survives. Vendor also notes a high value can cause language mixing; 1.5 is their stated general-purpose figure."
+}
