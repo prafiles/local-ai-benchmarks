@@ -62,6 +62,13 @@ is **not** a single-variable measurement of reasoning — hot resampling, a non-
 
 **Headroom is 22 tasks.** The leader takes 79% of the suite where b3's took 96.5%.
 
+**Two of these scores are single samples with a wide error bar.** Ornith 1.5 35B and Muse Glimmer
+run non-greedy by design, and repeating them moved the score by **−4 and +8** — Muse going 80 → 88,
+which would lead the tier. They are not promoted on one higher sample: Muse (80–88) and Qwen3.8
+(82, greedy) are **not separable** without repeats of both. The rule of thumb this establishes is
+that a greedy arm's score is worth about ±1 and a non-greedy arm's about ±4 to ±8, so every
+confounded thinking arm above carries the wider bar on top of its confound.
+
 Two rows read oddly for a reason. **Qwen3.8 on GGUF has no thinking arm**, because
 `reasoning_effort` is ignored there and it is the only knob that makes this model's thinking arm
 terminate. **GLM 4.7 Flash on GGUF at 5/104** is a degenerate build, not a capability result.

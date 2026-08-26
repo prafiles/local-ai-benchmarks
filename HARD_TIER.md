@@ -394,26 +394,67 @@ Result files written before 2026-08-24 record no worker count, so none of this
 could be checked from the data; it had to be recovered from the drivers. `b5.py`
 now writes a `res["run"]` block so a result is auditable from itself.
 
-### Noise floor, per stack
+### Noise floor: two of them, and which one applies depends on the arm
 
-| stack | byte-identical | graded flips |
+| condition | byte-identical | score movement |
 |---|---|---|
-| Mac / MLX, 1 worker | 725/728 | **1 flip in 312 task-repeats** |
-| CUDA / vLLM, 4 workers | 76.7% | 8 flips |
+| Mac / MLX, greedy, 1 worker | 725/728 | **1 flip in 312 task-repeats** |
+| Mac / GGUF, non-greedy thinking | not expected | **4–8 tasks** |
+| CUDA / vLLM, greedy, same server | 104/104 at 1 and 4 workers | 0–1 tasks |
+| CUDA / vLLM, greedy, across a server restart | 29–46/104 | 1–3 tasks |
 
-Two of three Mac models reproduce perfectly, byte for byte, across runs a day
-apart with the model unloaded and reloaded in between. The floor is a property of
-the *request sequence*, not of greedy decoding: five back-to-back identical
-requests reproduce exactly, but the same prompt after a different predecessor can
-diverge — here at character 128, choosing `v.split('+', 1)[0]` over
-`v.split('+')[0]` — because MLX prompt-cache state carries across calls. A
-benchmark that runs 104 prompts in a fixed order reproduces that sequence, which
-is why the measured floor is this low. Change the order, or interleave another
-workload, and the guarantee is gone. That is exactly what 4 concurrent workers do
-on the CUDA node.
+**This file previously quoted the first row as "the" Mac noise floor.** It is not.
+It was measured on greedy off arms, and it does not describe a non-greedy arm at
+all. The two thinking-only models, both of which run non-greedy by design, were
+repeated and moved far more:
 
-Against a clean spread of 30 tasks (82 down to 52) a floor of 0–1 means the Mac
-tier's separations are signal. The CUDA node's are not comparably safe.
+| model | profile | run 1 | run 2 | Δ | churn |
+|---|---|---|---|---|---|
+| Ornith 1.5 35B A3B | t0.6/k20 | 66 | 62 | **−4** | 24 tasks |
+| Muse Glimmer 30B | t1.0/k64 | 80 | **88** | **+8** | 14 tasks |
+
+Muse's second run would lead the tier outright. It is not promoted to leader
+here, because one higher sample is not evidence of rank: the honest statement is
+that Muse (80–88 over two samples) and Qwen3.8 (82, greedy) are **not
+separable**, and separating them needs repeats of both.
+
+The general rule this establishes: **a greedy arm's score is worth roughly ±1; a
+non-greedy arm's is worth roughly ±4 to ±8.** Every confounded thinking arm in
+the confound table above runs non-greedy, so each of those deltas carries the
+wider bar in addition to its confound.
+
+### Reproducibility on CUDA is not ordered by worker count
+
+The 15-cell matrix on q35's off arm, greedy throughout:
+
+```
+condition            same instance    across restart   scores
+stock  1 worker      104/104 (100%)    29/104 (28%)    37 / 37 / 36
+stock  2 workers      53/104  (51%)    45/104 (43%)    34 / 35 / 35
+stock  4 workers     104/104 (100%)    46/104 (44%)    36 / 36 / 34
+```
+
+Two results, both against expectation. **1 and 4 workers are equally bit-exact
+within a server process; 2 workers is not.** Reproducibility is not monotonic in
+concurrency, so "run at 1 worker" was never buying what it claimed — 4 workers
+already reproduced. The divergence at 2 workers is visible in which tasks hit the
+output cap: identical sets at 1 and 4 workers, different sets at 2, with one run
+capping 8 tasks against the other's 4. Why 2 is the bad case is **not explained
+by this data**, and it should not be guessed at.
+
+**A server restart costs more than concurrency ever did**, at every worker count:
+28–44% agreement, versus 51–100% within an instance. That is the variable nobody
+was controlling.
+
+Scores move 34–37 across all nine runs while text agreement swings 100% → 28%.
+Byte-reproducibility is fragile; the score is not. For a benchmark that is the
+property that matters.
+
+`VLLM_BATCH_INVARIANT=1`, which vLLM documents as forcing a fixed reduction order,
+could not be tested: it fails engine startup on this stack. The docs require only
+compute capability ≥ 8.0 and this card is 8.9, so it is a configuration
+interaction — `--kv-cache-dtype fp8` and `--enforce-eager` are the suspects — and
+it remains untested rather than ruled out.
 
 ### TypeScript responds to reasoning — in three of four clean arms
 
@@ -452,6 +493,11 @@ Claims this file or its commits previously made, and what replaced them:
 - ~~"No prompted-CoT arm has ever been positive"~~ → two of the four numbers
   behind that were 4-worker serving artefacts. At 1 worker Mellum2 goes −9 →
   **+1** and Qwen2.5-Coder −5 → −2. CoT does nothing; it does not harm.
+- ~~"The Mac noise floor is 1 flip in 312"~~ → true for greedy arms only. Non-greedy
+  arms move 4–8 tasks; Muse Glimmer moved 8.
+- ~~"Concurrency destroys reproducibility; 1 worker fixes it"~~ → 4 workers is
+  equally bit-exact within a server process, 2 workers is the bad case, and a
+  server restart costs more than any of them.
 - ~~"Running at 1 worker is what makes a CUDA arm clean"~~ → necessary but not
   sufficient: both native arms still abort at greedy, so two of the four models
   cannot produce a clean arm at any concurrency.
