@@ -1,0 +1,126 @@
+# Hard tier — all results
+
+104 execution-graded tasks. Two machines, three backends. Generated from
+`harness/aggall.py`; see [HARD_TIER.md](HARD_TIER.md) for method.
+
+`clean` = both arms greedy, unresampled, same server process, 1 worker.
+Anything else is marked with why.
+
+## Clean reasoning measurements
+
+Every arm below differs between off and on in exactly one thing: whether
+reasoning happened.
+
+| Model | Stack | off | on | Δ | arm |
+|---|---|---|---|---|---|
+| Qwen3.8 27B @ medium | MLX | 58 | **82** | **+24** | native |
+| Gemma 4 26B A4B | GGUF | 58 | **80** | **+22** | native |
+| Gemma 4 12B QAT | vLLM | 47 | **64** | **+17** | native |
+| Qwen3.6 27B | GGUF | 61 | 75 | **+14** | native |
+| Qwen3.6 35B A3B | GGUF | 54 | 67 | **+13** | native |
+| Mellum2 12B A2.5B | vLLM | 43 | 44 | +1 | CoT |
+| DeepSeek VL2 | MLX | 1 | 1 | 0 | CoT |
+| Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 | CoT |
+| Qwen2.5-Coder 14B | vLLM | 37 | 35 | −2 | CoT |
+
+Native thinking: **+13 to +24**, five for five positive, across all three
+backends. Prompted CoT: **−2 to +1**, four arms, all within noise.
+
+Gemma 4 12B's arm required `presence_penalty=1.5` on **both** arms; at plain
+greedy its thinking arm does not terminate.
+
+## Confounded measurements
+
+Reported for completeness. Not comparable to the table above.
+
+| Model | Stack | off | on | Δ | why not clean |
+|---|---|---|---|---|---|
+| Gemma 4 26B A4B QAT | MLX | 54 | 82 | +28 | 47/104 answers from a hotter resample |
+| Gemma 4 12B QAT | vLLM | 46 | 66 | +20 | t0.60; 4 workers |
+| Qwen3.6 35B A3B | MLX | 48 | 65 | +17 | t1.00; 1 resample |
+| Qwen3.5 9B FP8 | vLLM | 36 | 52 | +16 | t1.00; 4 workers |
+| Qwen3.6 27B | MLX | 62 | 75 | +13 | 1 resample |
+| GLM 4.7 Flash | MLX | 35 | 47 | +12 | t1.00 |
+| Mellum2 12B A2.5B | vLLM | 45 | 36 | −9 | 4 workers |
+| Qwen2.5-Coder 14B | vLLM | 36 | 31 | −5 | 4 workers |
+
+**De-confounding shrinks the gain every time it has been measured** — five for
+five, never grown:
+
+| | confounded | clean |
+|---|---|---|
+| Gemma 4 26B | +28 | +22 |
+| Gemma 4 12B | +20 | +17 |
+| Qwen3.6 35B | +17 | +13 |
+| Mellum2 12B | −9 | **+1** |
+| Qwen2.5-Coder | −5 | −2 |
+
+## Thinking-only models
+
+No off arm by design. Standalone scores, not deltas.
+
+| Model | Stack | run 1 | run 2 | Δ |
+|---|---|---|---|---|
+| Muse Glimmer 30B | GGUF | 80 | **88** | +8 |
+| Ornith 1.5 35B A3B | GGUF | 66 | 62 | −4 |
+| Ornith 1.5 9B | vLLM | 39 | — | — |
+
+Muse's run 2 would lead the tier. It is **not** ranked first: 80–88 over two
+samples against Qwen3.8's greedy 82 are not separable.
+
+## Arms that cannot be measured
+
+| Model | Stack | problem |
+|---|---|---|
+| Qwen3.5 9B FP8 | vLLM | greedy thinking never terminates: 39h projected at 1 worker, 5/5 capped. `presence_penalty` did not help. `reasoning_effort`, `max_thinking_tokens`, template `thinking_budget` all silently ignored. No lever left. |
+| GLM 4.7 Flash | GGUF Q4_K_S | degenerate build. 5/104 with reasoning **off**. At 4× budget: 0/104, 102/104 capped, 1.39M tokens for zero answers. Thinking arm aborts at 87h. |
+| GLM 4.7 Flash | MLX | greedy thinking aborts at 46h projected. Only complete arm is t1.00 (confounded). |
+| Qwen3.8 27B | GGUF | no thinking arm possible: `reasoning_effort` is silently ignored on GGUF and is the only knob that makes this model terminate. Off arm 60/104. |
+
+## Noise floors — two, not one
+
+| Condition | byte-identical | score movement |
+|---|---|---|
+| Mac, greedy | 725/728 | 1 flip in 312 task-repeats |
+| Mac, non-greedy | not expected | **4–8 tasks** |
+| CUDA, greedy, same server | 104/104 | 0–1 |
+| CUDA, greedy, across restart | 29–46/104 | 1–3 |
+
+A greedy score is worth ~±1. A non-greedy score is worth ~±4 to ±8. Every
+confounded arm above runs non-greedy and carries the wider bar on top of its
+confound.
+
+## Concurrency matrix — q35 off arm, greedy
+
+| Condition | same server process | across a restart | scores |
+|---|---|---|---|
+| 1 worker | 104/104 (100%) | 29/104 (28%) | 37 / 37 / 36 |
+| 2 workers | 53/104 (51%) | 45/104 (43%) | 34 / 35 / 35 |
+| 4 workers | 104/104 (100%) | 46/104 (44%) | 36 / 36 / 34 |
+
+- Reproducibility is **not ordered by worker count**. 1 and 4 are bit-exact
+  within a process; 2 is not. Why 2 is the bad case is not explained by this
+  data.
+- **A server restart costs more than concurrency**, at every worker count.
+- Scores move 34–37 across all nine runs while text agreement swings 100%→28%.
+  Byte-reproducibility is fragile; the score is not.
+- The original "concurrency destroys reproducibility" claim compared a
+  *within-process* pair against an *across-restart* pair and credited the
+  difference to worker count.
+
+`VLLM_BATCH_INVARIANT=1` — **untested**. Fails engine startup on this stack
+(compute capability 8.9 vs a documented requirement of 8.0, so it is a config
+interaction). A probe isolating `--kv-cache-dtype fp8` and `--enforce-eager` was
+running when the node became unreachable.
+
+## Per category, best arm per model
+
+Generated by `harness/aggall.py`. TypeScript is the headroom block: best is
+7/15, and 6 of 14 models score ≤3. SQL and Bash are closest to saturating.
+
+## Reproducing
+
+```bash
+python3 harness/aggall.py     # every arm, both machines
+python3 harness/aggb5.py      # the original 7-model MLX subset
+```
