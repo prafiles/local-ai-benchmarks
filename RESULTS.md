@@ -108,10 +108,45 @@ confound.
   *within-process* pair against an *across-restart* pair and credited the
   difference to worker count.
 
-`VLLM_BATCH_INVARIANT=1` — **untested**. Fails engine startup on this stack
-(compute capability 8.9 vs a documented requirement of 8.0, so it is a config
-interaction). A probe isolating `--kv-cache-dtype fp8` and `--enforce-eager` was
-running when the node became unreachable.
+## Batch invariance — tested, does not fix it
+
+`VLLM_BATCH_INVARIANT=1` cannot run on Qwen3.5 at all:
+
+```
+RuntimeError: VLLM batch_invariant mode is not supported for GDN_ATTN.
+```
+
+All four flag combinations fail identically (fp8 KV on/off × enforce-eager
+on/off), so it is the attention backend — Qwen3.5 uses Gated DeltaNet — not a
+flag interaction. Gemma 4 12B uses standard attention and starts fine, so the
+matrix was re-run there with its own stock baseline.
+
+| Condition | same process | across restart | scores |
+|---|---|---|---|
+| stock, 2 workers | 64/104 (62%) | 68/104 (65%) | 44 / 43 / 44 |
+| stock, 4 workers | 58/104 (56%) | 55/104 (53%) | 42 / 41 / 42 |
+| **invariant, 2 workers** | 74/104 (71%) | 74/104 (71%) | 40 / 41 / 41 |
+| **invariant, 4 workers** | 54/104 (52%) | 57/104 (55%) | 40 / 39 / 38 |
+
+**It does not deliver determinism.** Best case is 71% at 2 workers, against a
+documented promise of batch-size independence. At 4 workers it is 52%, no better
+than stock. Nothing approaches the 100% that serial decoding gives.
+
+It also costs ~2–3 tasks of score (38–41 with, 41–44 without), so the
+deterministic kernels are not numerically neutral either.
+
+Two further results from the Gemma rows:
+
+- **Gemma at 4 workers does not reproduce (56%)** where q35 at 4 workers was
+  bit-exact (100%). The non-monotonic pattern is model-specific, not a property
+  of the stack.
+- For Gemma a restart costs nothing beyond concurrency (62% vs 65%), unlike q35
+  at 1 worker (100% vs 28%).
+
+Net: on this hardware and vLLM version there is **no configuration that gives
+reproducible text under concurrency**. Serial decoding within one server process
+is the only bit-exact setting found. Scores stay within a 38–44 band throughout,
+which is why the tier's numbers survive this while its byte-identity does not.
 
 ## Per category, best arm per model
 
