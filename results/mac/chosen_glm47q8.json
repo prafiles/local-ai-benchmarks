@@ -1,0 +1,8 @@
+{
+ "model": "glm-4.7-flash@q8_0",
+ "name": "t0/greedy",
+ "sampling": {
+  "temperature": 0.0
+ },
+ "why": "Greedy on both arms. Q8_0 exists to test whether GLM-4.7-Flash's Q4_K_S GGUF was quantisation damage: that build scores 5/104 with reasoning off and 0/104 at 4x budget. Greedy thinking has aborted on every GLM build so far (MLX 46h, Q4_K_S 87h); if it aborts here too that is the model, and this time the evidence is not from a broken file."
+}

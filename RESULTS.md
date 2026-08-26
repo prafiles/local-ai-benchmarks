@@ -73,9 +73,36 @@ samples against Qwen3.8's greedy 82 are not separable.
 | Model | Stack | problem |
 |---|---|---|
 | Qwen3.5 9B FP8 | vLLM | greedy thinking never terminates: 39h projected at 1 worker, 5/5 capped. `presence_penalty` did not help. `reasoning_effort`, `max_thinking_tokens`, template `thinking_budget` all silently ignored. No lever left. |
-| GLM 4.7 Flash | GGUF Q4_K_S | degenerate build. 5/104 with reasoning **off**. At 4× budget: 0/104, 102/104 capped, 1.39M tokens for zero answers. Thinking arm aborts at 87h. |
+| GLM 4.7 Flash | GGUF (any quant) | the GGUF conversion is broken, not the quantization — see below. |
 | GLM 4.7 Flash | MLX | greedy thinking aborts at 46h projected. Only complete arm is t1.00 (confounded). |
 | Qwen3.8 27B | GGUF | no thinking arm possible: `reasoning_effort` is silently ignored on GGUF and is the only knob that makes this model terminate. Off arm 60/104. |
+
+## GLM 4.7 Flash: the GGUF build is broken at every quant
+
+| build | off arm | thinking arm |
+|---|---|---|
+| MLX 6-bit | **35/104** | 47/104 (t1.00, confounded) |
+| GGUF Q4_K_S | 5/104 | abort, 5 tasks, 87h projected |
+| GGUF Q8_0 | **3/104** | abort, 5 tasks |
+
+Q8_0 was downloaded specifically to test whether Q4_K_S was quantization damage.
+It is not: **8-bit scores lower than 4-bit** (3 vs 5), and the same weights via
+MLX safetensors score 35. Doubling the bits per weight changed nothing, so the
+fault is the GGUF conversion of this model rather than precision loss.
+
+Both GGUF off arms are genuine: 104/104 tasks ran, `think_chars` 0 throughout, so
+reasoning really is suppressed. The failure is well-formed ` ```lang ` fences
+containing code that trails off mid-function. A 4× budget control on Q4_K_S made
+it worse, not better — caps went 39 → 102 and the score 5 → 0, burning 1.39M
+tokens for zero answers.
+
+**Consequence for an earlier retraction.** This repo withdrew the claim that
+GLM's greedy non-termination is the model rather than the MLX engine, on the
+grounds that the GGUF evidence came from a degenerate build. That reasoning still
+holds and the claim stays withdrawn — Q8_0 is degenerate too, so it is not
+independent evidence either. GLM has **no clean thinking measurement on any
+build**, and the question of whether greedy thinking can work for this model is
+still open.
 
 ## Noise floors — two, not one
 
