@@ -72,7 +72,17 @@ NOW=$(actual_ctx)
 [ "$NOW" = "$WIN" ] || { echo "ABORT: window changed $WIN -> $NOW mid-run"; exit 1; }
 
 echo "---- $KEY on arm (native thinking, budget 8000) @ window $WIN"
-B4_THINK=1 B4_COT=0 B4_BUDGET=8000 B4_BUDGET_MULT=1 B4_RETRIES=2 \
+# Retries are per-model, not a constant, and hardcoding them here silently
+# overrode the caller -- the same bug macpair5.sh carried until it was fixed
+# there. It matters most on exactly the models where it is most expensive: a
+# retry is only ever spent on an EMPTY answer, so a model that terminates
+# normally never sees one, while a model that does not stop pays a full budget
+# of generation per retry and triples the arm. It also decides whether the arm
+# is a measurement: a resample is drawn at a HOTTER temperature than the off
+# arm it is compared against, which is the confound that inflated Gemma 4 26B
+# from +22 to +28. Default stays 2 so every published b3 number is reproduced.
+B4_THINK=1 B4_COT=0 B4_BUDGET=8000 B4_BUDGET_MULT=1 \
+  B4_RETRIES="${B4_RETRIES:-2}" \
   B4_ESCALATE="${B4_ESCALATE:-1.0,1.15}" \
   B4_PROFILES="$(python3 mkprofiles.py "$KEY=$MODEL")" \
   python3 -u b3.py run "$MODEL" "$OUT/t_$KEY.json" || exit 1
