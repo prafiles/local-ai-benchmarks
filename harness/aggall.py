@@ -48,6 +48,10 @@ MAC_GGUF = [
     ("q38gguf",      "Qwen3.8 27B",       "GGUF; reasoning_effort silently ignored here"),
     ("ornith35",     "Ornith 1.5 35B A3B","GGUF Q8_0, thinking-only"),
     ("muse",         "Muse Glimmer 30B",  "GGUF Q8_0, thinking-only"),
+    # The arm switch was probed per model rather than assumed from the backend:
+    # reasoning_effort works here and is ignored on q38gguf above, both GGUF.
+    ("nemotron",     "Nemotron 3.5 Lightning 30B A3B",
+                     "GGUF Q4_K_M; greedy BOTH arms, 0 retries"),
 ]
 # Labels here are taken from the "model" field inside each result file, not
 # from the run key. The keys are short ("qwen", "q35") and do not say which
@@ -68,6 +72,12 @@ CUDA = [
     ("gemma.w1",    "Gemma 4 12B QAT",          "vLLM, 1 worker, greedy both arms"),
     ("mellum.w1",   "Mellum2 12B A2.5B FP8",    "vLLM, 1 worker, greedy both arms"),
     ("qwen.w1",     "Qwen2.5-Coder 14B AWQ",    "vLLM, 1 worker, greedy both arms"),
+    # greedy + presence_penalty 1.5 on BOTH arms. The penalty is a shared brake,
+    # not a confound -- it is what makes Gemma's thinking arm terminate at all,
+    # and applying it to one arm only is what would break the pair. This is the
+    # node's one clean native measurement; q35 spirals through the same brake.
+    ("gemma.pp",    "Gemma 4 12B QAT",          "vLLM, 1 worker, greedy + presence_penalty 1.5 both arms"),
+    ("q35.pp",      "Qwen3.5 9B FP8",           "vLLM, 1 worker, greedy + presence_penalty 1.5 both arms"),
 ]
 THINK_ONLY = {"muse", "ornith35", "ornith9"}
 
