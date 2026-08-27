@@ -40,51 +40,62 @@ is **not** a single-variable measurement of reasoning — hot resampling, a non-
 
 | Model | orig. | stack | off | on | best |
 |---|---|---|---|---|---|
+| **Muse Glimmer 30B** | new | GGUF | — | 80 / **88** | **88** |
 | **Qwen3.8 27B @ medium** | b3 | MLX | 58 | **82** | **82** |
 | Gemma 4 26B A4B QAT | b3 | MLX | 54 | 82 † | 82 † |
 | **Gemma 4 26B A4B** | b3 | GGUF | 58 | **80** | **80** |
-| **Muse Glimmer 30B** | new | GGUF | — | **80** | **80** |
 | **Qwen3.6 27B** | b3 | GGUF | 61 | **75** | **75** |
 | Qwen3.6 27B | b3 | MLX | 62 | 75 † | 75 † |
 | **Qwen3.6 35B A3B** | b3 | GGUF | 54 | **67** | **67** |
-| Gemma 4 12B QAT | b3 | vLLM | 46 | 66 † | 66 † |
-| Ornith 1.5 35B A3B | new | GGUF | — | 66 | 66 |
+| Ornith 1.5 35B A3B | new | GGUF | — | 66 / 62 | 66 |
 | Qwen3.6 35B A3B | b3 | MLX | 48 | 65 † | 65 † |
+| **Gemma 4 12B QAT** | b3 | vLLM | 47 | **64** | **64** |
 | Qwen3.8 27B | b3 | GGUF | 60 | — | 60 |
 | Qwen3-Coder-Next 80B | b3 | MLX | 53 | 52 | 53 |
 | Qwen3.5 9B FP8 | b3 | vLLM | 36 | 52 † | 52 † |
 | GLM 4.7 Flash | b3 | MLX | 35 | 47 † | 47 † |
-| Mellum2 12B A2.5B | b3 | vLLM | 45 | 36 † | 45 † |
+| **Mellum2 12B A2.5B** | b3 | vLLM | 43 | **44** | **44** |
 | Ornith 1.5 9B | new | vLLM | — | 39 | 39 |
-| Qwen2.5-Coder 14B | b3 | vLLM | 36 | 31 † | 36 † |
-| GLM 4.7 Flash | b3 | GGUF | 5 | — | 5 |
+| **Qwen2.5-Coder 14B** | b3 | vLLM | **37** | 35 | **37** |
+| GLM 4.7 Flash | b3 | GGUF | 5 (Q4) / 3 (Q8) | — | 5 |
 | DeepSeek VL2 | b3 | MLX | 1 | 1 | 1 |
 
-**Headroom is 22 tasks.** The leader takes 79% of the suite where b3's took 96.5%.
+The three CUDA rows in bold replaced older confounded scores after the node was
+re-run serially: Gemma 4 12B's clean arm runs `presence_penalty=1.5` on **both**
+arms because its plain-greedy thinking never terminates, and Mellum2 /
+Qwen2.5-Coder are 1-worker greedy re-runs of the arms that previously read
+45→36 and 36→31 at 4 workers.
 
-**Two of these scores are single samples with a wide error bar.** Ornith 1.5 35B and Muse Glimmer
-run non-greedy by design, and repeating them moved the score by **−4 and +8** — Muse going 80 → 88,
-which would lead the tier. They are not promoted on one higher sample: Muse (80–88) and Qwen3.8
-(82, greedy) are **not separable** without repeats of both. The rule of thumb this establishes is
-that a greedy arm's score is worth about ±1 and a non-greedy arm's about ±4 to ±8, so every
-confounded thinking arm above carries the wider bar on top of its confound.
+**Headroom held.** The best clean arm takes 79% of the suite where b3's leader took 96.5%.
+
+**Muse's 88 leads the table and is still not ranked above Qwen3.8's 82.** Ornith 1.5 35B and Muse
+Glimmer run non-greedy by design, and their repeat runs moved **−4 and +8**. Two samples spanning
+80–88 against a greedy, repeatable 82 are not separable without repeats of both. The rule of thumb
+this establishes is that a greedy arm's score is worth about ±1 and a non-greedy arm's about ±4 to
+±8, so every confounded thinking arm above carries the wider bar on top of its confound.
 
 Two rows read oddly for a reason. **Qwen3.8 on GGUF has no thinking arm**, because
 `reasoning_effort` is ignored there and it is the only knob that makes this model's thinking arm
-terminate. **GLM 4.7 Flash on GGUF at 5/104** is a degenerate build, not a capability result.
+terminate. **GLM 4.7 Flash on GGUF** is a degenerate build at every quant, not a capability
+result — Q8_0 scores *below* Q4_K_S (3 vs 5) while the same weights on MLX score 35, so the fault
+is the conversion, not the quantization.
 
 ### Does reasoning help? Only the trained kind, and only when measured cleanly
 
-Strip out every arm that is not single-variable and six remain out of nineteen:
+Strip out every arm that is not single-variable and nine remain — five native, four CoT, at
+least one of each on every backend:
 
 | Model | stack | off | on | Δ |
 |---|---|---|---|---|
 | **Qwen3.8 27B @ medium** | MLX | 58 | **82** | **+24** |
 | Gemma 4 26B A4B | GGUF | 58 | **80** | +22 |
+| Gemma 4 12B QAT | vLLM | 47 | **64** | +17 *(pp 1.5 both arms)* |
 | Qwen3.6 27B | GGUF | 61 | 75 | +14 |
 | Qwen3.6 35B A3B | GGUF | 54 | 67 | +13 |
-| Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 *(prompted CoT)* |
+| Mellum2 12B A2.5B | vLLM | 43 | 44 | +1 *(prompted CoT)* |
 | DeepSeek VL2 | MLX | 1 | 1 | 0 *(prompted CoT)* |
+| Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 *(prompted CoT)* |
+| Qwen2.5-Coder 14B | vLLM | 37 | 35 | −2 *(prompted CoT)* |
 
 **Every clean native-thinking arm is positive (+13 to +24). Prompted CoT lands within ±2 of
 zero** — −2, −1, 0 and +1 once concurrency is removed.
@@ -97,14 +108,17 @@ about four times harder. So prompted CoT does **nothing** here rather than harm.
 native-vs-CoT asymmetry is unaffected: +13..+24 against −2..+1 does not depend on which end of
 that second range is right.
 
-**Removing a confound always shrinks the gain.** Gemma reads +28 with hot resampling and +22
-measured cleanly; Qwen3.6 35B reads +17 at t1.00 and +13 at greedy.
+**Removing a confound has shrunk the apparent effect every time — five for five.** +28 → +22
+(Gemma 26B, resampling), +20 → +17 (Gemma 12B), +17 → +13 (Qwen3.6 35B), and the two "reasoning
+hurts" results −9 and −5 collapsed to +1 and −2 once concurrency was removed.
 
-**The CUDA node has two clean arms, both CoT, and no clean native measurement.** All four of its
-models were re-run at 1 worker with greedy on both arms. The two CoT models completed. Both native
-models' thinking arms **abort at greedy regardless of worker count** — Qwen3.5 projecting 39h and
-Gemma 38h, with 4–5 of 5 tasks capped and no answers. Their +16 and +20 therefore stay confounded
-and cannot be cleaned by re-running, because the clean configuration does not terminate.
+**The CUDA node's native arms both spiral at plain greedy** — at 1 worker, with no concurrency to
+blame, both burn the full 32,000-token reasoning budget and answer nothing (39h and 38h
+projected). One was recovered: `presence_penalty=1.5` on **both** arms keeps decoding
+deterministic and makes Gemma 4 12B terminate, giving the node its clean native measurement
+(+17). Qwen3.5 9B spirals through the same brake, and `reasoning_effort`,
+`max_thinking_tokens`, and template `thinking_budget` are all accepted and silently ignored —
+no lever is left, so its +16 stays permanently confounded.
 
 ### Three findings that were harness bugs, not model behaviour
 
@@ -114,14 +128,30 @@ and cannot be cleaned by re-running, because the clean configuration does not te
 - **Gemma's "broken reasoning mode"** is [mlx-engine#337](https://github.com/lmstudio-ai/mlx-engine/issues/337).
   On GGUF the same model gains +22 cleanly.
 - **The CUDA node's numbers** were all produced at 4 concurrent workers — the setting at which it
-  reproduces only 46/104 of its own greedy run, against 104/104 at 1 worker. It contributes no
-  clean native-thinking measurement.
+  reproduces only 46/104 of its own greedy run. Re-running serially rescued three of its four
+  models; measuring what concurrency actually does turned into its own set of experiments (below).
 
 **TypeScript** was b3's blindest spot: every model scored 49–50 out of 50 there, and 0–5 out of 15
-here. Reasoning moves it in three of four clean arms (3→7, 3→6, 1→5, and 3→3).
+here. Reasoning moves it in three of five clean arms (3→7, 3→6, 1→5, 3→3, and 4→3).
+
+### Reproducibility was measured, not assumed
+
+- **Two noise floors, not one.** Greedy: 725/728 answers byte-identical on the Mac, 1 graded flip
+  in 312 task-repeats — a greedy score is worth ~±1. Non-greedy: 4–8 tasks per repeat.
+- **Concurrency is not what breaks CUDA reproducibility — restarts are.** On q35's greedy off arm,
+  1 and 4 workers are both 104/104 bit-exact within a server process (2 workers is the unexplained
+  outlier at 51%), while the same run across a server restart agrees only 28–44%. Scores move
+  34–37 throughout: byte-identity is fragile, the score is not.
+- **`VLLM_BATCH_INVARIANT=1` does not fix it.** It cannot start at all on Qwen3.5 (GDN_ATTN,
+  categorically), and on Gemma 4 12B it tops out at 71% byte-identical against a documented
+  promise of batch-size independence — while costing 2–3 tasks of score. Serial decoding within
+  one server process is the only bit-exact configuration found on this stack.
 
 > **See [HARD_TIER.md](HARD_TIER.md)** for the design, the validation gates, the confound
-> taxonomy, the per-stack noise floors, and a list of the claims this project has had to retract.
+> taxonomy, the reproducibility experiments in full, and the claims this project has had to
+> retract. **[RESULTS.md](RESULTS.md)** is the condensed all-experiments report, rendered as an
+> [interactive page](https://claude.ai/code/artifact/0758f1cc-e4e8-4dde-b414-aec5253e58d5). The
+> drivers for the re-runs live in [`serving/hard/`](serving/hard/).
 
 ---
 

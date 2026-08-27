@@ -167,10 +167,15 @@ experimental variable rather than a setting.
 
 ## Results
 
-Seventeen arms across two machines and three serving backends: LM Studio / MLX
-and LM Studio / GGUF on an Apple M2 Max 64 GB, and vLLM 0.22.1 on an RTX 4060 Ti
-16 GB. `harness/aggall.py` prints the whole roster; `harness/aggb5.py` prints the
+Two machines and three serving backends: LM Studio / MLX and LM Studio / GGUF on
+an Apple M2 Max 64 GB, and vLLM 0.22.1 on an RTX 4060 Ti 16 GB.
+`harness/aggall.py` prints the whole roster; `harness/aggb5.py` prints the
 original seven-model MLX subset that this file's first version reported.
+[RESULTS.md](RESULTS.md) is the condensed table-driven report of every
+experiment, and the
+[interactive report](https://claude.ai/code/artifact/0758f1cc-e4e8-4dde-b414-aec5253e58d5)
+renders it. The drivers for the re-runs and reproducibility experiments are in
+[`serving/hard/`](serving/hard/).
 
 ### Most published reasoning gains are not measurements
 
@@ -182,10 +187,13 @@ that rule is enforced, most of the deltas this project has produced fail it:
 |---|---|
 | Qwen3.8 27B @medium  58 → 82  **(+24)** | Gemma 4 26B MLX  54 → 82 (+28) — 47/104 resampled hotter |
 | Gemma 4 26B GGUF  58 → 80  **(+22)** | Qwen3.6 35B MLX  48 → 65 (+17) — t1.00 |
-| Qwen3.6 27B GGUF  61 → 75  **(+14)** | Gemma 4 12B CUDA  46 → 66 (+20) — t0.60, 4 workers |
-| Qwen3.6 35B A3B GGUF  54 → 67  **(+13)** | Qwen3.5 9B CUDA  36 → 52 (+16) — t1.00, 4 workers |
-| Qwen3-Coder-Next  53 → 52  (−1) *CoT* | GLM 4.7 Flash MLX  35 → 47 (+12) — t1.00 |
-| DeepSeek VL2  1 → 1  (0) *CoT* | Qwen3.6 27B MLX  62 → 75 (+13) — 1 resample |
+| Gemma 4 12B CUDA  47 → 64  **(+17)** *pp1.5 both arms* | Gemma 4 12B CUDA  46 → 66 (+20) — t0.60, 4 workers |
+| Qwen3.6 27B GGUF  61 → 75  **(+14)** | Qwen3.5 9B CUDA  36 → 52 (+16) — t1.00, 4 workers |
+| Qwen3.6 35B A3B GGUF  54 → 67  **(+13)** | GLM 4.7 Flash MLX  35 → 47 (+12) — t1.00 |
+| Mellum2 12B CUDA  43 → 44  (+1) *CoT* | Qwen3.6 27B MLX  62 → 75 (+13) — 1 resample |
+| DeepSeek VL2  1 → 1  (0) *CoT* | Mellum2 12B CUDA  45 → 36 (−9) — 4 workers |
+| Qwen3-Coder-Next  53 → 52  (−1) *CoT* | Qwen2.5-Coder CUDA  36 → 31 (−5) — 4 workers |
+| Qwen2.5-Coder CUDA  37 → 35  (−2) *CoT* | |
 
 Two mechanisms do the damage. **Hot resampling**: `ask()` retries at a higher
 temperature when a trace returns no answer, so on a model that often returns
@@ -195,15 +203,17 @@ own greedy profile — one is a tier lead, the other is two tasks *worse* than n
 thinking. **Non-greedy profiles**: an arm whose profile is t1.00 differs from its
 greedy off arm twice over.
 
-The direction of the error is consistent: **every time a confound is removed the
-gain shrinks.** Gemma goes +28 → +22 measured cleanly on GGUF; Qwen3.6 35B goes
-+17 → +13. Confounding inflates.
+The direction of the error is consistent: **every time a confound has been
+removed the apparent effect shrank — five for five.** +28 → +22 (Gemma 26B),
++20 → +17 (Gemma 12B), +17 → +13 (Qwen3.6 35B), and the two "reasoning hurts"
+results −9 and −5 collapsed to +1 and −2. Confounding inflates in both
+directions away from zero.
 
 ### Native thinking helps; prompted CoT does essentially nothing
 
-Across the four clean native arms the gain is **+13 to +24**, and every one is
-positive. Prompted CoT, measured without concurrency, lands within **±2 of
-zero**:
+Across the five clean native arms — one now on each of the three backends — the
+gain is **+13 to +24**, and every one is positive. Prompted CoT, measured
+without concurrency, lands within **±2 of zero**:
 
 | CoT arm | stack | Δ |
 |---|---|---|
@@ -243,38 +253,48 @@ single-variable measurement of reasoning, for the reasons in the table above.
 
 | # | Model | orig. suite | stack | off | on | best |
 |---|---|---|---|---|---|---|
-| 1 | Qwen3.8 27B @ medium | b3 | MLX | 58 | **82** | **82** |
-| 1 | Gemma 4 26B A4B QAT | b3 | MLX | 54 | 82 † | 82 † |
-| 3 | Gemma 4 26B A4B | b3 | GGUF | 58 | **80** | **80** |
-| 3 | Muse Glimmer 30B | new | GGUF | — | **80** | **80** |
+| 1 | Muse Glimmer 30B | new | GGUF | — | 80 / **88** | **88** |
+| 2 | Qwen3.8 27B @ medium | b3 | MLX | 58 | **82** | **82** |
+| 2 | Gemma 4 26B A4B QAT | b3 | MLX | 54 | 82 † | 82 † |
+| 4 | Gemma 4 26B A4B | b3 | GGUF | 58 | **80** | **80** |
 | 5 | Qwen3.6 27B | b3 | GGUF | 61 | **75** | **75** |
 | 5 | Qwen3.6 27B | b3 | MLX | 62 | 75 † | 75 † |
 | 7 | Qwen3.6 35B A3B | b3 | GGUF | 54 | **67** | **67** |
-| 8 | Gemma 4 12B QAT | b3 | vLLM | 46 | 66 † | 66 † |
-| 8 | Ornith 1.5 35B A3B | new | GGUF | — | 66 | 66 |
-| 10 | Qwen3.6 35B A3B | b3 | MLX | 48 | 65 † | 65 † |
-| 11 | Qwen3.8 27B | b3 | GGUF | 60 | — | 60 |
-| 12 | Qwen3-Coder-Next 80B | b3 | MLX | 53 | 52 | 53 |
-| 13 | Qwen3.5 9B FP8 | b3 | vLLM | 36 | 52 † | 52 † |
-| 14 | GLM 4.7 Flash | b3 | MLX | 35 | 47 † | 47 † |
-| 15 | Mellum2 12B A2.5B | b3 | vLLM | 45 | 36 † | 45 † |
-| 16 | Ornith 1.5 9B | new | vLLM | — | 39 | 39 |
-| 17 | Qwen2.5-Coder 14B | b3 | vLLM | 36 | 31 † | 36 † |
-| 18 | GLM 4.7 Flash | b3 | GGUF | 5 | — | 5 |
-| 19 | DeepSeek VL2 | b3 | MLX | 1 | 1 | 1 |
+| 8 | Ornith 1.5 35B A3B | new | GGUF | — | 66 / 62 | 66 |
+| 9 | Qwen3.6 35B A3B | b3 | MLX | 48 | 65 † | 65 † |
+| 10 | Gemma 4 12B QAT | b3 | vLLM | 47 | **64** | **64** |
+| 10 | Gemma 4 12B QAT | b3 | vLLM | 46 | 66 † | 66 † |
+| 12 | Qwen3.8 27B | b3 | GGUF | 60 | — | 60 |
+| 13 | Qwen3-Coder-Next 80B | b3 | MLX | 53 | 52 | 53 |
+| 14 | Qwen3.5 9B FP8 | b3 | vLLM | 36 | 52 † | 52 † |
+| 15 | GLM 4.7 Flash | b3 | MLX | 35 | 47 † | 47 † |
+| 16 | Mellum2 12B A2.5B | b3 | vLLM | 43 | **44** | **44** |
+| 17 | Ornith 1.5 9B | new | vLLM | — | 39 | 39 |
+| 18 | Qwen2.5-Coder 14B | b3 | vLLM | **37** | 35 | **37** |
+| 19 | GLM 4.7 Flash | b3 | GGUF | 5 (Q4) / 3 (Q8) | — | 5 |
+| 20 | DeepSeek VL2 | b3 | MLX | 1 | 1 | 1 |
 
-**Headroom is 22 tasks.** The leader takes 79% of the suite, against b3's 96.5% —
-the tier still discriminates, which is what it was built for.
+Muse's two runs and Ornith's two runs are shown as ranges; a thinking-only model
+runs non-greedy by design and two samples are a range, not a rank. Muse's 88 is
+the highest single run in the tier and it is still **not** ranked above Qwen3.8's
+greedy, repeatable 82 — 80–88 over two samples and 82 exact are not separable.
+Gemma 4 12B's clean row (47 → 64, `presence_penalty=1.5` on both arms) is the
+one to cite; its 4-worker t0.60 row is retained above it for continuity.
+Mellum2's and Qwen2.5-Coder's rows are their clean 1-worker re-runs; the old
+4-worker scores (45 → 36, 36 → 31) appear in the confound table.
+
+**Headroom held.** The best clean arm takes 79% of the suite, against b3's
+96.5% — the tier still discriminates, which is what it was built for.
 
 Two rows need reading carefully. **Qwen3.8 on GGUF has no thinking arm at all**
 because `reasoning_effort` is silently ignored there, and it is the only knob
 that makes this model's thinking arm terminate; its 60 is an off-arm score.
-**GLM 4.7 Flash on GGUF at 5/104** is a degenerate build, not a capability
-result — see below.
+**GLM 4.7 Flash on GGUF at 5/104 (Q4_K_S) and 3/104 (Q8_0)** is a degenerate
+build at every quant, not a capability result — see below.
 
 Muse Glimmer is worth singling out for something other than its score: **0 capped
-and 0 unanswered across all 104 tasks**. Every other thinking arm in the tier
-hits the token ceiling somewhere. It ended every trace on its own.
+and 0 unanswered across all 208 tasks of both runs**. Every other thinking arm in
+the tier hits the token ceiling somewhere. It ended every trace on its own.
 
 ### The same list, clean arms only
 
@@ -285,14 +305,20 @@ which is the honest picture of what has actually been measured:
 |---|---|---|---|---|
 | **Qwen3.8 27B @ medium** | MLX | 58 | **82** | **+24** |
 | Gemma 4 26B A4B | GGUF | 58 | **80** | +22 |
+| Gemma 4 12B QAT | vLLM | 47 | **64** | +17 |
 | Qwen3.6 27B | GGUF | 61 | 75 | +14 |
 | Qwen3.6 35B A3B | GGUF | 54 | 67 | +13 |
-| Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 (CoT) |
+| Mellum2 12B A2.5B | vLLM | 43 | 44 | +1 (CoT) |
 | DeepSeek VL2 | MLX | 1 | 1 | 0 (CoT) |
+| Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 (CoT) |
+| Qwen2.5-Coder 14B | vLLM | 37 | 35 | −2 (CoT) |
 
-Six arms out of nineteen. **Every model that only exists on the CUDA node is
-absent from this table**, because all four of its b3 models ran at 4 concurrent
-workers and both of its native arms additionally ran non-greedy.
+Nine arms. The CUDA node, which contributed none of these when this section was
+first written, now contributes three — the two CoT models re-run at 1 worker,
+and Gemma 4 12B under the shared `presence_penalty` brake described below. The
+two arms that remain unmeasurable (Qwen3.5 9B, GLM 4.7 Flash) are unmeasurable
+because greedy thinking does not terminate on them and no working brake exists,
+not because the runs were skipped.
 
 ### Qwen3.8 was never unmeasurable — it was inheriting `xhigh`
 
@@ -330,12 +356,23 @@ so on the GGUF runs the window is a control rather than an observed variable.
 These are **not** a clean engine A/B against the MLX numbers: the quantisations
 differ between builds.
 
-### GLM 4.7 Flash: a broken build, and a question left open
+### GLM 4.7 Flash: broken at every quant, and a question left open
 
-The GLM Q4_K_S GGUF file is degenerate. With reasoning switched off entirely
-(`think_chars` 0 across all 104) it scores **5/104** against 35/104 for the MLX
-6-bit build of the same model, emitting well-formed ` ```lang ` fences wrapped
-around code that does not work:
+The GLM GGUF conversion is degenerate at every quantization tested:
+
+| build | off arm | thinking arm |
+|---|---|---|
+| MLX 6-bit | **35/104** | 47/104 (t1.00, confounded) |
+| GGUF Q4_K_S | 5/104 | abort at 5 tasks, 87h projected |
+| GGUF Q8_0 | **3/104** | abort at 5 tasks |
+
+Q8_0 was downloaded specifically to test whether Q4_K_S was quantization damage.
+It is not: **8-bit scores lower than 4-bit**, and the same weights via MLX
+safetensors score 35. Doubling the bits per weight changed nothing, so the fault
+is the GGUF conversion of this model rather than precision loss. Both off arms
+are genuine — reasoning switched off entirely, `think_chars` 0 across all 104 —
+and both emit well-formed ` ```lang ` fences wrapped around code that does not
+work:
 
 ```python
 def cmp_semver(a, b):     # after trailing off into whitespace mid-function
@@ -347,14 +384,16 @@ the caps went **39 → 102** and the score went **5 → 0**, spending 1,389,516
 tokens over 12.7 hours to answer nothing, with 2 of 104 tasks reaching a natural
 stop. It does not overrun a budget that is too small; it does not stop.
 
-Its thinking arm aborted at a projected **87 hours**. Its MLX greedy thinking arm
-had already aborted at a projected 46 hours — but **that pair proves nothing
-about the model.** A build this broken is not independent evidence, so whether
-GLM's greedy non-termination is the model or the MLX engine remains open, and
-answering it needs a GLM GGUF at Q6/Q8 or the MLX build at a lower temperature.
+The Q4_K_S thinking arm aborted at a projected **87 hours**; the MLX greedy
+thinking arm had already aborted at a projected 46 — but **that pair proves
+nothing about the model.** A degenerate build is not independent evidence, and
+the Q8_0 result closes the escape route this file previously left open:
+"a GLM GGUF at Q6/Q8" cannot arbitrate, because every GGUF quant is broken the
+same way. Whether GLM's greedy non-termination is the model or the MLX engine
+stays open pending a non-degenerate conversion.
 
-GLM 4.7 Flash therefore has **no single-variable thinking measurement on either
-backend**. Its only complete thinking arm is the MLX one at t1.00, which is
+GLM 4.7 Flash therefore has **no single-variable thinking measurement on any
+build**. Its only complete thinking arm is the MLX one at t1.00, which is
 confounded.
 
 ### The CUDA node: re-run at 1 worker, and what it settled
@@ -379,11 +418,27 @@ Gemma projected 38h with 4/5 capped, though one task did terminate normally at
 belongs to the models, not to the serving concurrency — which is what the re-run
 was built to find out, and the answer is negative.
 
-The node therefore now has **two clean arms, both prompted CoT**, and still no
-single-variable measurement of native thinking. Its +16 and +20 remain
-confounded twice over, by t1.00/t0.60 sampling and by 4-way concurrency, and
-they cannot be cleaned by re-running because the clean configuration does not
-terminate.
+That left the node with two clean arms, both prompted CoT, and a question:
+whether any brake could make greedy thinking terminate without breaking the
+single-variable rule. One could — for one of the two models.
+
+**`presence_penalty` recovered Gemma 4 12B.** The vendor documents
+`presence_penalty` 0–2 as the knob for exactly this failure ("reduce endless
+repetitions"), and it composes with temperature 0 — decoding stays deterministic
+argmax, so the greedy reproducibility properties survive. Applied at 1.5 to
+**both** arms, keeping the pair single-variable under a shared brake, Gemma
+terminates and measures **47 → 64 (+17)** — in line with the Mac's clean native
+arms, and the node's first clean native measurement. The penalty is not free:
+it moved the off arm too (44 plain greedy → 47), which is exactly why it must be
+applied to both sides.
+
+**The same brake did not save Qwen3.5 9B.** At `presence_penalty=1.5` its
+thinking arm still failed to terminate, while the off arm dropped 3 tasks
+(36 → 33). `reasoning_effort`, `max_thinking_tokens`, and the chat template's
+`thinking_budget` are all accepted by the server and silently ignored
+(`chosen_q35.json` records the probes). Every documented lever has now been
+tried: this model's reasoning mode is unmeasurable on this stack, and its +16
+stays permanently confounded.
 
 Off-arm scores move only 2–4 tasks across worker counts (q35 36/34 at 4 vs
 37/37/36 at 1; Gemma 46/48 vs 44), and the 1-worker runs are not systematically
@@ -450,13 +505,42 @@ Scores move 34–37 across all nine runs while text agreement swings 100% → 28
 Byte-reproducibility is fragile; the score is not. For a benchmark that is the
 property that matters.
 
-`VLLM_BATCH_INVARIANT=1`, which vLLM documents as forcing a fixed reduction order,
-could not be tested: it fails engine startup on this stack. The docs require only
-compute capability ≥ 8.0 and this card is 8.9, so it is a configuration
-interaction — `--kv-cache-dtype fp8` and `--enforce-eager` are the suspects — and
-it remains untested rather than ruled out.
+### Batch-invariant mode: tested, and it does not fix it
 
-### TypeScript responds to reasoning — in three of four clean arms
+An earlier revision of this file said `VLLM_BATCH_INVARIANT=1` could not be
+tested and suspected a flag interaction. Both halves were wrong. On Qwen3.5 the
+startup failure is
+`RuntimeError: VLLM batch_invariant mode is not supported for GDN_ATTN` across
+all four combinations of `--kv-cache-dtype fp8` and `--enforce-eager`, so it is
+the model's Gated DeltaNet attention backend, not a flag — categorical, not a
+configuration problem. Gemma 4 12B uses standard attention, starts fine, and ran
+the full matrix against its own stock baseline (three runs per cell, greedy off
+arm):
+
+```
+condition                same instance    across restart   scores
+stock      2 workers      64/104 (62%)     68/104 (65%)    44 / 43 / 44
+stock      4 workers      58/104 (56%)     55/104 (53%)    42 / 41 / 42
+invariant  2 workers      74/104 (71%)     74/104 (71%)    40 / 41 / 41
+invariant  4 workers      54/104 (52%)     57/104 (55%)    40 / 39 / 38
+```
+
+- **It does not deliver determinism.** Best case 71% byte-identical at 2
+  workers against a documented promise of batch-size independence; at 4 workers
+  52%, no better than stock. Nothing approaches the 100% serial decoding gives.
+- **It costs score**: 38–41 with the deterministic kernels, 41–44 without. They
+  are not numerically neutral.
+- **The concurrency pattern is model-specific, not a property of the stack.**
+  Gemma at stock 4 workers does not reproduce (56%) where q35 at 4 workers was
+  bit-exact; and Gemma pays nothing for a restart (62% vs 65%) where q35 at 1
+  worker fell 100% → 28%.
+
+Net: on this hardware and vLLM version there is **no configuration that gives
+reproducible text under concurrency**. Serial decoding within one server process
+is the only bit-exact setting found. Scores stay inside a 38–44 band throughout,
+which is why the tier's numbers survive this while its byte-identity does not.
+
+### TypeScript responds to reasoning — in three of five clean arms
 
 b3 scored every model 49 or 50 out of 50 on TypeScript. Here the off arms run
 0–5 out of 15, and reasoning moves it:
@@ -464,15 +548,17 @@ b3 scored every model 49 or 50 out of 50 on TypeScript. Here the off arms run
 | clean native arm | TS off → on |
 |---|---|
 | Qwen3.8 27B @medium | 3 → 7 |
-| Gemma 4 26B GGUF | 3 → 6 |
 | Qwen3.6 27B GGUF | 1 → 5 |
+| Gemma 4 26B GGUF | 3 → 6 |
 | Qwen3.6 35B A3B GGUF | 3 → 3 |
+| Gemma 4 12B vLLM (pp) | 4 → 3 |
 
 This file has now been wrong about TypeScript in **both** directions. It first
 claimed TS was immune to reasoning, generalised from a single model. That was
-wrong. The correction then overstated the opposite — three cases do not make a
-universal rule, and the fourth clean arm moves TS not at all. The supported claim
-is that TS *usually* responds and starts far lower than b3 suggested.
+wrong. The correction then overstated the opposite — and the fifth clean arm
+promptly moved TS *down* by one. Three of five positive, one flat, one negative:
+the supported claim is that TS *usually* responds and starts far lower than b3
+suggested.
 
 ### Corrections
 
@@ -481,7 +567,7 @@ Claims this file or its commits previously made, and what replaced them:
 - ~~"Qwen3.8's thinking arm is unmeasurable at 79 h"~~ → it inherited the model's
   `xhigh` default; at `medium` it is the tier leader at +24.
 - ~~"TypeScript is immune to reasoning"~~ → then ~~"TypeScript responds"~~ →
-  it responds in three of four clean arms.
+  it responds in three of five clean arms.
 - ~~"Gemma's reasoning mode fails"~~ → an MLX engine bug; +22 clean on GGUF.
 - ~~"GLM's greedy non-termination is the model, not the engine"~~ → withdrawn;
   the GGUF build that was supposed to be the independent test is degenerate.
@@ -501,11 +587,30 @@ Claims this file or its commits previously made, and what replaced them:
 - ~~"Running at 1 worker is what makes a CUDA arm clean"~~ → necessary but not
   sufficient: both native arms still abort at greedy, so two of the four models
   cannot produce a clean arm at any concurrency.
+- ~~"The CUDA node has no clean native measurement, and cannot get one because
+  the clean configuration does not terminate"~~ → `presence_penalty=1.5` on
+  both arms recovered Gemma 4 12B: 47 → 64 (+17), clean. Qwen3.5 stays
+  unmeasurable.
+- ~~"GLM at Q6/Q8 would separate the model from the broken build"~~ → Q8_0
+  scores 3/104, *below* Q4_K_S's 5. The conversion is broken at every quant, so
+  no GGUF build can arbitrate.
+- ~~"VLLM_BATCH_INVARIANT could not be tested; suspects are fp8 KV and
+  enforce-eager"~~ → tested. The startup failure is categorical (GDN_ATTN, all
+  four flag combinations), and on a model where it runs it neither delivers
+  determinism (52–71% vs a promise of independence) nor leaves the score alone
+  (−2 to −3 tasks).
+- ~~"1 and 4 workers being bit-exact is a property of the stack"~~ → it is a
+  property of the model. Gemma at 4 workers reproduces only 56% where q35
+  reproduced 100%.
 
 ### What is still open
 
-- GLM 4.7 Flash at Q6/Q8, to separate the model from the broken build.
-- The CUDA node re-run at 1 worker, to give it any clean native measurement.
-- Repeat arms for Ornith 1.5 and Muse Glimmer — thinking-only models with no
-  noise floor of their own.
+- Qwen3.5 9B's thinking arm. Every documented brake has failed; it may simply be
+  unmeasurable under deterministic decoding on this stack.
 - Qwen3.8's GGUF thinking arm, which cannot use `reasoning_effort` at all.
+- GLM 4.7 Flash everywhere, pending a non-degenerate GGUF conversion.
+- Why 2 workers is the reproducibility outlier when 1 and 4 are bit-exact on
+  q35. The data localises it (different cap-sets at 2 workers) but does not
+  explain it.
+- Third runs for Muse Glimmer and Ornith 1.5 — their 8- and 4-task spreads are
+  two-sample ranges, not measured floors.

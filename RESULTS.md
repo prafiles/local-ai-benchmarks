@@ -1,7 +1,8 @@
 # Hard tier — all results
 
 104 execution-graded tasks. Two machines, three backends. Generated from
-`harness/aggall.py`; see [HARD_TIER.md](HARD_TIER.md) for method.
+`harness/aggall.py`; see [HARD_TIER.md](HARD_TIER.md) for method. Rendered as an
+[interactive report](https://claude.ai/code/artifact/0758f1cc-e4e8-4dde-b414-aec5253e58d5).
 
 `clean` = both arms greedy, unresampled, same server process, 1 worker.
 Anything else is marked with why.
