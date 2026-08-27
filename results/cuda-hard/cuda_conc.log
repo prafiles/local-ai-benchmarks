@@ -1,0 +1,257 @@
+waiting for cuda_w1.sh to finish...
+w1 sweep finished Tue Aug 25 15:41:30 UTC 2026
+ Container gemma4-vllm Stopping 
+ Container gemma4-vllm Stopped 
+ Container gemma4-vllm Removing 
+ Container gemma4-vllm Removed 
+ Network gemma4-vllm-aio_default Removing 
+ Network gemma4-vllm-aio_default Removed 
+######## COMPLETE CONCURRENCY MATRIX
+Tue Aug 25 15:41:32 UTC 2026
+
+=============== stock kernels, 2 workers
+(EngineCore pid=106) INFO 08-25 15:44:09 [kv_cache_utils.py:1733] GPU KV cache size: 119,954 tokens
+---- off arm  key=q35.w2a  workers=2  15:44:29
+  104 to run, 2 concurrent
+  5/104  4.2m elapsed, ~1.4h left  [capped 1, no-answer 0]
+  10/104  6.9m elapsed, ~1.1h left  [capped 2, no-answer 0]
+  15/104  9.7m elapsed, ~1.0h left  [capped 3, no-answer 0]
+  20/104  11.3m elapsed, ~0.8h left  [capped 3, no-answer 0]
+  25/104  13.3m elapsed, ~0.7h left  [capped 4, no-answer 0]
+  30/104  14.1m elapsed, ~0.6h left  [capped 4, no-answer 0]
+  35/104  15.3m elapsed, ~0.5h left  [capped 4, no-answer 0]
+  40/104  16.3m elapsed, ~0.4h left  [capped 4, no-answer 0]
+  45/104  17.1m elapsed, ~0.4h left  [capped 4, no-answer 0]
+  50/104  21.6m elapsed, ~0.4h left  [capped 6, no-answer 0]
+  55/104  22.5m elapsed, ~0.3h left  [capped 6, no-answer 0]
+  60/104  24.7m elapsed, ~0.3h left  [capped 6, no-answer 0]
+  65/104  25.0m elapsed, ~0.2h left  [capped 6, no-answer 0]
+  70/104  25.2m elapsed, ~0.2h left  [capped 7, no-answer 0]
+  75/104  25.5m elapsed, ~0.2h left  [capped 7, no-answer 0]
+  80/104  25.7m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  85/104  25.8m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  90/104  25.9m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  95/104  25.9m elapsed, ~0.0h left  [capped 7, no-answer 0]
+  100/104  26.0m elapsed, ~0.0h left  [capped 7, no-answer 0]
+  104/104  26.7m elapsed, ~0.0h left  [capped 8, no-answer 0]
+saved -> /root/b5out/hb_q35.w2a.json
+  decode: 65838 tok / 3166s = 20.8 tok/s
+graded -> /root/b5out/hb_q35.w2a.graded.json
+---- off arm  key=q35.w2b  workers=2  16:12:29
+  104 to run, 2 concurrent
+  5/104  4.3m elapsed, ~1.4h left  [capped 1, no-answer 0]
+  10/104  5.6m elapsed, ~0.9h left  [capped 2, no-answer 0]
+  15/104  7.6m elapsed, ~0.7h left  [capped 2, no-answer 0]
+  20/104  8.4m elapsed, ~0.6h left  [capped 2, no-answer 0]
+  25/104  9.6m elapsed, ~0.5h left  [capped 2, no-answer 0]
+  30/104  10.4m elapsed, ~0.4h left  [capped 2, no-answer 0]
+  35/104  11.8m elapsed, ~0.4h left  [capped 2, no-answer 0]
+  40/104  12.7m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  45/104  14.3m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  50/104  18.9m elapsed, ~0.3h left  [capped 3, no-answer 0]
+  55/104  19.8m elapsed, ~0.3h left  [capped 3, no-answer 0]
+  60/104  20.4m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  65/104  20.6m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  70/104  20.9m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  75/104  21.2m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  80/104  21.4m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  85/104  21.5m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  90/104  21.6m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  95/104  21.6m elapsed, ~0.0h left  [capped 4, no-answer 0]
+  100/104  21.7m elapsed, ~0.0h left  [capped 4, no-answer 0]
+  104/104  21.7m elapsed, ~0.0h left  [capped 4, no-answer 0]
+saved -> /root/b5out/hb_q35.w2b.json
+  decode: 53913 tok / 2609s = 20.7 tok/s
+graded -> /root/b5out/hb_q35.w2b.graded.json
+--- fresh instance for the cross-restart cell
+(EngineCore pid=102) INFO 08-25 16:37:42 [kv_cache_utils.py:1733] GPU KV cache size: 119,954 tokens
+---- off arm  key=q35.w2c  workers=2  16:38:03
+  104 to run, 2 concurrent
+  5/104  3.9m elapsed, ~1.3h left  [capped 0, no-answer 0]
+  10/104  5.4m elapsed, ~0.8h left  [capped 1, no-answer 0]
+  15/104  8.2m elapsed, ~0.8h left  [capped 1, no-answer 0]
+  20/104  9.2m elapsed, ~0.6h left  [capped 1, no-answer 0]
+  25/104  10.1m elapsed, ~0.5h left  [capped 1, no-answer 0]
+  30/104  10.8m elapsed, ~0.4h left  [capped 1, no-answer 0]
+  35/104  12.6m elapsed, ~0.4h left  [capped 1, no-answer 0]
+  40/104  14.2m elapsed, ~0.4h left  [capped 2, no-answer 0]
+  45/104  15.0m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  50/104  20.7m elapsed, ~0.4h left  [capped 4, no-answer 0]
+  55/104  21.8m elapsed, ~0.3h left  [capped 4, no-answer 0]
+  60/104  24.8m elapsed, ~0.3h left  [capped 6, no-answer 0]
+  65/104  25.1m elapsed, ~0.3h left  [capped 6, no-answer 0]
+  70/104  26.0m elapsed, ~0.2h left  [capped 6, no-answer 0]
+  75/104  26.2m elapsed, ~0.2h left  [capped 7, no-answer 0]
+  80/104  26.5m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  85/104  26.7m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  90/104  26.8m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  95/104  26.9m elapsed, ~0.0h left  [capped 7, no-answer 0]
+  100/104  27.0m elapsed, ~0.0h left  [capped 7, no-answer 0]
+  104/104  27.1m elapsed, ~0.0h left  [capped 7, no-answer 0]
+saved -> /root/b5out/hb_q35.w2c.json
+  decode: 68132 tok / 3253s = 20.9 tok/s
+graded -> /root/b5out/hb_q35.w2c.graded.json
+
+=============== stock kernels, 4 workers
+(EngineCore pid=101) INFO 08-25 17:08:40 [kv_cache_utils.py:1733] GPU KV cache size: 119,954 tokens
+---- off arm  key=q35.w4a  workers=4  17:08:55
+  104 to run, 4 concurrent
+  5/104  1.0m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  10/104  1.7m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  15/104  2.8m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  20/104  3.2m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  25/104  3.8m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  30/104  4.7m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  35/104  5.3m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  40/104  5.8m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  45/104  6.6m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  50/104  7.2m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  55/104  7.6m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  60/104  7.9m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  65/104  8.1m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  70/104  8.3m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  75/104  8.6m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  80/104  8.7m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  85/104  8.8m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  90/104  8.9m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  95/104  8.9m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  100/104  9.0m elapsed, ~0.0h left  [capped 2, no-answer 0]
+  104/104  10.7m elapsed, ~0.0h left  [capped 4, no-answer 0]
+saved -> /root/b5out/hb_q35.w4a.json
+  decode: 47384 tok / 2306s = 20.5 tok/s
+graded -> /root/b5out/hb_q35.w4a.graded.json
+---- off arm  key=q35.w4b  workers=4  17:24:11
+  104 to run, 4 concurrent
+  5/104  1.0m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  10/104  1.7m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  15/104  2.8m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  20/104  3.2m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  25/104  3.8m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  30/104  4.7m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  35/104  5.2m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  40/104  5.7m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  45/104  6.5m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  50/104  7.1m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  55/104  7.5m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  60/104  7.8m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  65/104  8.0m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  70/104  8.2m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  75/104  8.5m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  80/104  8.6m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  85/104  8.7m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  90/104  8.8m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  95/104  8.8m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  100/104  8.9m elapsed, ~0.0h left  [capped 2, no-answer 0]
+  104/104  10.6m elapsed, ~0.0h left  [capped 4, no-answer 0]
+saved -> /root/b5out/hb_q35.w4b.json
+  decode: 47384 tok / 2281s = 20.8 tok/s
+graded -> /root/b5out/hb_q35.w4b.graded.json
+--- fresh instance for the cross-restart cell
+(EngineCore pid=102) INFO 08-25 17:41:37 [kv_cache_utils.py:1733] GPU KV cache size: 119,954 tokens
+---- off arm  key=q35.w4c  workers=4  17:41:55
+  104 to run, 4 concurrent
+  5/104  1.0m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  10/104  1.8m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  15/104  2.8m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  20/104  3.2m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  25/104  3.9m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  30/104  4.7m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  35/104  5.4m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  40/104  6.0m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  45/104  6.8m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  50/104  8.1m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  55/104  8.7m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  60/104  9.1m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  65/104  9.6m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  70/104  9.7m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  75/104  9.8m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  80/104  10.0m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  85/104  10.0m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  90/104  10.1m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  95/104  10.1m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  100/104  10.2m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  104/104  10.9m elapsed, ~0.0h left  [capped 3, no-answer 0]
+saved -> /root/b5out/hb_q35.w4c.json
+  decode: 52682 tok / 2527s = 20.8 tok/s
+graded -> /root/b5out/hb_q35.w4c.graded.json
+
+=============== batch-invariant, 1 worker
+!!!! LAUNCH FAILED
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=1)     return func(*args, **kwargs)
+(APIServer pid=1)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 932, in __init__
+(APIServer pid=1)     super().__init__(
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 567, in __init__
+(APIServer pid=1)     with launch_core_engines(
+(APIServer pid=1)          ^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=1)   File "/usr/lib/python3.12/contextlib.py", line 144, in __exit__
+(APIServer pid=1)     next(self.gen)
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1150, in launch_core_engines
+(APIServer pid=1)     wait_for_engine_startup(
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1209, in wait_for_engine_startup
+(APIServer pid=1)     raise RuntimeError(
+(APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+
+=============== batch-invariant, 2 workers
+!!!! LAUNCH FAILED
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=1)     return func(*args, **kwargs)
+(APIServer pid=1)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 932, in __init__
+(APIServer pid=1)     super().__init__(
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 567, in __init__
+(APIServer pid=1)     with launch_core_engines(
+(APIServer pid=1)          ^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=1)   File "/usr/lib/python3.12/contextlib.py", line 144, in __exit__
+(APIServer pid=1)     next(self.gen)
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1150, in launch_core_engines
+(APIServer pid=1)     wait_for_engine_startup(
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1209, in wait_for_engine_startup
+(APIServer pid=1)     raise RuntimeError(
+(APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+
+=============== batch-invariant, 4 workers
+!!!! LAUNCH FAILED
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=1)     return func(*args, **kwargs)
+(APIServer pid=1)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 932, in __init__
+(APIServer pid=1)     super().__init__(
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 567, in __init__
+(APIServer pid=1)     with launch_core_engines(
+(APIServer pid=1)          ^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=1)   File "/usr/lib/python3.12/contextlib.py", line 144, in __exit__
+(APIServer pid=1)     next(self.gen)
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1150, in launch_core_engines
+(APIServer pid=1)     wait_for_engine_startup(
+(APIServer pid=1)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1209, in wait_for_engine_startup
+(APIServer pid=1)     raise RuntimeError(
+(APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+
+######## MATRIX RESULTS
+
+  condition                  same instance    across restart   scores
+  ----------------------------------------------------------------------------
+  stock       1 worker       104/104 (100%)    29/104 ( 28%)   37 / 37 / 36
+  stock       2 workers       53/104 ( 51%)    45/104 ( 43%)   34 / 35 / 35
+  stock       4 workers      104/104 (100%)    46/104 ( 44%)   36 / 36 / 34
+  invariant   1 worker            --               --          -- / -- / --
+  invariant   2 workers           --               --          -- / -- / --
+  invariant   4 workers           --               --          -- / -- / --
+
+  same instance  = two passes, one server process  -> isolates concurrency
+  across restart = third pass, fresh server        -> isolates the restart
+
+######## MATRIX DONE
+Tue Aug 25 18:00:16 UTC 2026
+
+######## restoring gemma4-vllm
+time="2026-08-25T18:00:17Z" level=warning msg="No services to build"
+ Network gemma4-vllm-aio_default Creating 
+ Network gemma4-vllm-aio_default Created 
+ Container gemma4-vllm Creating 
+ Container gemma4-vllm Created 
+ Container gemma4-vllm Starting 
+ Container gemma4-vllm Started 
+gemma4-vllm	Up 5 seconds (health: starting)

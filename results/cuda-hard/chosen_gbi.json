@@ -1,0 +1,8 @@
+{
+ "model": "google/gemma-4-12B-it-qat-w4a16-ct",
+ "name": "t0/greedy",
+ "sampling": {
+  "temperature": 0.0
+ },
+ "why": "Gemma stands in for q35 in the batch-invariance matrix: q35 cannot run it at all, because its attention backend is GDN_ATTN and vLLM raises \"batch_invariant mode is not supported for GDN_ATTN\". Greedy so the only variable is the serving configuration."
+}

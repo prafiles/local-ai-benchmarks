@@ -1,0 +1,35 @@
+
+=============== A: fp8 KV + enforce-eager (matrix config)
+RESULT: FAILED. root cause:
+(EngineCore pid=101)        new kernel: registered at /usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/batch_invariant.py:913 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore pid=101) ERROR 08-26 08:33:57 [core.py:1165]     raise RuntimeError(
+(EngineCore pid=101) ERROR 08-26 08:33:57 [core.py:1165] RuntimeError: VLLM batch_invariant mode is not supported for GDN_ATTN.
+(EngineCore pid=101)     raise RuntimeError(
+(EngineCore pid=101) RuntimeError: VLLM batch_invariant mode is not supported for GDN_ATTN.
+(APIServer pid=1)     raise RuntimeError(
+(APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+
+=============== B: fp8 KV, no enforce-eager
+RESULT: FAILED. root cause:
+(EngineCore pid=101)        new kernel: registered at /usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/batch_invariant.py:913 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore pid=101) ERROR 08-26 08:34:54 [core.py:1165]     raise RuntimeError(
+(EngineCore pid=101) ERROR 08-26 08:34:54 [core.py:1165] RuntimeError: VLLM batch_invariant mode is not supported for GDN_ATTN.
+(EngineCore pid=101)     raise RuntimeError(
+(EngineCore pid=101) RuntimeError: VLLM batch_invariant mode is not supported for GDN_ATTN.
+(APIServer pid=1)     raise RuntimeError(
+(APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+
+=============== C: enforce-eager, default KV
+RESULT: FAILED. root cause:
+(EngineCore pid=101)        new kernel: registered at /usr/local/lib/python3.12/dist-packages/vllm/model_executor/layers/batch_invariant.py:913 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore pid=101) ERROR 08-26 08:35:49 [core.py:1165]     raise RuntimeError(
+(EngineCore pid=101) ERROR 08-26 08:35:49 [core.py:1165] RuntimeError: VLLM batch_invariant mode is not supported for GDN_ATTN.
+(EngineCore pid=101)     raise RuntimeError(
+(EngineCore pid=101) RuntimeError: VLLM batch_invariant mode is not supported for GDN_ATTN.
+(APIServer pid=1)     raise RuntimeError(
+(APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+
+=============== D: neither (plain)
+RESULT: FAILED. root cause:
+
+######## PROBE DONE

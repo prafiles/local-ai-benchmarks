@@ -1,0 +1,154 @@
+waiting for the concurrency matrix to finish...
+matrix finished Tue Aug 25 18:01:39 UTC 2026
+ Container gemma4-vllm Stopping 
+ Container gemma4-vllm Stopped 
+ Container gemma4-vllm Removing 
+ Container gemma4-vllm Removed 
+ Network gemma4-vllm-aio_default Removing 
+ Network gemma4-vllm-aio_default Removed 
+######## GREEDY + PRESENCE_PENALTY, BOTH ARMS
+Tue Aug 25 18:01:50 UTC 2026
+
+=============== q35 Qwen3.5-9B-FP8
+RedHatAI/Qwen3.5-9B-FP8-dynamic -> {'temperature': 0.0, 'presence_penalty': 1.5}
+            Greedy + presence_penalty, applied to BOTH arms so the pair stays single-variable. Greedy thinking spirals on this model: at 1 worker, with no concurrency to blame, all 5 tasks burned the full 32000 tokens on reasoning alone (47k-123k think chars) and returned no answer, projecting 39h. That is the model, not the serving. The vendor documents presence_penalty 0-2 as the knob for exactly this failure ('reduce endless repetitions'), and chosen_q35.json records that the obvious alternatives -- reasoning_effort, max_thinking_tokens, template thinking_budget -- are all accepted and silently ignored, so this is the only brake available. Applying it to the OFF arm too is the point: the alternative clean-ish arm is t1.0/k64, which changes temperature, top_k and top_p at once. presence_penalty at temperature 0 keeps decoding deterministic argmax, so reproducibility survives. Vendor also notes a high value can cause language mixing; 1.5 is their stated general-purpose figure.
+     profile: {"RedHatAI/Qwen3.5-9B-FP8-dynamic": {"temperature": 0.0, "presence_penalty": 1.5}}
+---- q35.pp off arm (reasoning suppressed, greedy + pp) @ 40960, 1 worker
+  104 to run, 1 concurrent
+  5/104  4.9m elapsed, ~1.6h left  [capped 0, no-answer 0]
+  10/104  6.4m elapsed, ~1.0h left  [capped 0, no-answer 0]
+  15/104  13.9m elapsed, ~1.4h left  [capped 1, no-answer 0]
+  20/104  16.0m elapsed, ~1.1h left  [capped 1, no-answer 0]
+  25/104  21.4m elapsed, ~1.1h left  [capped 2, no-answer 0]
+  30/104  26.1m elapsed, ~1.1h left  [capped 2, no-answer 0]
+  35/104  31.6m elapsed, ~1.0h left  [capped 3, no-answer 0]
+  40/104  34.7m elapsed, ~0.9h left  [capped 3, no-answer 0]
+  45/104  42.0m elapsed, ~0.9h left  [capped 4, no-answer 0]
+  50/104  42.9m elapsed, ~0.8h left  [capped 4, no-answer 0]
+  55/104  46.3m elapsed, ~0.7h left  [capped 4, no-answer 0]
+  60/104  47.8m elapsed, ~0.6h left  [capped 4, no-answer 0]
+  65/104  48.4m elapsed, ~0.5h left  [capped 4, no-answer 0]
+  70/104  49.0m elapsed, ~0.4h left  [capped 4, no-answer 0]
+  75/104  49.3m elapsed, ~0.3h left  [capped 4, no-answer 0]
+  80/104  49.6m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  85/104  49.7m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  90/104  49.9m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  95/104  50.0m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  100/104  50.1m elapsed, ~0.0h left  [capped 4, no-answer 0]
+  104/104  50.2m elapsed, ~0.0h left  [capped 4, no-answer 0]
+saved -> /root/b5out/hb_q35.pp.json
+---- q35.pp on arm (NATIVE thinking, greedy + pp) @ 40960, 1 worker
+  104 to run, 1 concurrent
+  5/104  84.1m elapsed, ~27.7h left  [capped 3, no-answer 3]
+    WARNING: projected 28h for this arm -- 3/5 capped, 3 unanswered. Check for non-termination.
+Traceback (most recent call last):
+  File "/root/bench2/b5.py", line 450, in <module>
+    run(sys.argv[2], sys.argv[3])
+  File "/root/bench2/b5.py", line 192, in run
+    list(ex.map(work, todo))
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 619, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 317, in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/bench2/b5.py", line 183, in work
+    raise RuntimeError(
+RuntimeError: ABORT: projected 28h exceeds B5_ABORT_HOURS=10 (capped 3/5, unanswered 3). Fix sampling or budget. Partial arm saved to /root/b5out/ht_q35.pp.json -- 5 tasks.
+!!!! q35.pp on arm nonzero (abort) -- continuing
+  decode: 64890 tok / 3009s = 21.6 tok/s
+graded -> /root/b5out/hb_q35.pp.graded.json
+  decode: 107865 tok / 5045s = 21.4 tok/s
+graded -> /root/b5out/ht_q35.pp.graded.json
+
+=============== gemma Gemma 4 12B QAT
+google/gemma-4-12B-it-qat-w4a16-ct -> {'temperature': 0.0, 'presence_penalty': 1.5}
+            Greedy + presence_penalty, applied to BOTH arms so the pair stays single-variable. Greedy thinking spirals on this model: at 1 worker, with no concurrency to blame, all 5 tasks burned the full 32000 tokens on reasoning alone (47k-123k think chars) and returned no answer, projecting 39h. That is the model, not the serving. The vendor documents presence_penalty 0-2 as the knob for exactly this failure ('reduce endless repetitions'), and chosen_q35.json records that the obvious alternatives -- reasoning_effort, max_thinking_tokens, template thinking_budget -- are all accepted and silently ignored, so this is the only brake available. Applying it to the OFF arm too is the point: the alternative clean-ish arm is t1.0/k64, which changes temperature, top_k and top_p at once. presence_penalty at temperature 0 keeps decoding deterministic argmax, so reproducibility survives. Vendor also notes a high value can cause language mixing; 1.5 is their stated general-purpose figure.
+     profile: {"google/gemma-4-12B-it-qat-w4a16-ct": {"temperature": 0.0, "presence_penalty": 1.5}}
+---- gemma.pp off arm (reasoning suppressed, greedy + pp) @ 40960, 1 worker
+  104 to run, 1 concurrent
+  5/104  6.7m elapsed, ~2.2h left  [capped 1, no-answer 0]
+  10/104  8.8m elapsed, ~1.4h left  [capped 1, no-answer 0]
+  15/104  12.2m elapsed, ~1.2h left  [capped 1, no-answer 0]
+  20/104  14.0m elapsed, ~1.0h left  [capped 1, no-answer 0]
+  25/104  16.0m elapsed, ~0.8h left  [capped 1, no-answer 0]
+  30/104  19.7m elapsed, ~0.8h left  [capped 1, no-answer 0]
+  35/104  22.0m elapsed, ~0.7h left  [capped 1, no-answer 0]
+  40/104  27.0m elapsed, ~0.7h left  [capped 1, no-answer 0]
+  45/104  33.5m elapsed, ~0.7h left  [capped 2, no-answer 0]
+  50/104  39.4m elapsed, ~0.7h left  [capped 3, no-answer 0]
+  55/104  41.4m elapsed, ~0.6h left  [capped 3, no-answer 0]
+  60/104  43.3m elapsed, ~0.5h left  [capped 3, no-answer 0]
+  65/104  43.8m elapsed, ~0.4h left  [capped 3, no-answer 0]
+  70/104  45.8m elapsed, ~0.4h left  [capped 4, no-answer 0]
+  75/104  46.2m elapsed, ~0.3h left  [capped 4, no-answer 0]
+  80/104  47.3m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  85/104  47.6m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  90/104  47.7m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  95/104  47.9m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  100/104  48.1m elapsed, ~0.0h left  [capped 4, no-answer 0]
+  104/104  48.2m elapsed, ~0.0h left  [capped 4, no-answer 0]
+saved -> /root/b5out/hb_gemma.pp.json
+---- gemma.pp on arm (NATIVE thinking, greedy + pp) @ 40960, 1 worker
+  104 to run, 1 concurrent
+  5/104  20.7m elapsed, ~6.8h left  [capped 0, no-answer 0]
+    WARNING: projected 7h for this arm -- 0/5 capped, 0 unanswered. Check for non-termination.
+  10/104  46.7m elapsed, ~7.3h left  [capped 0, no-answer 0]
+    WARNING: projected 7h for this arm -- 0/10 capped, 0 unanswered. Check for non-termination.
+  15/104  85.2m elapsed, ~8.4h left  [capped 0, no-answer 0]
+    WARNING: projected 8h for this arm -- 0/15 capped, 0 unanswered. Check for non-termination.
+  20/104  99.2m elapsed, ~6.9h left  [capped 0, no-answer 0]
+    WARNING: projected 7h for this arm -- 0/20 capped, 0 unanswered. Check for non-termination.
+  25/104  126.3m elapsed, ~6.7h left  [capped 0, no-answer 0]
+    WARNING: projected 7h for this arm -- 0/25 capped, 0 unanswered. Check for non-termination.
+  30/104  175.6m elapsed, ~7.2h left  [capped 1, no-answer 1]
+    WARNING: projected 7h for this arm -- 1/30 capped, 1 unanswered. Check for non-termination.
+  35/104  220.6m elapsed, ~7.2h left  [capped 2, no-answer 2]
+    WARNING: projected 7h for this arm -- 2/35 capped, 2 unanswered. Check for non-termination.
+  40/104  240.7m elapsed, ~6.4h left  [capped 2, no-answer 2]
+    WARNING: projected 6h for this arm -- 2/40 capped, 2 unanswered. Check for non-termination.
+  45/104  274.5m elapsed, ~6.0h left  [capped 2, no-answer 2]
+    WARNING: projected 6h for this arm -- 2/45 capped, 2 unanswered. Check for non-termination.
+  50/104  336.0m elapsed, ~6.0h left  [capped 3, no-answer 3]
+    WARNING: projected 6h for this arm -- 3/50 capped, 3 unanswered. Check for non-termination.
+  55/104  415.5m elapsed, ~6.2h left  [capped 5, no-answer 5]
+    WARNING: projected 6h for this arm -- 5/55 capped, 5 unanswered. Check for non-termination.
+  60/104  484.3m elapsed, ~5.9h left  [capped 7, no-answer 7]
+    WARNING: projected 6h for this arm -- 7/60 capped, 7 unanswered. Check for non-termination.
+  65/104  493.5m elapsed, ~4.9h left  [capped 7, no-answer 7]
+    WARNING: projected 5h for this arm -- 7/65 capped, 7 unanswered. Check for non-termination.
+  70/104  507.5m elapsed, ~4.1h left  [capped 7, no-answer 7]
+    WARNING: projected 4h for this arm -- 7/70 capped, 7 unanswered. Check for non-termination.
+  75/104  516.9m elapsed, ~3.3h left  [capped 7, no-answer 7]
+  80/104  524.6m elapsed, ~2.6h left  [capped 7, no-answer 7]
+  85/104  568.3m elapsed, ~2.1h left  [capped 8, no-answer 8]
+  90/104  580.6m elapsed, ~1.5h left  [capped 8, no-answer 8]
+  95/104  596.5m elapsed, ~0.9h left  [capped 8, no-answer 8]
+  100/104  609.5m elapsed, ~0.4h left  [capped 8, no-answer 8]
+  104/104  619.4m elapsed, ~0.0h left  [capped 8, no-answer 8]
+saved -> /root/b5out/ht_gemma.pp.json
+  decode: 54258 tok / 2892s = 18.8 tok/s
+graded -> /root/b5out/hb_gemma.pp.graded.json
+  decode: 695190 tok / 37167s = 18.7 tok/s
+graded -> /root/b5out/ht_gemma.pp.graded.json
+
+######## PRESENCE-PENALTY PHASE DONE
+Wed Aug 26 08:03:32 UTC 2026
+
+######## restoring gemma4-vllm
+time="2026-08-26T08:03:33Z" level=warning msg="No services to build"
+ Network gemma4-vllm-aio_default Creating 
+ Network gemma4-vllm-aio_default Created 
+ Container gemma4-vllm Creating 
+ Container gemma4-vllm Created 
+ Container gemma4-vllm Starting 
+ Container gemma4-vllm Started 
+gemma4-vllm	Up 6 seconds (health: starting)

@@ -1,0 +1,103 @@
+ Container gemma4-vllm Stopping 
+ Container gemma4-vllm Stopped 
+ Container gemma4-vllm Removing 
+ Container gemma4-vllm Removed 
+ Network gemma4-vllm-aio_default Removing 
+ Network gemma4-vllm-aio_default Removed 
+---- q35 off arm, ONE worker, pass w1a 22:37:29
+  104 to run, 1 concurrent
+  5/104  5.3m elapsed, ~1.7h left  [capped 0, no-answer 0]
+  10/104  7.5m elapsed, ~1.2h left  [capped 0, no-answer 0]
+  15/104  12.4m elapsed, ~1.2h left  [capped 0, no-answer 0]
+  20/104  14.2m elapsed, ~1.0h left  [capped 0, no-answer 0]
+  25/104  17.2m elapsed, ~0.9h left  [capped 0, no-answer 0]
+  30/104  22.4m elapsed, ~0.9h left  [capped 0, no-answer 0]
+  35/104  25.0m elapsed, ~0.8h left  [capped 0, no-answer 0]
+  40/104  26.5m elapsed, ~0.7h left  [capped 0, no-answer 0]
+  45/104  33.3m elapsed, ~0.7h left  [capped 1, no-answer 0]
+  50/104  38.3m elapsed, ~0.7h left  [capped 2, no-answer 0]
+  55/104  42.9m elapsed, ~0.6h left  [capped 3, no-answer 0]
+  60/104  44.0m elapsed, ~0.5h left  [capped 3, no-answer 0]
+  65/104  44.5m elapsed, ~0.4h left  [capped 3, no-answer 0]
+  70/104  45.9m elapsed, ~0.4h left  [capped 4, no-answer 0]
+  75/104  46.2m elapsed, ~0.3h left  [capped 4, no-answer 0]
+  80/104  46.5m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  85/104  46.7m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  90/104  46.9m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  95/104  46.9m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  100/104  47.1m elapsed, ~0.0h left  [capped 4, no-answer 0]
+  104/104  47.2m elapsed, ~0.0h left  [capped 4, no-answer 0]
+saved -> /root/b5out/hb_q35.w1a.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== RedHatAI/Qwen3.5-9B-FP8-dynamic  (hard tier)
+  Bash            9/12
+  Git             2/12
+  JS              2/15
+  Python         13/30
+  SQL            11/20
+  TS              0/15
+  TOTAL          37/104
+  decode: 61517 tok / 2830s = 21.7 tok/s
+graded -> /root/b5out/hb_q35.w1a.graded.json
+---- q35 off arm, ONE worker, pass w1b 23:25:52
+  104 to run, 1 concurrent
+  5/104  5.2m elapsed, ~1.7h left  [capped 0, no-answer 0]
+  10/104  7.4m elapsed, ~1.2h left  [capped 0, no-answer 0]
+  15/104  12.3m elapsed, ~1.2h left  [capped 0, no-answer 0]
+  20/104  14.1m elapsed, ~1.0h left  [capped 0, no-answer 0]
+  25/104  17.1m elapsed, ~0.9h left  [capped 0, no-answer 0]
+  30/104  22.3m elapsed, ~0.9h left  [capped 0, no-answer 0]
+  35/104  24.9m elapsed, ~0.8h left  [capped 0, no-answer 0]
+  40/104  26.4m elapsed, ~0.7h left  [capped 0, no-answer 0]
+  45/104  33.2m elapsed, ~0.7h left  [capped 1, no-answer 0]
+  50/104  38.2m elapsed, ~0.7h left  [capped 2, no-answer 0]
+  55/104  42.7m elapsed, ~0.6h left  [capped 3, no-answer 0]
+  60/104  43.9m elapsed, ~0.5h left  [capped 3, no-answer 0]
+  65/104  44.4m elapsed, ~0.4h left  [capped 3, no-answer 0]
+  70/104  45.8m elapsed, ~0.4h left  [capped 4, no-answer 0]
+  75/104  46.1m elapsed, ~0.3h left  [capped 4, no-answer 0]
+  80/104  46.4m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  85/104  46.6m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  90/104  46.8m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  95/104  46.8m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  100/104  47.0m elapsed, ~0.0h left  [capped 4, no-answer 0]
+  104/104  47.1m elapsed, ~0.0h left  [capped 4, no-answer 0]
+saved -> /root/b5out/hb_q35.w1b.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== RedHatAI/Qwen3.5-9B-FP8-dynamic  (hard tier)
+  Bash            9/12
+  Git             2/12
+  JS              2/15
+  Python         13/30
+  SQL            11/20
+  TS              0/15
+  TOTAL          37/104
+  decode: 61517 tok / 2825s = 21.8 tok/s
+graded -> /root/b5out/hb_q35.w1b.graded.json
+
+######## CONCURRENCY TEST RESULT
+  1 worker, two passes : 104/104 byte-identical
+  4 workers, two passes: 46/104   (measured earlier)
+######## CUDA PHASE 3 DONE Sun Aug 23 00:14:09 UTC 2026
+
+######## restoring gemma4-vllm
+time="2026-08-23T00:14:10Z" level=warning msg="No services to build"
+ Network gemma4-vllm-aio_default Creating 
+ Network gemma4-vllm-aio_default Created 
+ Container gemma4-vllm Creating 
+ Container gemma4-vllm Created 
+ Container gemma4-vllm Starting 
+ Container gemma4-vllm Started 
+gemma4-vllm	Up 6 seconds (health: starting)

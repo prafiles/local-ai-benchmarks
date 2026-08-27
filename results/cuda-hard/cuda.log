@@ -1,0 +1,380 @@
+######## CUDA HARD TIER Sat Aug 22 10:43:56 UTC 2026
+######## stopping the user's gemma4-vllm
+ Container gemma4-vllm Stopping 
+ Container gemma4-vllm Stopped 
+ Container gemma4-vllm Removing 
+ Container gemma4-vllm Removed 
+ Network gemma4-vllm-aio_default Removing 
+ Network gemma4-vllm-aio_default Removed 
+
+================================================ [1/4] q35 Qwen3.5-9B-FP8
+(EngineCore pid=102) INFO 08-22 10:46:37 [kv_cache_utils.py:1733] GPU KV cache size: 119,954 tokens
+(EngineCore pid=102) INFO 08-22 10:46:37 [kv_cache_utils.py:1734] Maximum concurrency for 40,960 tokens per request: 2.93x
+---- q35 off arm (reasoning suppressed, greedy) @ window 40960, 4 workers
+  104 to run, 4 concurrent
+  5/104  1.0m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  10/104  1.7m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  15/104  2.8m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  20/104  3.3m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  25/104  3.9m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  30/104  4.8m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  35/104  5.3m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  40/104  5.8m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  45/104  6.6m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  50/104  7.2m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  55/104  7.6m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  60/104  7.9m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  65/104  8.1m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  70/104  8.3m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  75/104  8.6m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  80/104  8.7m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  85/104  8.8m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  90/104  8.9m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  95/104  8.9m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  100/104  9.0m elapsed, ~0.0h left  [capped 2, no-answer 0]
+  104/104  10.8m elapsed, ~0.0h left  [capped 4, no-answer 0]
+saved -> /root/b5out/hb_q35.json
+RedHatAI/Qwen3.5-9B-FP8-dynamic -> {'temperature': 1.0, 'top_p': 0.95, 'top_k': 64}
+            Measured on the 6 probes that actually spiral, 2 passes each, budget 8000: t=0.6/k20 (Qwen own thinking recommendation) answered 4/12 for 78066 tokens; t=0.8/k20 7/12 for 79952; t=1.0/k64 10/12 for 64379. Hotter is both more reliable and cheaper here, because a spiral burns the whole budget and returns nothing. Greedy is unusable: doubling the budget 8000->16000 at t=0 doubled 5 of 6 traces instead of letting them finish. No trace cap is available -- reasoning_effort, max_thinking_tokens and template thinking_budget are all accepted and silently ignored.
+---- q35 on arm (NATIVE thinking, budget 32000) @ window 40960
+  104 to run, 4 concurrent
+  5/104  26.7m elapsed, ~8.8h left  [capped 1, no-answer 1]
+    WARNING: projected 9h for this arm -- 1/5 capped, 1 unanswered. Check for non-termination.
+  10/104  43.9m elapsed, ~6.9h left  [capped 3, no-answer 3]
+    WARNING: projected 7h for this arm -- 3/10 capped, 3 unanswered. Check for non-termination.
+  15/104  59.2m elapsed, ~5.9h left  [capped 5, no-answer 5]
+  20/104  83.5m elapsed, ~5.8h left  [capped 8, no-answer 8]
+  25/104  96.3m elapsed, ~5.1h left  [capped 9, no-answer 9]
+  30/104  124.3m elapsed, ~5.1h left  [capped 12, no-answer 12]
+  35/104  151.4m elapsed, ~5.0h left  [capped 15, no-answer 14]
+  40/104  172.5m elapsed, ~4.6h left  [capped 16, no-answer 15]
+  45/104  192.4m elapsed, ~4.2h left  [capped 19, no-answer 18]
+  50/104  217.0m elapsed, ~3.9h left  [capped 20, no-answer 18]
+  55/104  239.1m elapsed, ~3.5h left  [capped 21, no-answer 19]
+  60/104  254.4m elapsed, ~3.1h left  [capped 22, no-answer 20]
+  65/104  259.0m elapsed, ~2.6h left  [capped 22, no-answer 20]
+  70/104  269.0m elapsed, ~2.2h left  [capped 22, no-answer 20]
+  75/104  273.8m elapsed, ~1.8h left  [capped 22, no-answer 20]
+  80/104  279.1m elapsed, ~1.4h left  [capped 22, no-answer 20]
+  85/104  291.3m elapsed, ~1.1h left  [capped 22, no-answer 20]
+  90/104  299.3m elapsed, ~0.8h left  [capped 22, no-answer 20]
+  95/104  306.8m elapsed, ~0.5h left  [capped 22, no-answer 20]
+  100/104  315.5m elapsed, ~0.2h left  [capped 22, no-answer 20]
+  104/104  318.7m elapsed, ~0.0h left  [capped 22, no-answer 20]
+saved -> /root/b5out/ht_q35.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== RedHatAI/Qwen3.5-9B-FP8-dynamic  (hard tier)
+  Bash            9/12
+  Git             3/12
+  JS              1/15
+  Python         11/30
+  SQL            12/20
+  TS              0/15
+  TOTAL          36/104
+  decode: 47384 tok / 2314s = 20.5 tok/s
+graded -> /root/b5out/hb_q35.graded.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== RedHatAI/Qwen3.5-9B-FP8-dynamic  (hard tier)
+  Bash           11/12
+  Git             7/12
+  JS              2/15
+  Python         12/30
+  SQL            19/20
+  TS              1/15
+  TOTAL          52/104
+  decode: 1571715 tok / 76308s = 20.6 tok/s
+graded -> /root/b5out/ht_q35.graded.json
+######## q35 DONE Sat Aug 22 16:21:52 UTC 2026
+
+================================================ [2/4] gemma Gemma 4 12B QAT
+(EngineCore pid=99) INFO 08-22 16:24:35 [kv_cache_utils.py:1733] GPU KV cache size: 189,164 tokens
+(EngineCore pid=99) INFO 08-22 16:24:35 [kv_cache_utils.py:1734] Maximum concurrency for 40,960 tokens per request: 4.62x
+---- gemma off arm (reasoning suppressed, greedy) @ window 40960, 4 workers
+  104 to run, 4 concurrent
+  5/104  1.1m elapsed, ~0.4h left  [capped 0, no-answer 0]
+  10/104  2.6m elapsed, ~0.4h left  [capped 0, no-answer 0]
+  15/104  4.3m elapsed, ~0.4h left  [capped 0, no-answer 0]
+  20/104  4.7m elapsed, ~0.3h left  [capped 1, no-answer 0]
+  25/104  5.8m elapsed, ~0.3h left  [capped 1, no-answer 0]
+  30/104  7.3m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  35/104  8.1m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  40/104  9.2m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  45/104  10.3m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  50/104  11.4m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  55/104  12.8m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  60/104  13.4m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  65/104  13.6m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  70/104  13.9m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  75/104  14.0m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  80/104  14.2m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  85/104  14.5m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  90/104  14.6m elapsed, ~0.0h left  [capped 5, no-answer 0]
+  95/104  15.0m elapsed, ~0.0h left  [capped 5, no-answer 0]
+  100/104  15.5m elapsed, ~0.0h left  [capped 6, no-answer 0]
+  104/104  16.1m elapsed, ~0.0h left  [capped 9, no-answer 0]
+saved -> /root/b5out/hb_gemma.json
+google/gemma-4-12B-it-qat-w4a16-ct -> {'temperature': 0.6, 'top_p': 0.95, 'top_k': 20}
+            Measured on the 6 probes that spiral, 2 passes each, budget 8000: t0.6/k20 12/12 for 18780 tok; t0.8/k20 12/12 for 19975 tok; t1.0/k64 12/12 for 19378 tok. Picked on answered count, not median trace length -- ranking by median is what wrongly 'confirmed' a trace cap on Qwen3.5.
+---- gemma on arm (NATIVE thinking, budget 32000) @ window 40960
+  104 to run, 4 concurrent
+  5/104  11.5m elapsed, ~3.8h left  [capped 0, no-answer 0]
+  10/104  18.2m elapsed, ~2.9h left  [capped 0, no-answer 0]
+  15/104  29.0m elapsed, ~2.9h left  [capped 0, no-answer 0]
+  20/104  38.4m elapsed, ~2.7h left  [capped 0, no-answer 0]
+  25/104  48.4m elapsed, ~2.6h left  [capped 1, no-answer 1]
+  30/104  61.4m elapsed, ~2.5h left  [capped 1, no-answer 1]
+  35/104  70.7m elapsed, ~2.3h left  [capped 1, no-answer 1]
+  40/104  79.7m elapsed, ~2.1h left  [capped 1, no-answer 1]
+  45/104  90.6m elapsed, ~2.0h left  [capped 1, no-answer 1]
+  50/104  106.7m elapsed, ~1.9h left  [capped 2, no-answer 2]
+  55/104  122.1m elapsed, ~1.8h left  [capped 3, no-answer 3]
+  60/104  136.0m elapsed, ~1.7h left  [capped 3, no-answer 3]
+  65/104  138.8m elapsed, ~1.4h left  [capped 4, no-answer 4]
+  70/104  144.6m elapsed, ~1.2h left  [capped 4, no-answer 4]
+  75/104  152.4m elapsed, ~1.0h left  [capped 5, no-answer 5]
+  80/104  156.0m elapsed, ~0.8h left  [capped 5, no-answer 5]
+  85/104  163.6m elapsed, ~0.6h left  [capped 5, no-answer 5]
+  90/104  167.9m elapsed, ~0.4h left  [capped 5, no-answer 5]
+  95/104  179.3m elapsed, ~0.3h left  [capped 5, no-answer 5]
+  100/104  185.1m elapsed, ~0.1h left  [capped 5, no-answer 5]
+  104/104  198.0m elapsed, ~0.0h left  [capped 7, no-answer 8]
+saved -> /root/b5out/ht_gemma.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== google/gemma-4-12B-it-qat-w4a16-ct  (hard tier)
+  Bash            8/12
+  Git             2/12
+  JS              2/15
+  Python         16/30
+  SQL            15/20
+  TS              3/15
+  TOTAL          46/104
+  decode: 70490 tok / 3792s = 18.6 tok/s
+graded -> /root/b5out/hb_gemma.graded.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== google/gemma-4-12B-it-qat-w4a16-ct  (hard tier)
+  Bash            9/12
+  Git             6/12
+  JS              9/15
+  Python         21/30
+  SQL            19/20
+  TS              2/15
+  TOTAL          66/104
+  decode: 840686 tok / 45407s = 18.5 tok/s
+graded -> /root/b5out/ht_gemma.graded.json
+######## gemma DONE Sat Aug 22 20:04:48 UTC 2026
+
+================================================ [3/4] mellum Mellum2-12B-A2.5B
+(EngineCore pid=94) INFO 08-22 20:06:22 [kv_cache_utils.py:1733] GPU KV cache size: 104,158 tokens
+(EngineCore pid=94) INFO 08-22 20:06:22 [kv_cache_utils.py:1734] Maximum concurrency for 32,768 tokens per request: 3.18x
+---- mellum off arm (reasoning suppressed, greedy) @ window 32768, 4 workers
+  104 to run, 4 concurrent
+  5/104  0.8m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  10/104  1.1m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  15/104  1.6m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  20/104  1.9m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  25/104  2.1m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  30/104  2.4m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  35/104  2.9m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  40/104  3.2m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  45/104  3.4m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  50/104  3.7m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  55/104  3.8m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  60/104  4.1m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  65/104  4.2m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  70/104  4.3m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  75/104  4.4m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  80/104  4.5m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  85/104  4.6m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  90/104  4.6m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  95/104  4.6m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  100/104  4.7m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  104/104  4.7m elapsed, ~0.0h left  [capped 0, no-answer 0]
+saved -> /root/b5out/hb_mellum.json
+voves/Mellum2-12B-A2.5B-Instruct-FP8 -> {'temperature': 0.0}
+            Prompted-CoT arm. Greedy, matching this model own off arm, so the two arms differ only in the prompt -- the single-variable comparison that the native-thinking arms on this node cannot offer, since Qwen3.5 greedy does not terminate and Gemma 4 is tuned to t0.6/k20. Same treatment as Qwen3-Coder-Next and DeepSeek VL2 on the Mac node.
+---- mellum on arm (prompted CoT -- no native thinking mode) @ window 32768
+  104 to run, 4 concurrent
+  5/104  0.9m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  10/104  1.4m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  15/104  2.1m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  20/104  2.6m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  25/104  3.1m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  30/104  3.5m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  35/104  4.0m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  40/104  4.4m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  45/104  4.7m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  50/104  5.0m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  55/104  5.2m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  60/104  5.5m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  65/104  5.7m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  70/104  5.8m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  75/104  6.0m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  80/104  6.2m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  85/104  6.4m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  90/104  6.5m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  95/104  6.5m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  100/104  6.6m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  104/104  6.7m elapsed, ~0.0h left  [capped 0, no-answer 0]
+saved -> /root/b5out/ht_mellum.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== voves/Mellum2-12B-A2.5B-Instruct-FP8  (hard tier)
+  Bash            6/12
+  Git             4/12
+  JS              4/15
+  Python         14/30
+  SQL            14/20
+  TS              3/15
+  TOTAL          45/104
+  decode: 28125 tok / 1123s = 25.0 tok/s
+graded -> /root/b5out/hb_mellum.graded.json
+  CoT arm: 92/104 answers used the ANSWER: marker
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== voves/Mellum2-12B-A2.5B-Instruct-FP8  (hard tier)
+  Bash            6/12
+  Git             4/12
+  JS              3/15
+  Python         12/30
+  SQL            10/20
+  TS              1/15
+  TOTAL          36/104
+  decode: 41672 tok / 1604s = 26.0 tok/s
+graded -> /root/b5out/ht_mellum.graded.json
+######## mellum DONE Sat Aug 22 20:23:38 UTC 2026
+
+================================================ [4/4] qwen Qwen2.5-Coder-14B-AWQ
+(EngineCore pid=103) INFO 08-22 20:25:34 [kv_cache_utils.py:1733] GPU KV cache size: 52,544 tokens
+(EngineCore pid=103) INFO 08-22 20:25:34 [kv_cache_utils.py:1734] Maximum concurrency for 32,768 tokens per request: 1.60x
+---- qwen off arm (reasoning suppressed, greedy) @ window 32768, 4 workers
+  104 to run, 4 concurrent
+  5/104  0.3m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  10/104  0.5m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  15/104  0.6m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  20/104  0.8m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  25/104  0.9m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  30/104  1.1m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  35/104  1.3m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  40/104  1.4m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  45/104  1.6m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  50/104  1.8m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  55/104  2.0m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  60/104  2.2m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  65/104  2.2m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  70/104  2.4m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  75/104  2.5m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  80/104  2.6m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  85/104  2.6m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  90/104  2.7m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  95/104  2.7m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  100/104  2.7m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  104/104  3.5m elapsed, ~0.0h left  [capped 0, no-answer 0]
+saved -> /root/b5out/hb_qwen.json
+Qwen/Qwen2.5-Coder-14B-Instruct-AWQ -> {'temperature': 0.0}
+            Prompted-CoT arm. Greedy, matching this model own off arm, so the two arms differ only in the prompt -- the single-variable comparison that the native-thinking arms on this node cannot offer, since Qwen3.5 greedy does not terminate and Gemma 4 is tuned to t0.6/k20. Same treatment as Qwen3-Coder-Next and DeepSeek VL2 on the Mac node.
+---- qwen on arm (prompted CoT -- no native thinking mode) @ window 32768
+  104 to run, 4 concurrent
+  5/104  0.4m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  10/104  0.7m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  15/104  1.1m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  20/104  1.3m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  25/104  1.6m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  30/104  1.9m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  35/104  2.1m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  40/104  2.3m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  45/104  2.6m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  50/104  2.8m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  55/104  3.0m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  60/104  3.3m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  65/104  3.5m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  70/104  3.7m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  75/104  3.9m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  80/104  4.1m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  85/104  4.1m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  90/104  4.3m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  95/104  4.4m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  100/104  4.5m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  104/104  4.6m elapsed, ~0.0h left  [capped 0, no-answer 0]
+saved -> /root/b5out/ht_qwen.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== Qwen/Qwen2.5-Coder-14B-Instruct-AWQ  (hard tier)
+  Bash            8/12
+  Git             5/12
+  JS              3/15
+  Python          8/30
+  SQL            11/20
+  TS              1/15
+  TOTAL          36/104
+  decode: 19582 tok / 699s = 28.0 tok/s
+graded -> /root/b5out/hb_qwen.graded.json
+  CoT arm: 104/104 answers used the ANSWER: marker
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== Qwen/Qwen2.5-Coder-14B-Instruct-AWQ  (hard tier)
+  Bash            5/12
+  Git             4/12
+  JS              3/15
+  Python          7/30
+  SQL            10/20
+  TS              2/15
+  TOTAL          31/104
+  decode: 31559 tok / 1097s = 28.8 tok/s
+graded -> /root/b5out/ht_qwen.graded.json
+######## qwen DONE Sat Aug 22 20:37:54 UTC 2026
+
+######## CUDA HARD TIER DONE Sat Aug 22 20:37:54 UTC 2026
+
+######## restoring gemma4-vllm
+time="2026-08-22T20:37:55Z" level=warning msg="No services to build"
+ Network gemma4-vllm-aio_default Creating 
+ Network gemma4-vllm-aio_default Created 
+ Container gemma4-vllm Creating 
+ Container gemma4-vllm Created 
+ Container gemma4-vllm Starting 
+ Container gemma4-vllm Started 
+gemma4-vllm	Up 5 seconds (health: starting)

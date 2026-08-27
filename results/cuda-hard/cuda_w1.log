@@ -1,0 +1,387 @@
+######## CUDA HARD TIER @ 1 WORKER, GREEDY BOTH ARMS
+Tue Aug 25 07:09:42 UTC 2026
+ Container gemma4-vllm Stopping 
+ Container gemma4-vllm Stopped 
+ Container gemma4-vllm Removing 
+ Container gemma4-vllm Removed 
+ Network gemma4-vllm-aio_default Removing 
+ Network gemma4-vllm-aio_default Removed 
+
+================================================ [1/4] q35 Qwen3.5-9B-FP8
+(EngineCore pid=101) INFO 08-25 07:12:23 [kv_cache_utils.py:1733] GPU KV cache size: 119,954 tokens
+(EngineCore pid=101) INFO 08-25 07:12:23 [kv_cache_utils.py:1734] Maximum concurrency for 40,960 tokens per request: 2.93x
+     preflight ok
+---- q35.w1 off arm (reasoning suppressed, greedy) @ window 40960, 1 worker
+  104 to run, 1 concurrent
+  5/104  7.6m elapsed, ~2.5h left  [capped 1, no-answer 0]
+  10/104  9.1m elapsed, ~1.4h left  [capped 1, no-answer 0]
+  15/104  14.5m elapsed, ~1.4h left  [capped 1, no-answer 0]
+  20/104  16.8m elapsed, ~1.2h left  [capped 1, no-answer 0]
+  25/104  18.4m elapsed, ~1.0h left  [capped 1, no-answer 0]
+  30/104  20.7m elapsed, ~0.9h left  [capped 1, no-answer 0]
+  35/104  23.1m elapsed, ~0.8h left  [capped 1, no-answer 0]
+  40/104  28.4m elapsed, ~0.8h left  [capped 2, no-answer 0]
+  45/104  31.7m elapsed, ~0.7h left  [capped 2, no-answer 0]
+  50/104  36.7m elapsed, ~0.7h left  [capped 3, no-answer 0]
+  55/104  41.1m elapsed, ~0.6h left  [capped 4, no-answer 0]
+  60/104  45.7m elapsed, ~0.6h left  [capped 5, no-answer 0]
+  65/104  46.9m elapsed, ~0.5h left  [capped 5, no-answer 0]
+  70/104  47.4m elapsed, ~0.4h left  [capped 5, no-answer 0]
+  75/104  47.6m elapsed, ~0.3h left  [capped 5, no-answer 0]
+  80/104  47.9m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  85/104  48.1m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  90/104  48.3m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  95/104  48.3m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  100/104  48.5m elapsed, ~0.0h left  [capped 5, no-answer 0]
+  104/104  48.5m elapsed, ~0.0h left  [capped 5, no-answer 0]
+saved -> /root/b5out/hb_q35.w1.json
+RedHatAI/Qwen3.5-9B-FP8-dynamic -> {'temperature': 0.0}
+            1-worker re-run. Every CUDA hard-tier score before 2026-08-25 was produced at B4_WORKERS=4, the setting at which this node reproduced only 46/104 answers of its own greedy run against 104/104 at 1 worker. Concurrency was therefore a confound on all of them. Greedy on BOTH arms here, so the off/on difference is reasoning alone -- which no CUDA arm has ever been able to claim: gemma ran t0.6/k20 and q35 t1.0/k64 against greedy off arms, differing twice over. Greedy thinking is the risk: gemmagreedy scored 1/104 at 4 workers by not terminating, and whether that was the model or the concurrency is exactly what this run tests. The runtime ceiling bounds the downside.
+---- q35.w1 on arm (NATIVE thinking, budget 32000, GREEDY) @ window 40960, 1 worker
+  104 to run, 1 concurrent
+  5/104  119.4m elapsed, ~39.4h left  [capped 5, no-answer 5]
+    WARNING: projected 39h for this arm -- 5/5 capped, 5 unanswered. Check for non-termination.
+Traceback (most recent call last):
+  File "/root/bench2/b5.py", line 445, in <module>
+    run(sys.argv[2], sys.argv[3])
+  File "/root/bench2/b5.py", line 192, in run
+    list(ex.map(work, todo))
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 619, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 317, in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/bench2/b5.py", line 183, in work
+    raise RuntimeError(
+RuntimeError: ABORT: projected 39h exceeds B5_ABORT_HOURS=10 (capped 5/5, unanswered 5). Fix sampling or budget. Partial arm saved to /root/b5out/ht_q35.w1.json -- 5 tasks.
+!!!! q35.w1 on arm nonzero (abort or error) -- continuing
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== RedHatAI/Qwen3.5-9B-FP8-dynamic  (hard tier)
+  Bash            8/12
+  Git             2/12
+  JS              3/15
+  Python         12/30
+  SQL            10/20
+  TS              1/15
+  TOTAL          36/104
+  decode: 64921 tok / 2913s = 22.3 tok/s
+graded -> /root/b5out/hb_q35.w1.graded.json
+  NOTE: 99/104 tasks absent from ht_q35.w1.json -- scored 0, not graded: ['hpy-006', 'hpy-007', 'hpy-008', 'hpy-009', 'hpy-010', 'hpy-011', '...']
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== RedHatAI/Qwen3.5-9B-FP8-dynamic  (hard tier)
+  Bash            0/12
+  Git             0/12
+  JS              0/15
+  Python          0/30
+  SQL             0/20
+  TS              0/15
+  TOTAL           0/104
+  decode: 160000 tok / 7164s = 22.3 tok/s
+graded -> /root/b5out/ht_q35.w1.graded.json
+
+================================================ [2/4] gemma Gemma 4 12B QAT
+(EngineCore pid=99) INFO 08-25 10:30:31 [kv_cache_utils.py:1733] GPU KV cache size: 189,164 tokens
+(EngineCore pid=99) INFO 08-25 10:30:31 [kv_cache_utils.py:1734] Maximum concurrency for 40,960 tokens per request: 4.62x
+     preflight ok
+---- gemma.w1 off arm (reasoning suppressed, greedy) @ window 40960, 1 worker
+  104 to run, 1 concurrent
+  5/104  7.5m elapsed, ~2.5h left  [capped 1, no-answer 0]
+  10/104  13.1m elapsed, ~2.1h left  [capped 2, no-answer 0]
+  15/104  19.7m elapsed, ~2.0h left  [capped 3, no-answer 0]
+  20/104  21.7m elapsed, ~1.5h left  [capped 3, no-answer 0]
+  25/104  23.4m elapsed, ~1.2h left  [capped 3, no-answer 0]
+  30/104  26.6m elapsed, ~1.1h left  [capped 3, no-answer 0]
+  35/104  28.6m elapsed, ~0.9h left  [capped 3, no-answer 0]
+  40/104  33.2m elapsed, ~0.9h left  [capped 3, no-answer 0]
+  45/104  39.0m elapsed, ~0.9h left  [capped 4, no-answer 0]
+  50/104  41.0m elapsed, ~0.7h left  [capped 4, no-answer 0]
+  55/104  42.3m elapsed, ~0.6h left  [capped 4, no-answer 0]
+  60/104  44.6m elapsed, ~0.5h left  [capped 4, no-answer 0]
+  65/104  45.1m elapsed, ~0.5h left  [capped 4, no-answer 0]
+  70/104  47.0m elapsed, ~0.4h left  [capped 4, no-answer 0]
+  75/104  47.3m elapsed, ~0.3h left  [capped 4, no-answer 0]
+  80/104  47.8m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  85/104  48.3m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  90/104  48.4m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  95/104  49.4m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  100/104  50.4m elapsed, ~0.0h left  [capped 6, no-answer 0]
+  104/104  50.5m elapsed, ~0.0h left  [capped 6, no-answer 0]
+saved -> /root/b5out/hb_gemma.w1.json
+google/gemma-4-12B-it-qat-w4a16-ct -> {'temperature': 0.0}
+            1-worker re-run. Every CUDA hard-tier score before 2026-08-25 was produced at B4_WORKERS=4, the setting at which this node reproduced only 46/104 answers of its own greedy run against 104/104 at 1 worker. Concurrency was therefore a confound on all of them. Greedy on BOTH arms here, so the off/on difference is reasoning alone -- which no CUDA arm has ever been able to claim: gemma ran t0.6/k20 and q35 t1.0/k64 against greedy off arms, differing twice over. Greedy thinking is the risk: gemmagreedy scored 1/104 at 4 workers by not terminating, and whether that was the model or the concurrency is exactly what this run tests. The runtime ceiling bounds the downside.
+---- gemma.w1 on arm (NATIVE thinking, budget 32000, GREEDY) @ window 40960, 1 worker
+  104 to run, 1 concurrent
+  5/104  114.3m elapsed, ~37.7h left  [capped 4, no-answer 4]
+    WARNING: projected 38h for this arm -- 4/5 capped, 4 unanswered. Check for non-termination.
+Traceback (most recent call last):
+  File "/root/bench2/b5.py", line 450, in <module>
+    run(sys.argv[2], sys.argv[3])
+  File "/root/bench2/b5.py", line 192, in run
+    list(ex.map(work, todo))
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 619, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 317, in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/bench2/b5.py", line 183, in work
+    raise RuntimeError(
+RuntimeError: ABORT: projected 38h exceeds B5_ABORT_HOURS=10 (capped 4/5, unanswered 4). Fix sampling or budget. Partial arm saved to /root/b5out/ht_gemma.w1.json -- 5 tasks.
+!!!! gemma.w1 on arm nonzero (abort or error) -- continuing
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== google/gemma-4-12B-it-qat-w4a16-ct  (hard tier)
+  Bash            8/12
+  Git             1/12
+  JS              2/15
+  Python         14/30
+  SQL            16/20
+  TS              3/15
+  TOTAL          44/104
+  decode: 57409 tok / 3030s = 18.9 tok/s
+graded -> /root/b5out/hb_gemma.w1.graded.json
+  NOTE: 99/104 tasks absent from ht_gemma.w1.json -- scored 0, not graded: ['hpy-006', 'hpy-007', 'hpy-008', 'hpy-009', 'hpy-010', 'hpy-011', '...']
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== google/gemma-4-12B-it-qat-w4a16-ct  (hard tier)
+  Bash            0/12
+  Git             0/12
+  JS              0/15
+  Python          1/30
+  SQL             0/20
+  TS              0/15
+  TOTAL           1/104
+  decode: 129765 tok / 6858s = 18.9 tok/s
+graded -> /root/b5out/ht_gemma.w1.graded.json
+
+================================================ [3/4] mellum Mellum2-12B-A2.5B
+(EngineCore pid=94) INFO 08-25 13:48:14 [kv_cache_utils.py:1733] GPU KV cache size: 104,158 tokens
+(EngineCore pid=94) INFO 08-25 13:48:14 [kv_cache_utils.py:1734] Maximum concurrency for 32,768 tokens per request: 3.18x
+     preflight ok
+---- mellum.w1 off arm (reasoning suppressed, greedy) @ window 32768, 1 worker
+  104 to run, 1 concurrent
+  5/104  2.2m elapsed, ~0.7h left  [capped 0, no-answer 0]
+  10/104  3.4m elapsed, ~0.5h left  [capped 0, no-answer 0]
+  15/104  5.6m elapsed, ~0.6h left  [capped 0, no-answer 0]
+  20/104  6.6m elapsed, ~0.5h left  [capped 0, no-answer 0]
+  25/104  7.6m elapsed, ~0.4h left  [capped 0, no-answer 0]
+  30/104  9.2m elapsed, ~0.4h left  [capped 0, no-answer 0]
+  35/104  10.6m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  40/104  11.6m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  45/104  12.8m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  50/104  16.5m elapsed, ~0.3h left  [capped 1, no-answer 0]
+  55/104  17.3m elapsed, ~0.3h left  [capped 1, no-answer 0]
+  60/104  18.2m elapsed, ~0.2h left  [capped 1, no-answer 0]
+  65/104  18.7m elapsed, ~0.2h left  [capped 1, no-answer 0]
+  70/104  19.1m elapsed, ~0.2h left  [capped 1, no-answer 0]
+  75/104  19.4m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  80/104  19.8m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  85/104  19.9m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  90/104  20.0m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  95/104  20.1m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  100/104  21.4m elapsed, ~0.0h left  [capped 3, no-answer 0]
+  104/104  21.5m elapsed, ~0.0h left  [capped 3, no-answer 0]
+saved -> /root/b5out/hb_mellum.w1.json
+voves/Mellum2-12B-A2.5B-Instruct-FP8 -> {'temperature': 0.0}
+            1-worker re-run. Every CUDA hard-tier score before 2026-08-25 was produced at B4_WORKERS=4, the setting at which this node reproduced only 46/104 answers of its own greedy run against 104/104 at 1 worker. Concurrency was therefore a confound on all of them. Greedy on BOTH arms here, so the off/on difference is reasoning alone -- which no CUDA arm has ever been able to claim: gemma ran t0.6/k20 and q35 t1.0/k64 against greedy off arms, differing twice over. Greedy thinking is the risk: gemmagreedy scored 1/104 at 4 workers by not terminating, and whether that was the model or the concurrency is exactly what this run tests. The runtime ceiling bounds the downside.
+---- mellum.w1 on arm (prompted CoT) @ window 32768, 1 worker
+  104 to run, 1 concurrent
+  5/104  4.9m elapsed, ~1.6h left  [capped 1, no-answer 0]
+  10/104  6.6m elapsed, ~1.0h left  [capped 1, no-answer 0]
+  15/104  8.6m elapsed, ~0.8h left  [capped 1, no-answer 0]
+  20/104  9.8m elapsed, ~0.7h left  [capped 1, no-answer 0]
+  25/104  11.3m elapsed, ~0.6h left  [capped 1, no-answer 0]
+  30/104  12.9m elapsed, ~0.5h left  [capped 1, no-answer 0]
+  35/104  14.4m elapsed, ~0.5h left  [capped 1, no-answer 0]
+  40/104  15.7m elapsed, ~0.4h left  [capped 1, no-answer 0]
+  45/104  17.2m elapsed, ~0.4h left  [capped 1, no-answer 0]
+  50/104  18.2m elapsed, ~0.3h left  [capped 1, no-answer 0]
+  55/104  19.2m elapsed, ~0.3h left  [capped 1, no-answer 0]
+  60/104  20.3m elapsed, ~0.2h left  [capped 1, no-answer 0]
+  65/104  21.0m elapsed, ~0.2h left  [capped 1, no-answer 0]
+  70/104  21.7m elapsed, ~0.2h left  [capped 1, no-answer 0]
+  75/104  22.5m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  80/104  23.4m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  85/104  23.8m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  90/104  24.2m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  95/104  24.5m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  100/104  24.9m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  104/104  25.1m elapsed, ~0.0h left  [capped 1, no-answer 0]
+saved -> /root/b5out/ht_mellum.w1.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== voves/Mellum2-12B-A2.5B-Instruct-FP8  (hard tier)
+  Bash            6/12
+  Git             2/12
+  JS              3/15
+  Python         14/30
+  SQL            16/20
+  TS              2/15
+  TOTAL          43/104
+  decode: 34215 tok / 1290s = 26.5 tok/s
+graded -> /root/b5out/hb_mellum.w1.graded.json
+  CoT arm: 91/104 answers used the ANSWER: marker
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== voves/Mellum2-12B-A2.5B-Instruct-FP8  (hard tier)
+  Bash            5/12
+  Git             5/12
+  JS              6/15
+  Python         13/30
+  SQL            13/20
+  TS              2/15
+  TOTAL          44/104
+  decode: 40120 tok / 1506s = 26.6 tok/s
+graded -> /root/b5out/ht_mellum.w1.graded.json
+
+================================================ [4/4] qwen Qwen2.5-Coder-14B-AWQ
+(EngineCore pid=98) INFO 08-25 14:43:51 [kv_cache_utils.py:1733] GPU KV cache size: 52,544 tokens
+(EngineCore pid=98) INFO 08-25 14:43:51 [kv_cache_utils.py:1734] Maximum concurrency for 32,768 tokens per request: 1.60x
+     preflight ok
+---- qwen.w1 off arm (reasoning suppressed, greedy) @ window 32768, 1 worker
+  104 to run, 1 concurrent
+  5/104  0.9m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  10/104  1.5m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  15/104  2.3m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  20/104  3.0m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  25/104  3.6m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  30/104  4.5m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  35/104  5.2m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  40/104  5.7m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  45/104  6.3m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  50/104  6.7m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  55/104  7.2m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  60/104  7.9m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  65/104  8.2m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  70/104  8.6m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  75/104  8.9m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  80/104  9.2m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  85/104  9.3m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  90/104  9.4m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  95/104  9.4m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  100/104  9.5m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  104/104  9.6m elapsed, ~0.0h left  [capped 0, no-answer 0]
+saved -> /root/b5out/hb_qwen.w1.json
+Qwen/Qwen2.5-Coder-14B-Instruct-AWQ -> {'temperature': 0.0}
+            1-worker re-run. Every CUDA hard-tier score before 2026-08-25 was produced at B4_WORKERS=4, the setting at which this node reproduced only 46/104 answers of its own greedy run against 104/104 at 1 worker. Concurrency was therefore a confound on all of them. Greedy on BOTH arms here, so the off/on difference is reasoning alone -- which no CUDA arm has ever been able to claim: gemma ran t0.6/k20 and q35 t1.0/k64 against greedy off arms, differing twice over. Greedy thinking is the risk: gemmagreedy scored 1/104 at 4 workers by not terminating, and whether that was the model or the concurrency is exactly what this run tests. The runtime ceiling bounds the downside.
+---- qwen.w1 on arm (prompted CoT) @ window 32768, 1 worker
+  104 to run, 1 concurrent
+  5/104  1.1m elapsed, ~0.4h left  [capped 0, no-answer 0]
+  10/104  2.3m elapsed, ~0.4h left  [capped 0, no-answer 0]
+  15/104  3.6m elapsed, ~0.4h left  [capped 0, no-answer 0]
+  20/104  4.7m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  25/104  5.6m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  30/104  6.9m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  35/104  7.9m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  40/104  8.7m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  45/104  9.8m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  50/104  10.7m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  55/104  11.4m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  60/104  12.5m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  65/104  13.1m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  70/104  13.9m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  75/104  14.6m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  80/104  15.3m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  85/104  15.7m elapsed, ~0.1h left  [capped 0, no-answer 0]
+  90/104  16.2m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  95/104  16.7m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  100/104  17.1m elapsed, ~0.0h left  [capped 0, no-answer 0]
+  104/104  17.5m elapsed, ~0.0h left  [capped 0, no-answer 0]
+saved -> /root/b5out/ht_qwen.w1.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== Qwen/Qwen2.5-Coder-14B-Instruct-AWQ  (hard tier)
+  Bash            8/12
+  Git             5/12
+  JS              2/15
+  Python          9/30
+  SQL            12/20
+  TS              1/15
+  TOTAL          37/104
+  decode: 16998 tok / 573s = 29.7 tok/s
+graded -> /root/b5out/hb_qwen.w1.graded.json
+  CoT arm: 104/104 answers used the ANSWER: marker
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== Qwen/Qwen2.5-Coder-14B-Instruct-AWQ  (hard tier)
+  Bash            5/12
+  Git             3/12
+  JS              2/15
+  Python          9/30
+  SQL            14/20
+  TS              2/15
+  TOTAL          35/104
+  decode: 31324 tok / 1048s = 29.9 tok/s
+graded -> /root/b5out/ht_qwen.w1.graded.json
+
+######## CUDA 1-WORKER RUN DONE
+Tue Aug 25 15:15:05 UTC 2026
+
+######## restoring gemma4-vllm
+time="2026-08-25T15:15:06Z" level=warning msg="No services to build"
+ Network gemma4-vllm-aio_default Creating 
+ Network gemma4-vllm-aio_default Created 
+ Container gemma4-vllm Creating 
+ Container gemma4-vllm Created 
+ Container gemma4-vllm Starting 
+ Container gemma4-vllm Started 
+gemma4-vllm	Up 5 seconds (health: starting)

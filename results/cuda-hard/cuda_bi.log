@@ -1,0 +1,347 @@
+######## GEMMA BATCH-INVARIANCE MATRIX
+Wed Aug 26 09:06:09 UTC 2026
+
+=============== stock, 2 workers
+---- gbi.s2a  workers=2  09:09:15
+  104 to run, 2 concurrent
+  5/104  1.8m elapsed, ~0.6h left  [capped 0, no-answer 0]
+  10/104  6.5m elapsed, ~1.0h left  [capped 1, no-answer 0]
+  15/104  8.3m elapsed, ~0.8h left  [capped 2, no-answer 0]
+  20/104  10.0m elapsed, ~0.7h left  [capped 2, no-answer 0]
+  25/104  11.1m elapsed, ~0.6h left  [capped 2, no-answer 0]
+  30/104  13.7m elapsed, ~0.6h left  [capped 2, no-answer 0]
+  35/104  14.5m elapsed, ~0.5h left  [capped 2, no-answer 0]
+  40/104  16.4m elapsed, ~0.4h left  [capped 2, no-answer 0]
+  45/104  18.0m elapsed, ~0.4h left  [capped 2, no-answer 0]
+  50/104  19.4m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  55/104  20.4m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  60/104  22.4m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  65/104  22.7m elapsed, ~0.2h left  [capped 2, no-answer 0]
+  70/104  24.7m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  75/104  25.1m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  80/104  25.4m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  85/104  25.6m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  90/104  25.8m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  95/104  26.4m elapsed, ~0.0h left  [capped 5, no-answer 0]
+  100/104  26.8m elapsed, ~0.0h left  [capped 6, no-answer 0]
+  104/104  27.3m elapsed, ~0.0h left  [capped 7, no-answer 0]
+saved -> /root/b5out/hb_gbi.s2a.json
+  decode: 61106 tok / 3252s = 18.8 tok/s
+graded -> /root/b5out/hb_gbi.s2a.graded.json
+---- gbi.s2b  workers=2  09:38:55
+  104 to run, 2 concurrent
+  5/104  4.4m elapsed, ~1.5h left  [capped 1, no-answer 0]
+  10/104  5.7m elapsed, ~0.9h left  [capped 1, no-answer 0]
+  15/104  9.2m elapsed, ~0.9h left  [capped 1, no-answer 0]
+  20/104  10.3m elapsed, ~0.7h left  [capped 1, no-answer 0]
+  25/104  11.4m elapsed, ~0.6h left  [capped 1, no-answer 0]
+  30/104  16.3m elapsed, ~0.7h left  [capped 2, no-answer 0]
+  35/104  17.4m elapsed, ~0.6h left  [capped 2, no-answer 0]
+  40/104  19.2m elapsed, ~0.5h left  [capped 2, no-answer 0]
+  45/104  22.3m elapsed, ~0.5h left  [capped 3, no-answer 0]
+  50/104  23.4m elapsed, ~0.4h left  [capped 3, no-answer 0]
+  55/104  24.2m elapsed, ~0.4h left  [capped 3, no-answer 0]
+  60/104  25.6m elapsed, ~0.3h left  [capped 3, no-answer 0]
+  65/104  25.8m elapsed, ~0.3h left  [capped 3, no-answer 0]
+  70/104  26.3m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  75/104  26.7m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  80/104  27.3m elapsed, ~0.1h left  [capped 3, no-answer 0]
+  85/104  27.4m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  90/104  27.5m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  95/104  27.6m elapsed, ~0.0h left  [capped 4, no-answer 0]
+  100/104  28.5m elapsed, ~0.0h left  [capped 6, no-answer 0]
+  104/104  29.4m elapsed, ~0.0h left  [capped 7, no-answer 0]
+saved -> /root/b5out/hb_gbi.s2b.json
+  decode: 65573 tok / 3478s = 18.9 tok/s
+graded -> /root/b5out/hb_gbi.s2b.graded.json
+--- fresh instance
+---- gbi.s2c  workers=2  10:13:42
+  104 to run, 2 concurrent
+  5/104  4.5m elapsed, ~1.5h left  [capped 1, no-answer 0]
+  10/104  5.8m elapsed, ~0.9h left  [capped 1, no-answer 0]
+  15/104  7.7m elapsed, ~0.8h left  [capped 1, no-answer 0]
+  20/104  9.5m elapsed, ~0.7h left  [capped 1, no-answer 0]
+  25/104  10.8m elapsed, ~0.6h left  [capped 2, no-answer 0]
+  30/104  14.4m elapsed, ~0.6h left  [capped 2, no-answer 0]
+  35/104  15.6m elapsed, ~0.5h left  [capped 3, no-answer 0]
+  40/104  17.9m elapsed, ~0.5h left  [capped 3, no-answer 0]
+  45/104  19.5m elapsed, ~0.4h left  [capped 3, no-answer 0]
+  50/104  20.7m elapsed, ~0.4h left  [capped 3, no-answer 0]
+  55/104  21.3m elapsed, ~0.3h left  [capped 3, no-answer 0]
+  60/104  22.4m elapsed, ~0.3h left  [capped 3, no-answer 0]
+  65/104  22.5m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  70/104  23.2m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  75/104  23.6m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  80/104  24.1m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  85/104  24.3m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  90/104  24.4m elapsed, ~0.1h left  [capped 4, no-answer 0]
+  95/104  24.5m elapsed, ~0.0h left  [capped 4, no-answer 0]
+  100/104  25.4m elapsed, ~0.0h left  [capped 6, no-answer 0]
+  104/104  26.3m elapsed, ~0.0h left  [capped 7, no-answer 0]
+saved -> /root/b5out/hb_gbi.s2c.json
+  decode: 58241 tok / 3107s = 18.7 tok/s
+graded -> /root/b5out/hb_gbi.s2c.graded.json
+
+=============== stock, 4 workers
+---- gbi.s4a  workers=4  10:45:03
+  104 to run, 4 concurrent
+  5/104  1.9m elapsed, ~0.6h left  [capped 0, no-answer 0]
+  10/104  4.7m elapsed, ~0.7h left  [capped 0, no-answer 0]
+  15/104  5.4m elapsed, ~0.5h left  [capped 2, no-answer 0]
+  20/104  5.9m elapsed, ~0.4h left  [capped 3, no-answer 0]
+  25/104  6.4m elapsed, ~0.3h left  [capped 3, no-answer 0]
+  30/104  7.7m elapsed, ~0.3h left  [capped 3, no-answer 0]
+  35/104  8.8m elapsed, ~0.3h left  [capped 3, no-answer 0]
+  40/104  10.8m elapsed, ~0.3h left  [capped 4, no-answer 0]
+  45/104  12.1m elapsed, ~0.3h left  [capped 5, no-answer 0]
+  50/104  12.5m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  55/104  13.2m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  60/104  14.0m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  65/104  14.2m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  70/104  14.5m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  75/104  14.7m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  80/104  14.8m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  85/104  15.0m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  90/104  15.0m elapsed, ~0.0h left  [capped 5, no-answer 0]
+  95/104  15.1m elapsed, ~0.0h left  [capped 5, no-answer 0]
+  100/104  16.0m elapsed, ~0.0h left  [capped 6, no-answer 0]
+  104/104  17.2m elapsed, ~0.0h left  [capped 9, no-answer 0]
+saved -> /root/b5out/hb_gbi.s4a.json
+  decode: 70356 tok / 3915s = 18.0 tok/s
+graded -> /root/b5out/hb_gbi.s4a.graded.json
+---- gbi.s4b  workers=4  11:04:30
+  104 to run, 4 concurrent
+  5/104  1.1m elapsed, ~0.4h left  [capped 0, no-answer 0]
+  10/104  2.7m elapsed, ~0.4h left  [capped 0, no-answer 0]
+  15/104  4.6m elapsed, ~0.5h left  [capped 1, no-answer 0]
+  20/104  5.0m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  25/104  5.6m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  30/104  7.6m elapsed, ~0.3h left  [capped 3, no-answer 0]
+  35/104  8.7m elapsed, ~0.3h left  [capped 3, no-answer 0]
+  40/104  10.0m elapsed, ~0.3h left  [capped 5, no-answer 0]
+  45/104  11.8m elapsed, ~0.3h left  [capped 5, no-answer 0]
+  50/104  12.9m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  55/104  13.9m elapsed, ~0.2h left  [capped 6, no-answer 0]
+  60/104  14.6m elapsed, ~0.2h left  [capped 7, no-answer 0]
+  65/104  14.7m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  70/104  15.0m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  75/104  15.1m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  80/104  15.3m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  85/104  15.5m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  90/104  15.6m elapsed, ~0.0h left  [capped 7, no-answer 0]
+  95/104  16.2m elapsed, ~0.0h left  [capped 8, no-answer 0]
+  100/104  16.5m elapsed, ~0.0h left  [capped 9, no-answer 0]
+  104/104  17.5m elapsed, ~0.0h left  [capped 12, no-answer 0]
+saved -> /root/b5out/hb_gbi.s4b.json
+  decode: 73666 tok / 4068s = 18.1 tok/s
+graded -> /root/b5out/hb_gbi.s4b.graded.json
+--- fresh instance
+---- gbi.s4c  workers=4  11:26:56
+  104 to run, 4 concurrent
+  5/104  1.1m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  10/104  3.4m elapsed, ~0.5h left  [capped 0, no-answer 0]
+  15/104  4.6m elapsed, ~0.5h left  [capped 2, no-answer 0]
+  20/104  4.9m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  25/104  5.4m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  30/104  6.8m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  35/104  7.3m elapsed, ~0.2h left  [capped 2, no-answer 0]
+  40/104  8.8m elapsed, ~0.2h left  [capped 2, no-answer 0]
+  45/104  10.0m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  50/104  10.7m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  55/104  11.9m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  60/104  12.4m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  65/104  12.6m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  70/104  12.8m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  75/104  13.0m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  80/104  13.1m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  85/104  13.3m elapsed, ~0.0h left  [capped 5, no-answer 0]
+  90/104  13.4m elapsed, ~0.0h left  [capped 5, no-answer 0]
+  95/104  14.0m elapsed, ~0.0h left  [capped 6, no-answer 0]
+  100/104  14.3m elapsed, ~0.0h left  [capped 7, no-answer 0]
+  104/104  15.1m elapsed, ~0.0h left  [capped 10, no-answer 0]
+saved -> /root/b5out/hb_gbi.s4c.json
+  decode: 66397 tok / 3517s = 18.9 tok/s
+graded -> /root/b5out/hb_gbi.s4c.graded.json
+
+=============== invariant, 2 workers
+---- gbi.i2a  workers=2  11:47:08
+  104 to run, 2 concurrent
+  5/104  5.7m elapsed, ~1.9h left  [capped 1, no-answer 0]
+  10/104  7.8m elapsed, ~1.2h left  [capped 2, no-answer 0]
+  15/104  9.7m elapsed, ~1.0h left  [capped 2, no-answer 0]
+  20/104  10.7m elapsed, ~0.7h left  [capped 2, no-answer 0]
+  25/104  11.8m elapsed, ~0.6h left  [capped 2, no-answer 0]
+  30/104  16.9m elapsed, ~0.7h left  [capped 3, no-answer 0]
+  35/104  18.1m elapsed, ~0.6h left  [capped 3, no-answer 0]
+  40/104  23.9m elapsed, ~0.6h left  [capped 5, no-answer 0]
+  45/104  26.1m elapsed, ~0.6h left  [capped 5, no-answer 0]
+  50/104  27.1m elapsed, ~0.5h left  [capped 5, no-answer 0]
+  55/104  28.3m elapsed, ~0.4h left  [capped 5, no-answer 0]
+  60/104  29.5m elapsed, ~0.4h left  [capped 5, no-answer 0]
+  65/104  29.8m elapsed, ~0.3h left  [capped 5, no-answer 0]
+  70/104  30.3m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  75/104  31.1m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  80/104  31.6m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  85/104  31.9m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  90/104  32.8m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  95/104  32.9m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  100/104  34.0m elapsed, ~0.0h left  [capped 9, no-answer 0]
+  104/104  35.1m elapsed, ~0.0h left  [capped 11, no-answer 0]
+saved -> /root/b5out/hb_gbi.i2a.json
+  decode: 67009 tok / 4203s = 15.9 tok/s
+graded -> /root/b5out/hb_gbi.i2a.graded.json
+---- gbi.i2b  workers=2  12:24:27
+  104 to run, 2 concurrent
+  5/104  5.7m elapsed, ~1.9h left  [capped 1, no-answer 0]
+  10/104  7.9m elapsed, ~1.2h left  [capped 2, no-answer 0]
+  15/104  11.5m elapsed, ~1.1h left  [capped 3, no-answer 0]
+  20/104  12.5m elapsed, ~0.9h left  [capped 3, no-answer 0]
+  25/104  13.8m elapsed, ~0.7h left  [capped 3, no-answer 0]
+  30/104  18.8m elapsed, ~0.8h left  [capped 4, no-answer 0]
+  35/104  19.9m elapsed, ~0.7h left  [capped 4, no-answer 0]
+  40/104  22.7m elapsed, ~0.6h left  [capped 4, no-answer 0]
+  45/104  25.3m elapsed, ~0.6h left  [capped 4, no-answer 0]
+  50/104  27.5m elapsed, ~0.5h left  [capped 5, no-answer 0]
+  55/104  29.6m elapsed, ~0.4h left  [capped 5, no-answer 0]
+  60/104  31.4m elapsed, ~0.4h left  [capped 6, no-answer 0]
+  65/104  31.9m elapsed, ~0.3h left  [capped 6, no-answer 0]
+  70/104  34.0m elapsed, ~0.3h left  [capped 7, no-answer 0]
+  75/104  34.8m elapsed, ~0.2h left  [capped 7, no-answer 0]
+  80/104  36.0m elapsed, ~0.2h left  [capped 8, no-answer 0]
+  85/104  36.2m elapsed, ~0.1h left  [capped 8, no-answer 0]
+  90/104  36.4m elapsed, ~0.1h left  [capped 8, no-answer 0]
+  95/104  37.1m elapsed, ~0.1h left  [capped 9, no-answer 0]
+  100/104  38.2m elapsed, ~0.0h left  [capped 11, no-answer 0]
+  104/104  39.2m elapsed, ~0.0h left  [capped 13, no-answer 0]
+saved -> /root/b5out/hb_gbi.i2b.json
+  decode: 74358 tok / 4672s = 15.9 tok/s
+graded -> /root/b5out/hb_gbi.i2b.graded.json
+--- fresh instance
+---- gbi.i2c  workers=2  13:08:41
+  104 to run, 2 concurrent
+  5/104  5.7m elapsed, ~1.9h left  [capped 1, no-answer 0]
+  10/104  7.9m elapsed, ~1.2h left  [capped 2, no-answer 0]
+  15/104  11.4m elapsed, ~1.1h left  [capped 3, no-answer 0]
+  20/104  12.5m elapsed, ~0.9h left  [capped 3, no-answer 0]
+  25/104  13.7m elapsed, ~0.7h left  [capped 3, no-answer 0]
+  30/104  18.6m elapsed, ~0.8h left  [capped 4, no-answer 0]
+  35/104  19.7m elapsed, ~0.6h left  [capped 4, no-answer 0]
+  40/104  22.5m elapsed, ~0.6h left  [capped 4, no-answer 0]
+  45/104  25.0m elapsed, ~0.5h left  [capped 4, no-answer 0]
+  50/104  27.2m elapsed, ~0.5h left  [capped 5, no-answer 0]
+  55/104  29.3m elapsed, ~0.4h left  [capped 5, no-answer 0]
+  60/104  31.0m elapsed, ~0.4h left  [capped 6, no-answer 0]
+  65/104  31.5m elapsed, ~0.3h left  [capped 6, no-answer 0]
+  70/104  33.6m elapsed, ~0.3h left  [capped 7, no-answer 0]
+  75/104  34.4m elapsed, ~0.2h left  [capped 7, no-answer 0]
+  80/104  35.6m elapsed, ~0.2h left  [capped 8, no-answer 0]
+  85/104  35.8m elapsed, ~0.1h left  [capped 8, no-answer 0]
+  90/104  36.1m elapsed, ~0.1h left  [capped 8, no-answer 0]
+  95/104  36.7m elapsed, ~0.1h left  [capped 9, no-answer 0]
+  100/104  37.9m elapsed, ~0.0h left  [capped 11, no-answer 0]
+  104/104  38.8m elapsed, ~0.0h left  [capped 13, no-answer 0]
+saved -> /root/b5out/hb_gbi.i2c.json
+  decode: 74358 tok / 4627s = 16.1 tok/s
+graded -> /root/b5out/hb_gbi.i2c.graded.json
+
+=============== invariant, 4 workers
+---- gbi.i4a  workers=4  13:52:35
+  104 to run, 4 concurrent
+  5/104  1.7m elapsed, ~0.6h left  [capped 0, no-answer 0]
+  10/104  5.3m elapsed, ~0.8h left  [capped 1, no-answer 0]
+  15/104  5.9m elapsed, ~0.6h left  [capped 2, no-answer 0]
+  20/104  6.3m elapsed, ~0.4h left  [capped 2, no-answer 0]
+  25/104  7.0m elapsed, ~0.4h left  [capped 2, no-answer 0]
+  30/104  8.4m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  35/104  11.3m elapsed, ~0.4h left  [capped 2, no-answer 0]
+  40/104  12.4m elapsed, ~0.3h left  [capped 4, no-answer 0]
+  45/104  14.9m elapsed, ~0.3h left  [capped 5, no-answer 0]
+  50/104  15.8m elapsed, ~0.3h left  [capped 5, no-answer 0]
+  55/104  16.7m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  60/104  18.0m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  65/104  18.8m elapsed, ~0.2h left  [capped 6, no-answer 0]
+  70/104  19.2m elapsed, ~0.2h left  [capped 6, no-answer 0]
+  75/104  20.2m elapsed, ~0.1h left  [capped 6, no-answer 0]
+  80/104  20.4m elapsed, ~0.1h left  [capped 6, no-answer 0]
+  85/104  20.5m elapsed, ~0.1h left  [capped 6, no-answer 0]
+  90/104  20.6m elapsed, ~0.1h left  [capped 6, no-answer 0]
+  95/104  21.7m elapsed, ~0.0h left  [capped 8, no-answer 0]
+  100/104  21.8m elapsed, ~0.0h left  [capped 9, no-answer 0]
+  104/104  22.8m elapsed, ~0.0h left  [capped 12, no-answer 0]
+saved -> /root/b5out/hb_gbi.i4a.json
+  decode: 84610 tok / 5315s = 15.9 tok/s
+graded -> /root/b5out/hb_gbi.i4a.graded.json
+---- gbi.i4b  workers=4  14:17:36
+  104 to run, 4 concurrent
+  5/104  2.4m elapsed, ~0.8h left  [capped 0, no-answer 0]
+  10/104  5.1m elapsed, ~0.8h left  [capped 0, no-answer 0]
+  15/104  6.1m elapsed, ~0.6h left  [capped 1, no-answer 0]
+  20/104  6.6m elapsed, ~0.5h left  [capped 2, no-answer 0]
+  25/104  7.0m elapsed, ~0.4h left  [capped 2, no-answer 0]
+  30/104  8.6m elapsed, ~0.4h left  [capped 2, no-answer 0]
+  35/104  10.2m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  40/104  11.5m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  45/104  12.2m elapsed, ~0.3h left  [capped 3, no-answer 0]
+  50/104  13.0m elapsed, ~0.2h left  [capped 3, no-answer 0]
+  55/104  14.7m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  60/104  15.7m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  65/104  16.6m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  70/104  17.2m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  75/104  17.8m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  80/104  18.0m elapsed, ~0.1h left  [capped 5, no-answer 0]
+  85/104  18.8m elapsed, ~0.1h left  [capped 6, no-answer 0]
+  90/104  18.9m elapsed, ~0.0h left  [capped 7, no-answer 0]
+  95/104  19.9m elapsed, ~0.0h left  [capped 9, no-answer 0]
+  100/104  20.0m elapsed, ~0.0h left  [capped 11, no-answer 0]
+  104/104  20.1m elapsed, ~0.0h left  [capped 12, no-answer 0]
+saved -> /root/b5out/hb_gbi.i4b.json
+  decode: 77043 tok / 4808s = 16.0 tok/s
+graded -> /root/b5out/hb_gbi.i4b.graded.json
+--- fresh instance
+---- gbi.i4c  workers=4  14:42:39
+  104 to run, 4 concurrent
+  5/104  1.9m elapsed, ~0.6h left  [capped 0, no-answer 0]
+  10/104  5.2m elapsed, ~0.8h left  [capped 1, no-answer 0]
+  15/104  6.1m elapsed, ~0.6h left  [capped 2, no-answer 0]
+  20/104  6.7m elapsed, ~0.5h left  [capped 3, no-answer 0]
+  25/104  7.4m elapsed, ~0.4h left  [capped 3, no-answer 0]
+  30/104  10.0m elapsed, ~0.4h left  [capped 3, no-answer 0]
+  35/104  11.7m elapsed, ~0.4h left  [capped 3, no-answer 0]
+  40/104  12.6m elapsed, ~0.3h left  [capped 4, no-answer 0]
+  45/104  13.6m elapsed, ~0.3h left  [capped 4, no-answer 0]
+  50/104  14.6m elapsed, ~0.3h left  [capped 4, no-answer 0]
+  55/104  16.5m elapsed, ~0.2h left  [capped 4, no-answer 0]
+  60/104  18.3m elapsed, ~0.2h left  [capped 5, no-answer 0]
+  65/104  18.7m elapsed, ~0.2h left  [capped 6, no-answer 0]
+  70/104  19.1m elapsed, ~0.2h left  [capped 6, no-answer 0]
+  75/104  20.1m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  80/104  20.3m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  85/104  20.4m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  90/104  20.4m elapsed, ~0.1h left  [capped 7, no-answer 0]
+  95/104  21.5m elapsed, ~0.0h left  [capped 8, no-answer 0]
+  100/104  21.6m elapsed, ~0.0h left  [capped 10, no-answer 0]
+  104/104  22.6m elapsed, ~0.0h left  [capped 12, no-answer 0]
+saved -> /root/b5out/hb_gbi.i4c.json
+  decode: 83890 tok / 5252s = 16.0 tok/s
+graded -> /root/b5out/hb_gbi.i4c.graded.json
+
+######## RESULTS
+
+  condition                same process     across restart   scores
+  --------------------------------------------------------------------------
+  stock      2 workers      64/104 ( 62%)    68/104 ( 65%)   44 / 43 / 44
+  stock      4 workers      58/104 ( 56%)    55/104 ( 53%)   42 / 41 / 42
+  invariant  2 workers      74/104 ( 71%)    74/104 ( 71%)   40 / 41 / 41
+  invariant  4 workers      54/104 ( 52%)    57/104 ( 55%)   40 / 39 / 38
+
+######## DONE
+Wed Aug 26 15:07:35 UTC 2026
+
+######## restoring gemma4-vllm
+time="2026-08-26T15:07:36Z" level=warning msg="No services to build"
+ Network gemma4-vllm-aio_default Creating 
+ Network gemma4-vllm-aio_default Created 
+ Container gemma4-vllm Creating 
+ Container gemma4-vllm Created 
+ Container gemma4-vllm Starting 
+ Container gemma4-vllm Started 
