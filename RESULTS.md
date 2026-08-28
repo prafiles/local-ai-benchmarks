@@ -122,22 +122,38 @@ retries. Eleven of twelve categories move up or hold. One moves sharply down:
 | on | 47 | **22** | 48 | 47 | 37 | 49 | 49 | 50 | 50 | 46 | 43 | 44 |
 | Δ | +12 | **−17** | 0 | +1 | −2 | +4 | +6 | +1 | +4 | +9 | 0 | +4 |
 
-**Django's −17 is not a capability result.** 21 Django tasks returned
-`finish_reason=stop` — a natural stop, not a cap — with **empty content**, and
-19 of those traces end with a closing code fence. The model wrote a complete
-answer inside the reasoning channel and closed cleanly; the harness reads
-`content`, so it scored zero. Only a 400-character tail of each trace is stored,
-so the answers cannot be recovered from the results file.
+**Part of that −17 is an extraction artifact, and most of it is not.** 21 Django
+tasks returned `finish_reason=stop` — a natural stop, not a cap — with **empty
+content**, and 19 of those traces end with a closing code fence: the model wrote
+an answer inside the reasoning channel and closed cleanly, where the grader does
+not look. Only a 400-character tail of each trace is stored, so the answers had
+to be re-generated to find out what they were worth.
 
-This is a different failure from the caps on the hard tier. There the budget ran
-out; here the model stopped on its own with the work finished and filed in the
-wrong place. Both suppress the score, so **+22 is a floor**, and the same
-mechanism is a candidate wherever a thinking arm loses a category outright.
+The control re-ran exactly those 21 tasks at the same profile and budget, kept
+`reasoning_content`, substituted it, and graded the arm again through the
+unmodified grader:
 
-The grader was **not** changed to read `reasoning_content` as a fallback. That
-would silently re-score every model in the repo against a rule none of them were
-measured under, to rescue one. It is recorded as an artifact instead — the same
-treatment as [mlx-engine#337](https://github.com/lmstudio-ai/mlx-engine/issues/337).
+| | Django | total |
+|---|---|---|
+| off arm | 39 | 510 |
+| thinking arm, as measured | 22 | 532 |
+| thinking arm, stranded answers substituted | **26** | **536** |
+
+All 21 reproduced the failure exactly — `content` empty every time, greedy, so
+this is deterministic and not a sampling fluke. But recovering every one of them
+buys **4 tasks, not 17**. Django still falls 39 → 26 against its own off arm.
+
+So the honest split is: **−4 was the harness failing to see the answer, and −13
+is the model getting Django wrong when it thinks.** An earlier revision of this
+file claimed the whole −17 was an artifact. That was wrong, and it was wrong in
+the direction that flatters the model — which is exactly why the control was run
+before the claim was left standing. The published number remains **532**; 536 is
+a control, not a score, and is itself a lower bound, since feeding a whole trace
+to the extractor can hand it an intermediate draft instead of the final answer.
+
+The grader was **not** given a `reasoning_content` fallback. That would silently
+re-score every model in the repo against a rule none of them were measured
+under, to rescue one — and on this evidence it would have moved the total by 4.
 
 ## Noise floors — two, not one
 

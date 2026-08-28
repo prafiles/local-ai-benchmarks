@@ -182,10 +182,13 @@ model actually achieved.
 | 11 | GLM 4.7 Flash | M2 Max | **521** | 515 | 521 | −6 |
 | 12 | DeepSeek VL2 | M2 Max | **167** | n/a | 167 | — |
 
-Nemotron's 532 is a **floor**, and by more than the ranking gap: 21 of its Django
-tasks stopped naturally with an empty answer because the model wrote the answer
-into its reasoning channel, where the grader does not look. See
-[RESULTS.md](RESULTS.md) for the evidence and why the grader was left alone.
+Nemotron's 532 is a slight **floor**: 21 Django tasks stopped naturally with an
+empty answer because the model wrote the answer into its reasoning channel,
+where the grader does not look. A control that re-ran those 21 and substituted
+the recovered answers scores **536** — so the artifact is worth 4 tasks, not the
+17 Django appears to lose, and the rest of that drop is real. It does not change
+the ranking. See [RESULTS.md](RESULTS.md) for the control and why the grader was
+deliberately left alone.
 
 **The top four are separated by 11 tasks out of 600.** They land within 2% of each other
 against a measured noise floor of ~6 tasks, so this is one leading cluster rather than a
