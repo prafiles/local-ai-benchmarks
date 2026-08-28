@@ -1,0 +1,107 @@
+######################## NEMOTRON 3.5 COMPLETE BENCHMARK
+Thu Aug 27 17:02:01 IST 2026
+model=nvidia-nemotron-3.5-lightning-30b-a3b  ctx=40960  greedy both arms, retries 0 on the hard tier
+preflight ok: model answered 'ready'
+
+=================== HARD TIER (104 tasks, both arms)
+######## HARD TIER  nemotron -- nvidia-nemotron-3.5-lightning-30b-a3b
+Thu Aug 27 17:02:02 IST 2026
+loaded once: requested 40960, actual window 40960 -- both arms will use it
+---- nemotron off arm (reasoning suppressed, greedy) @ window 40960
+  104 to run, 1 concurrent
+  5/104  2.3m elapsed, ~0.8h left  [capped 1, no-answer 0]
+  10/104  2.8m elapsed, ~0.4h left  [capped 1, no-answer 0]
+  15/104  4.2m elapsed, ~0.4h left  [capped 1, no-answer 0]
+  20/104  4.7m elapsed, ~0.3h left  [capped 1, no-answer 0]
+  25/104  5.4m elapsed, ~0.3h left  [capped 1, no-answer 0]
+  30/104  7.0m elapsed, ~0.3h left  [capped 2, no-answer 0]
+  35/104  7.6m elapsed, ~0.2h left  [capped 2, no-answer 0]
+  40/104  7.9m elapsed, ~0.2h left  [capped 2, no-answer 0]
+  45/104  8.3m elapsed, ~0.2h left  [capped 2, no-answer 0]
+  50/104  8.6m elapsed, ~0.2h left  [capped 2, no-answer 0]
+  55/104  8.9m elapsed, ~0.1h left  [capped 2, no-answer 0]
+  60/104  9.4m elapsed, ~0.1h left  [capped 2, no-answer 0]
+  65/104  9.6m elapsed, ~0.1h left  [capped 2, no-answer 0]
+  70/104  9.8m elapsed, ~0.1h left  [capped 2, no-answer 0]
+  75/104  9.9m elapsed, ~0.1h left  [capped 2, no-answer 0]
+  80/104  10.1m elapsed, ~0.1h left  [capped 2, no-answer 0]
+  85/104  10.1m elapsed, ~0.0h left  [capped 2, no-answer 0]
+  90/104  10.2m elapsed, ~0.0h left  [capped 2, no-answer 0]
+  95/104  10.2m elapsed, ~0.0h left  [capped 2, no-answer 0]
+  100/104  10.3m elapsed, ~0.0h left  [capped 2, no-answer 0]
+  104/104  10.3m elapsed, ~0.0h left  [capped 2, no-answer 0]
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/hard/hb_nemotron.json
+nvidia-nemotron-3.5-lightning-30b-a3b -> {'temperature': 0.0}
+            Greedy, on BOTH arms, so the pair is single-variable. This is the profile the tier wants and rarely gets: it was measured rather than assumed, at the budget the run actually uses (32000), which is the mistake that hid Qwen3.8's and GLM's spirals when they were tuned at 8000. Six probes, one per category, greedy thinking at budget 32000: 0/6 capped, 0/6 no-answer, every one finish_reason=stop with a real answer -- hpy-001 5104 tok, hjs-001 31085, hts-001 21170, hsql-001 2627, hsh-001 6868, hgit-001 13397, at ~60 tok/s. Greedy thinking spirals on Qwen3.5, GLM 4.7 and Gemma 4 12B; it does not spiral here, so no temperature escape and no presence_penalty brake is needed and the arms differ in exactly one thing. Two cautions the numbers carry. The traces are LONG (8.5k-120k characters); hjs-001 stopped on its own at 31085 of 32000, within 915 tokens of the cap, so some hard-tier tasks will cap and the recorded cap count is the thing to read rather than a surprise. And on b3, whose reasoning floor is 8000 rather than 32000, a trace of this length will bind on many tasks -- b3's floor is kept at 8000 anyway because every other model on that suite was measured there and changing it would break the comparison, not improve it.
+---- nemotron on arm (NATIVE thinking, budget 32000) @ window 40960
+  104 to run, 1 concurrent
+  5/104  23.0m elapsed, ~7.6h left  [capped 2, no-answer 2]
+  10/104  44.4m elapsed, ~7.0h left  [capped 2, no-answer 2]
+  15/104  83.4m elapsed, ~8.2h left  [capped 5, no-answer 5]
+  20/104  98.9m elapsed, ~6.9h left  [capped 5, no-answer 5]
+  25/104  119.8m elapsed, ~6.3h left  [capped 6, no-answer 6]
+  30/104  146.5m elapsed, ~6.0h left  [capped 8, no-answer 8]
+  35/104  167.6m elapsed, ~5.5h left  [capped 8, no-answer 8]
+  40/104  189.1m elapsed, ~5.0h left  [capped 9, no-answer 9]
+  45/104  218.2m elapsed, ~4.8h left  [capped 11, no-answer 11]
+  50/104  255.2m elapsed, ~4.6h left  [capped 12, no-answer 12]
+  55/104  290.4m elapsed, ~4.3h left  [capped 13, no-answer 13]
+  60/104  320.6m elapsed, ~3.9h left  [capped 13, no-answer 13]
+  65/104  324.5m elapsed, ~3.2h left  [capped 13, no-answer 13]
+  70/104  330.2m elapsed, ~2.7h left  [capped 13, no-answer 13]
+  75/104  334.1m elapsed, ~2.2h left  [capped 13, no-answer 13]
+  80/104  338.2m elapsed, ~1.7h left  [capped 13, no-answer 13]
+  85/104  342.6m elapsed, ~1.3h left  [capped 13, no-answer 13]
+  90/104  348.2m elapsed, ~0.9h left  [capped 13, no-answer 13]
+  95/104  355.6m elapsed, ~0.6h left  [capped 13, no-answer 13]
+  100/104  361.5m elapsed, ~0.2h left  [capped 13, no-answer 13]
+  104/104  373.3m elapsed, ~0.0h left  [capped 13, no-answer 13]
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/hard/ht_nemotron.json
+######## nemotron HARD TIER DONE -- arms=both at window 40960
+Thu Aug 27 23:25:45 IST 2026
+
+--- grading hard tier
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== nvidia-nemotron-3.5-lightning-30b-a3b  (hard tier)
+  Bash            8/12
+  Git             6/12
+  JS              1/15
+  Python         12/30
+  SQL            10/20
+  TS              0/15
+  TOTAL          37/104
+  decode: 37512 tok / 619s = 60.6 tok/s
+graded -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/hard/hb_nemotron.graded.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== nvidia-nemotron-3.5-lightning-30b-a3b  (hard tier)
+  Bash            9/12
+  Git             6/12
+  JS              5/15
+  Python         18/30
+  SQL            17/20
+  TS              3/15
+  TOTAL          58/104
+  decode: 1335767 tok / 22395s = 59.6 tok/s
+graded -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/hard/ht_nemotron.graded.json
+preflight ok: model answered 'ready'
+
+=================== B3 SUITE (600 tasks, both arms)
+######## nemotron -- nvidia-nemotron-3.5-lightning-30b-a3b
+Thu Aug 27 23:27:23 IST 2026
+loaded once: requested 40960, actual window 40960 -- both arms will use it
+---- nemotron off arm (reasoning suppressed, greedy) @ window 40960
+  600 to run, 1 concurrent
+Terminated: 15             B4_THINK=0 B4_COT=0 B4_PROFILES='{}' python3 -u b3.py run "$MODEL" "$OUT/b_$KEY.json"
+B3 FAILED

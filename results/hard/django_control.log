@@ -1,0 +1,52 @@
+21 Django tasks to re-run: ['dj-001', 'dj-006', 'dj-009', 'dj-010', 'dj-012', 'dj-014', 'dj-015', 'dj-016', 'dj-017', 'dj-019', 'dj-022', 'dj-024', 'dj-036', 'dj-037', 'dj-040', 'dj-042', 'dj-043', 'dj-047', 'dj-048', 'dj-049', 'dj-050']
+  [1/21] dj-001: content=0ch trace=12107ch -> recovered
+  [2/21] dj-006: content=0ch trace=1819ch -> recovered
+  [3/21] dj-009: content=0ch trace=1341ch -> recovered
+  [4/21] dj-010: content=0ch trace=900ch -> recovered
+  [5/21] dj-012: content=0ch trace=3007ch -> recovered
+  [6/21] dj-014: content=0ch trace=1611ch -> recovered
+  [7/21] dj-015: content=0ch trace=856ch -> recovered
+  [8/21] dj-016: content=0ch trace=14032ch -> recovered
+  [9/21] dj-017: content=76ch trace=3969ch -> recovered
+  [10/21] dj-019: content=0ch trace=930ch -> recovered
+  [11/21] dj-022: content=0ch trace=2793ch -> recovered
+  [12/21] dj-024: content=108ch trace=10557ch -> recovered
+  [13/21] dj-036: content=0ch trace=1023ch -> recovered
+  [14/21] dj-037: content=0ch trace=1575ch -> recovered
+  [15/21] dj-040: content=0ch trace=2783ch -> recovered
+  [16/21] dj-042: content=0ch trace=11406ch -> recovered
+  [17/21] dj-043: content=0ch trace=2229ch -> recovered
+  [18/21] dj-047: content=242ch trace=16674ch -> recovered
+  [19/21] dj-048: content=0ch trace=21540ch -> recovered
+  [20/21] dj-049: content=0ch trace=27375ch -> recovered
+  [21/21] dj-050: content=0ch trace=2344ch -> recovered
+
+21/21 recovered -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/t_nemotron.djctl.json
+  grading python ...
+  grading django ...
+  grading sql ...
+  grading js ...
+  grading ts ...
+  grading bash ...
+  grading git ...
+  grading sshcfg ...
+  grading yaml ...
+  grading rubric ...
+  grading rag ...
+
+===== nvidia-nemotron-3.5-lightning-30b-a3b
+  Bash           47/50
+  Django         26/50
+  Docs           48/50
+  Git            47/50
+  GitHub         37/50
+  JS             49/50
+  Python         49/50
+  RAG            50/50
+  ReactNative    50/50
+  SQL            46/50
+  SSH            43/50
+  TS             44/50
+  TOTAL         536/600
+  decode: 704664 tok / 11116s = 63.4 tok/s
+graded -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/t_nemotron.djctl.graded.json
