@@ -1,10 +1,11 @@
 # local-ai-benchmarks
 
-Execution-graded benchmarks for local coding models. **Fifteen models across two machines and
-three serving backends** — an RTX 4060 Ti (16 GB) under vLLM 0.22.1, and an Apple M2 Max (64 GB)
-under LM Studio on both MLX and GGUF. The 600-task suite covers twelve of those models; the hard
-tier adds Ornith 1.5 (35B and 9B) and Muse Glimmer 30B. Nemotron 3.5 Lightning 30B A3B is the
-only model measured on **both** suites from the start, under the current single-variable rules.
+Execution-graded benchmarks for local coding models. **Sixteen models across three machines and
+four serving backends** — an RTX 4060 Ti (16 GB) under vLLM 0.22.1, an Apple M2 Max (64 GB) under
+LM Studio on both MLX and GGUF, and a Spark node under vLLM 0.27.1 serving NVFP4. The 600-task
+suite covers twelve of those models; the hard tier adds Ornith 1.5 (35B and 9B), Muse Glimmer 30B
+and Nemotron 3 Super. Nemotron 3.5 Lightning 30B A3B is the only model measured on **both** suites
+from the start, under the current single-variable rules.
 
 Every model runs the same 600 tasks **twice**: once with reasoning suppressed, once with it
 enabled. Nothing is scored by an LLM judge. Python, Django, JS, TS and SQL answers are
@@ -35,7 +36,7 @@ larger and the reasoning floor moves 8000 → 32000.
 
 ### Every model from the 600-task suite, re-run on the hard tier
 
-All eleven, plus three that were not in the old suite. Best arm per model; `†` marks a score that
+All eleven, plus five that were not in the old suite. Best arm per model; `†` marks a score that
 is **not** a single-variable measurement of reasoning — hot resampling, a non-greedy profile, or
 4-way request concurrency.
 
@@ -47,6 +48,7 @@ is **not** a single-variable measurement of reasoning — hot resampling, a non-
 | **Gemma 4 26B A4B** | b3 | GGUF | 58 | **80** | **80** |
 | **Qwen3.6 27B** | b3 | GGUF | 61 | **75** | **75** |
 | Qwen3.6 27B | b3 | MLX | 62 | 75 † | 75 † |
+| **Nemotron 3 Super 120B A12B** | new | vLLM | 60 | **71** | **71** |
 | **Qwen3.6 35B A3B** | b3 | GGUF | 54 | **67** | **67** |
 | Ornith 1.5 35B A3B | new | GGUF | — | 66 / 62 | 66 |
 | Qwen3.6 35B A3B | b3 | MLX | 48 | 65 † | 65 † |
@@ -84,8 +86,8 @@ is the conversion, not the quantization.
 
 ### Does reasoning help? Only the trained kind, and only when measured cleanly
 
-Strip out every arm that is not single-variable and ten remain — six native, four CoT, at
-least one of each on every backend:
+Strip out every arm that is not single-variable and eleven remain — seven native, four CoT,
+spread across three machines:
 
 | Model | stack | off | on | Δ |
 |---|---|---|---|---|
@@ -95,12 +97,13 @@ least one of each on every backend:
 | Gemma 4 12B QAT | vLLM | 47 | **64** | +17 *(pp 1.5 both arms)* |
 | Qwen3.6 27B | GGUF | 61 | 75 | +14 |
 | Qwen3.6 35B A3B | GGUF | 54 | 67 | +13 |
+| Nemotron 3 Super 120B A12B | vLLM NVFP4 | 60 | **71** | +11 |
 | Mellum2 12B A2.5B | vLLM | 43 | 44 | +1 *(prompted CoT)* |
 | DeepSeek VL2 | MLX | 1 | 1 | 0 *(prompted CoT)* |
 | Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 *(prompted CoT)* |
 | Qwen2.5-Coder 14B | vLLM | 37 | 35 | −2 *(prompted CoT)* |
 
-**Every clean native-thinking arm is positive (+13 to +24). Prompted CoT lands within ±2 of
+**Every clean native-thinking arm is positive (+11 to +24). Prompted CoT lands within ±2 of
 zero** — −2, −1, 0 and +1 once concurrency is removed.
 
 **That second sentence is a correction.** This README previously said no CoT arm had ever been
@@ -108,7 +111,7 @@ positive, citing −9, −5, −1 and 0. Re-running the CUDA models at 1 worker 
 moved **Mellum2 from −9 to +1** and Qwen2.5-Coder from −5 to −2. Mellum's *off* arm shifted 2 tasks
 between worker counts while its *CoT* arm shifted 8 — concurrency hits the longer generations
 about four times harder. So prompted CoT does **nothing** here rather than harm. The
-native-vs-CoT asymmetry is unaffected: +13..+24 against −2..+1 does not depend on which end of
+native-vs-CoT asymmetry is unaffected: +11..+24 against −2..+1 does not depend on which end of
 that second range is right.
 
 **Removing a confound has shrunk the apparent effect every time — five for five.** +28 → +22

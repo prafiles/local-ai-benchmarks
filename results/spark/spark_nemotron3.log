@@ -1,0 +1,102 @@
+######## Nemotron 3 Super 120B-A12B -- Spark
+Fri Aug 28 21:25:34 IST 2026
+resident: nvidia/nemotron-3-super 262144
+in-flight requests not ours: 0.0
+preflight ok: model answered 'ready' at window 262144
+nemotron-3-super -> {'temperature': 0.0}
+            Greedy on BOTH arms, so the pair is single-variable. Greedy thinking terminates on this model, which is not the default assumption here: it spirals on Qwen3.5 9B, GLM 4.7 and Gemma 4 12B, each of which burned a full 32000-token budget and answered nothing. Probed at the budget the run actually uses (32000, per the rule that a profile tuned below its run's budget cannot see the failure it most needs to see): 3 hard-tier tasks across Python/SQL/Bash all finished on their own with 0 caps and traces of 1088-1869 characters. No brake -- presence_penalty, a hotter profile, a trace cap -- is needed or applied.
+profile: {"nemotron-3-super": {"temperature": 0.0}}
+
+=================== HARD TIER (104 tasks)
+---- nemotron3 off arm (thinking disabled via template, greedy)
+  104 to run, 1 concurrent
+  5/104  1.1m elapsed, ~0.4h left  [capped 0, no-answer 0]
+  10/104  1.8m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  15/104  3.4m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  20/104  4.3m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  25/104  5.0m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  30/104  6.1m elapsed, ~0.3h left  [capped 0, no-answer 0]
+  35/104  7.2m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  40/104  8.0m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  45/104  9.0m elapsed, ~0.2h left  [capped 0, no-answer 0]
+  50/104  12.6m elapsed, ~0.2h left  [capped 1, no-answer 0]
+  55/104  13.1m elapsed, ~0.2h left  [capped 1, no-answer 0]
+  60/104  13.8m elapsed, ~0.2h left  [capped 1, no-answer 0]
+  65/104  14.1m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  70/104  14.5m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  75/104  14.9m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  80/104  15.2m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  85/104  15.4m elapsed, ~0.1h left  [capped 1, no-answer 0]
+  90/104  15.5m elapsed, ~0.0h left  [capped 1, no-answer 0]
+  95/104  16.1m elapsed, ~0.0h left  [capped 2, no-answer 0]
+  100/104  16.2m elapsed, ~0.0h left  [capped 2, no-answer 0]
+  104/104  16.3m elapsed, ~0.0h left  [capped 2, no-answer 0]
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/spark/hb_nemotron3.json
+---- nemotron3 on arm (NATIVE thinking, greedy, budget 32000)
+  104 to run, 1 concurrent
+  5/104  22.7m elapsed, ~7.5h left  [capped 1, no-answer 1]
+  10/104  28.0m elapsed, ~4.4h left  [capped 1, no-answer 1]
+  15/104  49.1m elapsed, ~4.9h left  [capped 2, no-answer 2]
+  20/104  54.3m elapsed, ~3.8h left  [capped 2, no-answer 2]
+  25/104  77.3m elapsed, ~4.1h left  [capped 3, no-answer 3]
+  30/104  97.9m elapsed, ~4.0h left  [capped 4, no-answer 4]
+  35/104  105.0m elapsed, ~3.4h left  [capped 4, no-answer 4]
+  40/104  109.4m elapsed, ~2.9h left  [capped 4, no-answer 4]
+  45/104  119.0m elapsed, ~2.6h left  [capped 4, no-answer 4]
+  50/104  141.7m elapsed, ~2.6h left  [capped 4, no-answer 4]
+  55/104  175.9m elapsed, ~2.6h left  [capped 5, no-answer 5]
+  60/104  199.7m elapsed, ~2.4h left  [capped 6, no-answer 6]
+  65/104  201.6m elapsed, ~2.0h left  [capped 6, no-answer 6]
+  70/104  204.1m elapsed, ~1.7h left  [capped 6, no-answer 6]
+  75/104  205.6m elapsed, ~1.3h left  [capped 6, no-answer 6]
+  80/104  207.3m elapsed, ~1.0h left  [capped 6, no-answer 6]
+  85/104  209.7m elapsed, ~0.8h left  [capped 6, no-answer 6]
+  90/104  211.7m elapsed, ~0.5h left  [capped 6, no-answer 6]
+  95/104  212.8m elapsed, ~0.3h left  [capped 6, no-answer 6]
+  100/104  214.5m elapsed, ~0.1h left  [capped 6, no-answer 6]
+  104/104  216.6m elapsed, ~0.0h left  [capped 6, no-answer 6]
+saved -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/spark/ht_nemotron3.json
+
+--- grading hard tier
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== nvidia/nemotron-3-super  (hard tier)
+  Bash           11/12
+  Git             6/12
+  JS              4/15
+  Python         20/30
+  SQL            16/20
+  TS              3/15
+  TOTAL          60/104
+  decode: 29201 tok / 980s = 29.8 tok/s
+graded -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/spark/hb_nemotron3.graded.json
+  grading python ...
+  grading js ...
+  grading ts ...
+  grading sql ...
+  grading bash ...
+  grading git ...
+
+===== nvidia/nemotron-3-super  (hard tier)
+  Bash           11/12
+  Git             8/12
+  JS              9/15
+  Python         20/30
+  SQL            19/20
+  TS              4/15
+  TOTAL          71/104
+  decode: 375845 tok / 12995s = 28.9 tok/s
+graded -> /Volumes/Store/Developer/AER/local-ai-benchmarks/results/spark/ht_nemotron3.graded.json
+resident: nvidia/nemotron-3-super 262144
+in-flight requests not ours: 0.0
+preflight ok: model answered 'ready' at window 262144
+
+=================== B3 SUITE (600 tasks)
+---- nemotron3 off arm
+  600 to run, 1 concurrent
+Terminated: 15             B4_THINK=0 B4_COT=0 B4_PROFILES="$PROF" python3 -u b3.py run "$MODEL" "$OUT/b_$KEY.json"

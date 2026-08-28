@@ -189,6 +189,7 @@ that rule is enforced, most of the deltas this project has produced fail it:
 | Gemma 4 26B GGUF  58 → 80  **(+22)** | Qwen3.6 35B MLX  48 → 65 (+17) — t1.00 |
 | Gemma 4 12B CUDA  47 → 64  **(+17)** *pp1.5 both arms* | Gemma 4 12B CUDA  46 → 66 (+20) — t0.60, 4 workers |
 | Qwen3.6 27B GGUF  61 → 75  **(+14)** | Qwen3.5 9B CUDA  36 → 52 (+16) — t1.00, 4 workers |
+| Nemotron 3 Super  60 → 71  **(+11)** | |
 | Qwen3.6 35B A3B GGUF  54 → 67  **(+13)** | GLM 4.7 Flash MLX  35 → 47 (+12) — t1.00 |
 | Mellum2 12B CUDA  43 → 44  (+1) *CoT* | Qwen3.6 27B MLX  62 → 75 (+13) — 1 resample |
 | DeepSeek VL2  1 → 1  (0) *CoT* | Mellum2 12B CUDA  45 → 36 (−9) — 4 workers |
@@ -211,8 +212,10 @@ directions away from zero.
 
 ### Native thinking helps; prompted CoT does essentially nothing
 
-Across the six clean native arms — at least one on each of the three backends —
-the gain is **+13 to +24**, and every one is positive. Prompted CoT, measured
+Across the seven clean native arms — at least one on each of four backends and
+three machines — the gain is **+11 to +24**, and every one is positive. The
+floor of that range was +13 until Nemotron 3 Super landed at +11; the band was a
+property of the sample size, not a law. What survives is the sign. Prompted CoT, measured
 without concurrency, lands within **±2 of zero**:
 
 | CoT arm | stack | Δ |
@@ -264,6 +267,7 @@ single-variable measurement of reasoning, for the reasons in the table above.
 | 9 | Qwen3.6 35B A3B | b3 | MLX | 48 | 65 † | 65 † |
 | 10 | Gemma 4 12B QAT | b3 | vLLM | 47 | **64** | **64** |
 | 10 | Gemma 4 12B QAT | b3 | vLLM | 46 | 66 † | 66 † |
+| 7 | Nemotron 3 Super 120B A12B | new | vLLM NVFP4 | 60 | **71** | **71** |
 | 12 | Nemotron 3.5 Lightning 30B A3B | new | GGUF | 37 | **58** | **58** |
 | 12 | Qwen3.8 27B | b3 | GGUF | 60 | — | 60 |
 | 13 | Qwen3-Coder-Next 80B | b3 | MLX | 53 | 52 | 53 |
@@ -310,13 +314,14 @@ which is the honest picture of what has actually been measured:
 | Gemma 4 12B QAT | vLLM | 47 | **64** | +17 |
 | Qwen3.6 27B | GGUF | 61 | 75 | +14 |
 | Qwen3.6 35B A3B | GGUF | 54 | 67 | +13 |
+| Nemotron 3 Super 120B A12B | vLLM NVFP4 | 60 | **71** | +11 |
 | Mellum2 12B A2.5B | vLLM | 43 | 44 | +1 (CoT) |
 | DeepSeek VL2 | MLX | 1 | 1 | 0 (CoT) |
 | Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 (CoT) |
 | Qwen2.5-Coder 14B | vLLM | 37 | 35 | −2 (CoT) |
 
-Ten arms. The CUDA node, which contributed none of these when this section was
-first written, now contributes three — the two CoT models re-run at 1 worker,
+Eleven arms across three machines. The CUDA node, which contributed none of
+these when this section was first written, now contributes three — the two CoT models re-run at 1 worker,
 and Gemma 4 12B under the shared `presence_penalty` brake described below. The
 two arms that remain unmeasurable (Qwen3.5 9B, GLM 4.7 Flash) are unmeasurable
 because greedy thinking does not terminate on them and no working brake exists,

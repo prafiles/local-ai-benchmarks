@@ -20,13 +20,20 @@ reasoning happened.
 | Gemma 4 12B QAT | vLLM | 47 | **64** | **+17** | native |
 | Qwen3.6 27B | GGUF | 61 | 75 | **+14** | native |
 | Qwen3.6 35B A3B | GGUF | 54 | 67 | **+13** | native |
+| Nemotron 3 Super 120B A12B | vLLM NVFP4 | 60 | **71** | **+11** | native |
 | Mellum2 12B A2.5B | vLLM | 43 | 44 | +1 | CoT |
 | DeepSeek VL2 | MLX | 1 | 1 | 0 | CoT |
 | Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 | CoT |
 | Qwen2.5-Coder 14B | vLLM | 37 | 35 | −2 | CoT |
 
-Native thinking: **+13 to +24**, six for six positive, across all three
-backends. Prompted CoT: **−2 to +1**, four arms, all within noise.
+Native thinking: **+11 to +24**, seven for seven positive, across four backends
+and three machines. Prompted CoT: **−2 to +1**, four arms, all within noise.
+
+The floor of that range moved. It read "+13 to +24" until Nemotron 3 Super came
+in at **+11** — still positive, still far outside the ±1 greedy noise floor, but
+the tidy band was an artifact of having six arms rather than a law. The claim
+that survives is the *sign*, not the interval: seven for seven positive against
+four for four flat on prompted CoT.
 
 Nemotron's +21 is a **floor**: 13 of its 104 thinking tasks burned the whole
 32000-token budget and scored zero, all of them in Python (8), JS (3) and TS (2)
@@ -110,6 +117,34 @@ holds and the claim stays withdrawn — Q8_0 is degenerate too, so it is not
 independent evidence either. GLM has **no clean thinking measurement on any
 build**, and the question of whether greedy thinking can work for this model is
 still open.
+
+## Nemotron 3 Super 120B A12B — the strongest off arm in the tier
+
+Spark node, vLLM 0.27.1, NVFP4, 262144 window, greedy both arms, 1 worker, 0
+retries, 0 resamples.
+
+| | Python | JS | TS | SQL | Bash | Git | **total** |
+|---|---|---|---|---|---|---|---|
+| off | 20/30 | 4/15 | 3/15 | 16/20 | 11/12 | 6/12 | **60** |
+| on | 20/30 | 9/15 | 4/15 | 19/20 | 11/12 | 8/12 | **71** |
+| Δ | 0 | **+5** | +1 | +3 | 0 | +2 | **+11** |
+
+Two things stand out, and they are the same thing seen twice.
+
+**Its off arm, 60/104, is the second-highest in the tier** — behind only Qwen3.6
+27B's 62 on MLX, and above models that beat it overall. **And it has the
+smallest clean native gain measured here.** A model that is already strong
+without reasoning has less room to gain from it: Python and Bash, where it
+starts at 20/30 and 11/12, move not at all, while JS moves +5 from a low base of
+4/15. The gain concentrates exactly where the off arm was weak.
+
+That is worth stating carefully, because it is one model. It is consistent with
+the tier's other high off-arm scorers — Qwen3.6 27B is 62 → 75 (+13), the second
+smallest gain — but two points do not establish that headroom predicts gain.
+
+6 of its 104 thinking tasks exhausted the 32000-token budget and scored zero (4
+Python, 2 TS), so **+11 is a floor** like every other arm here. Median trace
+3798 characters, max 127204.
 
 ## Nemotron 3.5: the answer can end up in the reasoning channel
 
