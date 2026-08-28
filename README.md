@@ -1,9 +1,10 @@
 # local-ai-benchmarks
 
-Execution-graded benchmarks for local coding models. **Fourteen models across two machines and
+Execution-graded benchmarks for local coding models. **Fifteen models across two machines and
 three serving backends** — an RTX 4060 Ti (16 GB) under vLLM 0.22.1, and an Apple M2 Max (64 GB)
-under LM Studio on both MLX and GGUF. The 600-task suite covers eleven of those models in
-twenty-one runs; the hard tier adds Ornith 1.5 (35B and 9B) and Muse Glimmer 30B.
+under LM Studio on both MLX and GGUF. The 600-task suite covers twelve of those models; the hard
+tier adds Ornith 1.5 (35B and 9B) and Muse Glimmer 30B. Nemotron 3.5 Lightning 30B A3B is the
+only model measured on **both** suites from the start, under the current single-variable rules.
 
 Every model runs the same 600 tasks **twice**: once with reasoning suppressed, once with it
 enabled. Nothing is scored by an LLM judge. Python, Django, JS, TS and SQL answers are
@@ -50,6 +51,7 @@ is **not** a single-variable measurement of reasoning — hot resampling, a non-
 | Ornith 1.5 35B A3B | new | GGUF | — | 66 / 62 | 66 |
 | Qwen3.6 35B A3B | b3 | MLX | 48 | 65 † | 65 † |
 | **Gemma 4 12B QAT** | b3 | vLLM | 47 | **64** | **64** |
+| **Nemotron 3.5 Lightning 30B A3B** | new | GGUF | 37 | **58** | **58** |
 | Qwen3.8 27B | b3 | GGUF | 60 | — | 60 |
 | Qwen3-Coder-Next 80B | b3 | MLX | 53 | 52 | 53 |
 | Qwen3.5 9B FP8 | b3 | vLLM | 36 | 52 † | 52 † |
@@ -82,13 +84,14 @@ is the conversion, not the quantization.
 
 ### Does reasoning help? Only the trained kind, and only when measured cleanly
 
-Strip out every arm that is not single-variable and nine remain — five native, four CoT, at
+Strip out every arm that is not single-variable and ten remain — six native, four CoT, at
 least one of each on every backend:
 
 | Model | stack | off | on | Δ |
 |---|---|---|---|---|
 | **Qwen3.8 27B @ medium** | MLX | 58 | **82** | **+24** |
 | Gemma 4 26B A4B | GGUF | 58 | **80** | +22 |
+| Nemotron 3.5 Lightning 30B A3B | GGUF | 37 | **58** | +21 |
 | Gemma 4 12B QAT | vLLM | 47 | **64** | +17 *(pp 1.5 both arms)* |
 | Qwen3.6 27B | GGUF | 61 | 75 | +14 |
 | Qwen3.6 35B A3B | GGUF | 54 | 67 | +13 |
@@ -174,9 +177,15 @@ model actually achieved.
 | 6 | Qwen3.8 27B | M2 Max | 556 | 556 | 556 | 0 |
 | 7 | Qwen3.5 9B FP8 | CUDA | 500 | **546** | 546 | +46 |
 | 8 | Qwen2.5-Coder 14B | CUDA | **539** | 536 | 539 | −3 |
-| 9 | Mellum2 12B A2.5B | CUDA | **527** | 518 | 527 | −9 |
-| 10 | GLM 4.7 Flash | M2 Max | **521** | 515 | 521 | −6 |
-| 11 | DeepSeek VL2 | M2 Max | **167** | n/a | 167 | — |
+| 9 | Nemotron 3.5 Lightning 30B A3B | M2 Max | 510 | **532** | 532 | +22 |
+| 10 | Mellum2 12B A2.5B | CUDA | **527** | 518 | 527 | −9 |
+| 11 | GLM 4.7 Flash | M2 Max | **521** | 515 | 521 | −6 |
+| 12 | DeepSeek VL2 | M2 Max | **167** | n/a | 167 | — |
+
+Nemotron's 532 is a **floor**, and by more than the ranking gap: 21 of its Django
+tasks stopped naturally with an empty answer because the model wrote the answer
+into its reasoning channel, where the grader does not look. See
+[RESULTS.md](RESULTS.md) for the evidence and why the grader was left alone.
 
 **The top four are separated by 11 tasks out of 600.** They land within 2% of each other
 against a measured noise floor of ~6 tasks, so this is one leading cluster rather than a

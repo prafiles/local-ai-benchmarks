@@ -16,6 +16,7 @@ reasoning happened.
 |---|---|---|---|---|---|
 | Qwen3.8 27B @ medium | MLX | 58 | **82** | **+24** | native |
 | Gemma 4 26B A4B | GGUF | 58 | **80** | **+22** | native |
+| Nemotron 3.5 Lightning 30B A3B | GGUF | 37 | **58** | **+21** | native |
 | Gemma 4 12B QAT | vLLM | 47 | **64** | **+17** | native |
 | Qwen3.6 27B | GGUF | 61 | 75 | **+14** | native |
 | Qwen3.6 35B A3B | GGUF | 54 | 67 | **+13** | native |
@@ -24,8 +25,13 @@ reasoning happened.
 | Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 | CoT |
 | Qwen2.5-Coder 14B | vLLM | 37 | 35 | −2 | CoT |
 
-Native thinking: **+13 to +24**, five for five positive, across all three
+Native thinking: **+13 to +24**, six for six positive, across all three
 backends. Prompted CoT: **−2 to +1**, four arms, all within noise.
+
+Nemotron's +21 is a **floor**: 13 of its 104 thinking tasks burned the whole
+32000-token budget and scored zero, all of them in Python (8), JS (3) and TS (2)
+and none in SQL, Bash or Git. It spirals on the long algorithmic categories and
+terminates reliably on the short ones.
 
 Gemma 4 12B's arm required `presence_penalty=1.5` on **both** arms; at plain
 greedy its thinking arm does not terminate.
@@ -104,6 +110,34 @@ holds and the claim stays withdrawn — Q8_0 is degenerate too, so it is not
 independent evidence either. GLM has **no clean thinking measurement on any
 build**, and the question of whether greedy thinking can work for this model is
 still open.
+
+## Nemotron 3.5: the answer can end up in the reasoning channel
+
+On the 600-task suite Nemotron scores **510 → 532 (+22)**, greedy both arms, 0
+retries. Eleven of twelve categories move up or hold. One moves sharply down:
+
+| | Bash | Django | Docs | Git | GitHub | JS | Python | RAG | RN | SQL | SSH | TS |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| off | 35 | **39** | 48 | 46 | 39 | 45 | 43 | 49 | 46 | 37 | 43 | 40 |
+| on | 47 | **22** | 48 | 47 | 37 | 49 | 49 | 50 | 50 | 46 | 43 | 44 |
+| Δ | +12 | **−17** | 0 | +1 | −2 | +4 | +6 | +1 | +4 | +9 | 0 | +4 |
+
+**Django's −17 is not a capability result.** 21 Django tasks returned
+`finish_reason=stop` — a natural stop, not a cap — with **empty content**, and
+19 of those traces end with a closing code fence. The model wrote a complete
+answer inside the reasoning channel and closed cleanly; the harness reads
+`content`, so it scored zero. Only a 400-character tail of each trace is stored,
+so the answers cannot be recovered from the results file.
+
+This is a different failure from the caps on the hard tier. There the budget ran
+out; here the model stopped on its own with the work finished and filed in the
+wrong place. Both suppress the score, so **+22 is a floor**, and the same
+mechanism is a candidate wherever a thinking arm loses a category outright.
+
+The grader was **not** changed to read `reasoning_content` as a fallback. That
+would silently re-score every model in the repo against a rule none of them were
+measured under, to rescue one. It is recorded as an artifact instead — the same
+treatment as [mlx-engine#337](https://github.com/lmstudio-ai/mlx-engine/issues/337).
 
 ## Noise floors — two, not one
 

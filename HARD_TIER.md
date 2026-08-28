@@ -211,8 +211,8 @@ directions away from zero.
 
 ### Native thinking helps; prompted CoT does essentially nothing
 
-Across the five clean native arms — one now on each of the three backends — the
-gain is **+13 to +24**, and every one is positive. Prompted CoT, measured
+Across the six clean native arms — at least one on each of the three backends —
+the gain is **+13 to +24**, and every one is positive. Prompted CoT, measured
 without concurrency, lands within **±2 of zero**:
 
 | CoT arm | stack | Δ |
@@ -264,6 +264,7 @@ single-variable measurement of reasoning, for the reasons in the table above.
 | 9 | Qwen3.6 35B A3B | b3 | MLX | 48 | 65 † | 65 † |
 | 10 | Gemma 4 12B QAT | b3 | vLLM | 47 | **64** | **64** |
 | 10 | Gemma 4 12B QAT | b3 | vLLM | 46 | 66 † | 66 † |
+| 12 | Nemotron 3.5 Lightning 30B A3B | new | GGUF | 37 | **58** | **58** |
 | 12 | Qwen3.8 27B | b3 | GGUF | 60 | — | 60 |
 | 13 | Qwen3-Coder-Next 80B | b3 | MLX | 53 | 52 | 53 |
 | 14 | Qwen3.5 9B FP8 | b3 | vLLM | 36 | 52 † | 52 † |
@@ -305,6 +306,7 @@ which is the honest picture of what has actually been measured:
 |---|---|---|---|---|
 | **Qwen3.8 27B @ medium** | MLX | 58 | **82** | **+24** |
 | Gemma 4 26B A4B | GGUF | 58 | **80** | +22 |
+| Nemotron 3.5 Lightning 30B A3B | GGUF | 37 | **58** | +21 |
 | Gemma 4 12B QAT | vLLM | 47 | **64** | +17 |
 | Qwen3.6 27B | GGUF | 61 | 75 | +14 |
 | Qwen3.6 35B A3B | GGUF | 54 | 67 | +13 |
@@ -313,7 +315,7 @@ which is the honest picture of what has actually been measured:
 | Qwen3-Coder-Next 80B | MLX | 53 | 52 | −1 (CoT) |
 | Qwen2.5-Coder 14B | vLLM | 37 | 35 | −2 (CoT) |
 
-Nine arms. The CUDA node, which contributed none of these when this section was
+Ten arms. The CUDA node, which contributed none of these when this section was
 first written, now contributes three — the two CoT models re-run at 1 worker,
 and Gemma 4 12B under the shared `presence_penalty` brake described below. The
 two arms that remain unmeasurable (Qwen3.5 9B, GLM 4.7 Flash) are unmeasurable
@@ -505,6 +507,30 @@ Scores move 34–37 across all nine runs while text agreement swings 100% → 28
 Byte-reproducibility is fragile; the score is not. For a benchmark that is the
 property that matters.
 
+### The arm switch is a property of the model, not of the backend
+
+This file has said that `reasoning_effort` is "honoured on MLX and silently
+ignored on GGUF". That is too broad, and Nemotron 3.5 is the counterexample.
+Probed before the run rather than assumed, on the same LM Studio GGUF engine
+that ignores it for Qwen3.8:
+
+| sent | trace | verdict |
+|---|---|---|
+| nothing (baseline) | 1397 ch | thinks by default |
+| `reasoning_effort: none` | **0 ch** | **the off arm works** |
+| `reasoning_effort: low` / `medium` | 1397 ch, byte-identical to baseline | graduated scale inert |
+| `chat_template_kwargs` (3 forms) | 1397 ch, byte-identical to baseline | silently dropped |
+
+So the correct statement is that **each mechanism has to be probed per model**,
+because "accepted" and "honoured" are indistinguishable from the response. Two
+GGUF models on the same engine disagree about the same flag.
+
+The inert `low`/`medium` scale is worth its own note: it is the same shape as the
+bug that made Qwen3.8 look unmeasurable for 79 hours, except harmless here. There
+the ON arm inherited `xhigh` because the harness sent nothing; here sending an
+effort would have achieved nothing either way, so the ON arm deliberately sends
+nothing and takes the model's default.
+
 ### Batch-invariant mode: tested, and it does not fix it
 
 An earlier revision of this file said `VLLM_BATCH_INVARIANT=1` could not be
@@ -574,8 +600,10 @@ Claims this file or its commits previously made, and what replaced them:
 - ~~"The noise floor is ~94% byte-identical, ~3 flips"~~ → that compared a
   budget-3000 run against a budget-5000 run, a settings change measured as
   repetition. The real Mac floor is 1 flip in 312.
-- ~~"reasoning_effort is how the arms are switched"~~ → true on MLX only; GGUF
-  ignores it silently.
+- ~~"reasoning_effort is how the arms are switched"~~ → then ~~"true on MLX
+  only; GGUF ignores it silently"~~ → it is per **model**, not per backend.
+  Nemotron 3.5 honours it on the same GGUF engine that ignores it for Qwen3.8,
+  so the switch has to be probed for each model before its arms mean anything.
 - ~~"No prompted-CoT arm has ever been positive"~~ → two of the four numbers
   behind that were 4-worker serving artefacts. At 1 worker Mellum2 goes −9 →
   **+1** and Qwen2.5-Coder −5 → −2. CoT does nothing; it does not harm.
