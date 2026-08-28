@@ -79,6 +79,14 @@ CUDA = [
     ("gemma.pp",    "Gemma 4 12B QAT",          "vLLM, 1 worker, greedy + presence_penalty 1.5 both arms"),
     ("q35.pp",      "Qwen3.5 9B FP8",           "vLLM, 1 worker, greedy + presence_penalty 1.5 both arms"),
 ]
+SPARK = [
+    # The arm switch here is chat_template_kwargs, and reasoning_effort is
+    # silently ignored -- the exact inverse of Nemotron 3.5 on LM Studio GGUF.
+    # Same vendor, same model family, opposite switch: it is a property of the
+    # model and its template, not of the vendor or the serving stack.
+    ("nemotron3", "Nemotron 3 Super 120B A12B",
+                  "vLLM NVFP4, 1 worker, greedy BOTH arms, 0 retries"),
+]
 THINK_ONLY = {"muse", "ornith35", "ornith9"}
 
 
@@ -200,7 +208,14 @@ def report(title, here, models, profdir, stack_workers=1):
 MACOUT = os.path.join(REPO, "results", "hard")
 MACPROF = os.path.join(REPO, "results", "mac")
 CUOUT = os.path.join(REPO, "results", "cuda-hard")
+# Third machine. Results and profiles live together here, so the profile
+# directory is the output directory -- unlike the Mac, where they are split.
+SPARKOUT = os.path.join(REPO, "results", "spark")
 report("MAC / LM STUDIO / MLX -- Apple M2 Max 64GB", MACOUT, MAC_MLX, MACPROF)
 report("MAC / LM STUDIO / GGUF -- Apple M2 Max 64GB", MACOUT, MAC_GGUF, MACPROF)
 report("CUDA / vLLM 0.22.1 -- RTX 4060 Ti 16GB", CUOUT, CUDA, CUOUT, stack_workers=4)
+# stack_workers=1: unlike the 4060 Ti node, every Spark arm was run serially from
+# the start, and its driver refuses to launch while the server has other traffic
+# in flight -- so there is no recovered-from-the-driver worker count to warn about.
+report("SPARK / vLLM 0.27.1 -- NVIDIA Nemotron 3 Super", SPARKOUT, SPARK, SPARKOUT)
 print()

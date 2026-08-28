@@ -1,0 +1,11 @@
+{
+  "model": "nvidia/nemotron-3-super",
+  "name": "t0/greedy",
+  "sampling": {"temperature": 0.0},
+  "why": "Greedy on BOTH arms, so the pair is single-variable. Greedy thinking terminates on this model, which is not the default assumption here: it spirals on Qwen3.5 9B, GLM 4.7 and Gemma 4 12B, each of which burned a full 32000-token budget and answered nothing. Probed at the budget the run actually uses (32000, per the rule that a profile tuned below its run's budget cannot see the failure it most needs to see): 3 hard-tier tasks across Python/SQL/Bash all finished on their own with 0 caps and traces of 1088-1869 characters. No brake -- presence_penalty, a hotter profile, a trace cap -- is needed or applied.",
+  "arm_switch": {
+    "mechanism": "chat_template_kwargs.enable_thinking",
+    "evidence": "Probed per model rather than inherited. enable_thinking=false zeroes the trace (414ch -> 0ch); enable_thinking=true restores it. reasoning_effort is silently IGNORED on this model (none/low/medium all still produce a trace), the opposite of Nemotron 3.5 Lightning on LM Studio GGUF, where reasoning_effort works and chat_template_kwargs is dropped. On the pre-fix server config reasoning_effort=none additionally returned EMPTY content, so inheriting the other Nemotron's switch would have produced a blank, still-thinking off arm that scores zero and reads as a capability result."
+  },
+  "node": "Spark, vLLM 0.27.1, NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4, 262144 window, 1 worker"
+}
