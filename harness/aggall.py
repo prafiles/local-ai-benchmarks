@@ -86,6 +86,14 @@ SPARK = [
     # model and its template, not of the vendor or the serving stack.
     ("nemotron3", "Nemotron 3 Super 120B A12B",
                   "vLLM NVFP4, 1 worker, greedy BOTH arms, 0 retries"),
+    # Both switches work on this model -- reasoning_effort AND
+    # chat_template_kwargs -- where Nemotron 3.5 honours only the first and
+    # Nemotron 3 Super only the second. Three models, three behaviours.
+    # SHARED NODE: our concurrency is 1, but the server batched our requests
+    # with live traffic throughout, so this pair is not comparable to the
+    # exclusive-node arms above. contention_q38flash.tsv records how much.
+    ("q38flash",  "Qwen3.8-Flash-Next",
+                  "vLLM NVFP4/FP8, 1 worker, greedy BOTH arms, 0 retries -- SHARED node"),
 ]
 THINK_ONLY = {"muse", "ornith35", "ornith9"}
 
@@ -124,6 +132,25 @@ def confounds(raw, key, profdir, stack_workers=1):
     resampled = sum(1 for v in items.values() if v.get("attempts", 1) > 1)
     if resampled:
         out.append("%d/%d answers came from a HOTTER resample" % (resampled, N))
+    # A shared node is invisible to every check below: our worker count is
+    # genuinely 1 and the profile is genuinely greedy, so an arm batched with
+    # someone else's live traffic reports as CLEAN. That is the same shape as
+    # the worker-count bug -- a confound no field in the results file records.
+    # Where a run sampled the server's in-flight count, use it.
+    cont = os.path.join(profdir, "contention_%s.tsv" % key)
+    if os.path.exists(cont):
+        rows = [l.split("\t") for l in open(cont).read().splitlines()[1:] if l.strip()]
+        vals = []
+        for r in rows:
+            try:
+                vals.append(float(r[1]))
+            except (IndexError, ValueError):
+                pass
+        shared = sum(1 for v in vals if v > 1)
+        if vals and shared:
+            out.append("SHARED node: %d/%d samples (%.0f%%) had other traffic in "
+                       "the batch -- our workers=1, but the server batched anyway"
+                       % (shared, len(vals), 100.0 * shared / len(vals)))
     # Prefer the controls the run recorded about itself. Files written before
     # 2026-08-24 have no res["run"], so those still need the sibling profile --
     # but a new run is audited from its own bytes, which is the point.
@@ -217,5 +244,5 @@ report("CUDA / vLLM 0.22.1 -- RTX 4060 Ti 16GB", CUOUT, CUDA, CUOUT, stack_worke
 # stack_workers=1: unlike the 4060 Ti node, every Spark arm was run serially from
 # the start, and its driver refuses to launch while the server has other traffic
 # in flight -- so there is no recovered-from-the-driver worker count to warn about.
-report("SPARK / vLLM 0.27.1 -- NVIDIA Nemotron 3 Super", SPARKOUT, SPARK, SPARKOUT)
+report("SPARK / vLLM 0.27.1 -- GB10", SPARKOUT, SPARK, SPARKOUT)
 print()

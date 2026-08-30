@@ -1,0 +1,20 @@
+{
+  "model": "Qwen/Qwen3.8-Flash-Next",
+  "name": "t0/greedy",
+  "sampling": {
+    "temperature": 0.0
+  },
+  "why": "Greedy on BOTH arms, so the pair is single-variable. NOTE: an earlier draft of this file claimed the greedy profile had been confirmed at the run's own 32000 budget. It had not -- the node was serving other traffic at the time and only the arm-switch probe was run. That claim is withdrawn; what IS confirmed at 32000 on hard tasks is the effort setting below.",
+  "arm_switch": {
+    "mechanism": "reasoning_effort (B4_OFF_MECH=reasoning_effort): off arm sends none, on arm sends medium. chat_template_kwargs also works on this model, but B4_THINK_EFFORT is only honoured under the reasoning_effort mechanism (b3.py:238) -- under template the effort would be silently dropped and the ON arm would run at the vendor default again.",
+    "evidence": "BOTH switches work on this model -- a third pattern. reasoning_effort=none zeroes the trace (556ch -> 0ch) and chat_template_kwargs.enable_thinking=false also zeroes it. Compare: Nemotron 3.5 on LM Studio GGUF honours reasoning_effort and silently drops chat_template_kwargs; Nemotron 3 Super on this same vLLM node is the exact inverse. Three models, three behaviours, so the switch is a property of the model and its template, not of the backend.",
+    "effort_scale": "none/low/medium are accepted; reasoning_effort=high is REJECTED with HTTP 400. low and medium both produce 308ch and are indistinguishable on this probe. The unqualified ON arm produces 556ch -- MORE than low or medium but not a runaway, so this model does not repeat the Qwen3.8-27B xhigh inheritance that projected 79 hours on MLX. The ON arm therefore sends nothing and takes the model's own default, which is what the arm is meant to measure."
+  },
+  "node": "Spark, vLLM, primitive-ai/Qwen3.8-Flash-Next-mixed-NVFP4-FP8, 262144 window, 1 worker",
+  "effort_choice": {
+    "setting": "medium",
+    "why": "The model card documents reasoning_effort as defaulting to xhigh -- the MAXIMUM -- with xhigh/medium/low supported; 'high' is rejected with HTTP 400. An unqualified ON arm therefore runs at maximum effort, and it showed: 6 of the first 20 tasks burned the entire 32000-token budget and returned no answer (30%), projecting 13-16h. A controlled comparison on 4 hard tasks at the same 32000 budget gave 0/4 capped at medium, 92s/task, projecting 2.7h. This is the same failure and the same fix as Qwen3.8-27B, whose unqualified arm projected 79h on MLX and which at medium scored 58 -> 82, the tier lead.",
+    "caveat": "The arm therefore measures the model at medium effort, not at its shipped default. That is a deliberate choice and is labelled in the results: at the default the arm is not measurable inside this tier's 32000-token budget, which the vendor's own guidance explains -- it recommends up to 262144 tokens for reasoning content, 8x this tier's floor.",
+    "instrumentation_note": "A first pass at this comparison reported 0 reasoning characters at every effort level, which would have meant medium disables thinking entirely. That was a bug in the probe, not the model: this server returns the trace in `reasoning`, and the probe read only `reasoning_content`. The harness itself reads `reasoning` first (b3.py:338) and is unaffected."
+  }
+}
