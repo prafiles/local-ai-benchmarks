@@ -1,7 +1,7 @@
 # local-ai-benchmarks
 
-Execution-graded benchmarks for local coding models. **Sixteen models across three machines and
-four serving backends** — an RTX 4060 Ti (16 GB) under vLLM 0.22.1, an Apple M2 Max (64 GB) under
+Execution-graded benchmarks for local coding models. **Seventeen models across three machines and
+four serving backends**, plus two hosted APIs as reference points — an RTX 4060 Ti (16 GB) under vLLM 0.22.1, an Apple M2 Max (64 GB) under
 LM Studio on both MLX and GGUF, and a Spark node under vLLM 0.27.1 serving NVFP4. The 600-task
 suite covers twelve of those models; the hard tier adds Ornith 1.5 (35B and 9B), Muse Glimmer 30B
 and Nemotron 3 Super. Nemotron 3.5 Lightning 30B A3B is the only model measured on **both** suites
@@ -64,7 +64,24 @@ is **not** a single-variable measurement of reasoning — hot resampling, a non-
 | GLM 4.7 Flash | b3 | GGUF | 5 (Q4) / 3 (Q8) | — | 5 |
 | DeepSeek VL2 | b3 | MLX | 1 | 1 | 1 |
 
-**Qwen3.8-Flash-Next scores 91/104 — the highest on the tier — and is deliberately
+### Hosted reference points
+
+Two frontier APIs on the same 104 tasks, `effort=medium`, single arm each, through a proxy so the
+graders and task set are byte-identical. **Not part of the ranking above** — a hosted endpoint is
+not a model you can run on your own hardware, and its version can change under you.
+
+| Model | total | note |
+|---|---|---|
+| gpt-5.6-luna | **95/104** | JS 15/15, the first perfect category on this tier |
+| claude-sonnet-5 | **85/104** | Bash 12/12, but **0 reasoning emitted on all 104 tasks** |
+
+Sonnet's is a *no-reasoning* score: its effort scale has no `none`, its thinking is adaptive, and
+asked for medium it chose not to think on every task. 85 with no trace at all would still place
+third here. Neither model is greedy — both APIs refuse a fixed temperature — so both carry the
+wide ±4–8 floor. **TypeScript beat both** (11 and 9 of 15, against Qwen3.8-Flash's 12), which is
+the clearest evidence yet that this tier has not saturated.
+
+**Qwen3.8-Flash-Next scores 91/104 — the highest local score — and is deliberately
 not listed above.** It ran on a node serving live traffic (41% of samples shared a
 batch), so it is not comparable to these arms; see [RESULTS.md](RESULTS.md). Its
 story is the Qwen3.8 `xhigh` failure reproduced on a second backend: at default

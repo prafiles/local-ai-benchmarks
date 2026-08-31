@@ -125,6 +125,46 @@ five, never grown:
 | Mellum2 12B | −9 | **+1** |
 | Qwen2.5-Coder | −5 | −2 |
 
+## Hosted reference points — not part of the local ranking
+
+Two frontier APIs on the identical 104 tasks, at `effort=medium` with a 32K
+limit, routed through an OpenAI-shaped proxy so `b5.py`, the extractor and the
+graders are byte-identical to every local run. **Single arm each: these are
+capability scores, not reasoning deltas.**
+
+| Model | Python | JS | TS | SQL | Bash | Git | **total** |
+|---|---|---|---|---|---|---|---|
+| gpt-5.6-luna | 29/30 | **15/15** | 11/15 | 19/20 | 11/12 | 10/12 | **95** |
+| claude-sonnet-5 | 24/30 | 11/15 | 9/15 | 19/20 | **12/12** | 10/12 | **85** |
+
+Both ran with 0 caps, 0 empty answers and 0 resamples. Luna took 23 minutes,
+Sonnet 12.
+
+**Sonnet's 85 is a no-reasoning score, not a medium-reasoning one.** Its
+`think_chars` is **0 on all 104 tasks**. `output_config.effort` accepts only
+low/medium/high/xhigh/max — there is no `none` — and thinking is *adaptive*,
+meaning the model decides; asked for medium, it chose not to think, every time.
+That makes the number more interesting rather than less: 85 with no reasoning
+trace at all would place third on this tier, above every local model except
+Qwen3.8-Flash's 91, which needed a 20× reduction in trace length before it could
+be measured at all.
+
+**Neither is greedy, and not by choice.** Luna rejects `temperature=0`; Sonnet
+deprecates the field entirely. Both therefore carry the wide non-greedy floor
+measured here — 4–8 tasks per repeat — so the 10-task gap between them is real
+but not comfortably outside noise, and neither is comparable to a greedy local
+arm at ±1.
+
+**Two firsts, and one thing that held.** Luna's JS 15/15 and Sonnet's Bash 12/12
+are the first perfect categories anything has posted here. But **TypeScript
+resisted both** — 11 and 9 out of 15, with Qwen3.8-Flash's 12 still the best
+score on the tier. A category that defeats two frontier APIs is good evidence
+the tier has not saturated the way the 600-task suite did.
+
+They are reported separately because they are not the thing this repo measures:
+a hosted endpoint is not a model you can run on your own hardware, its version
+can change under you, and nothing about its serving is observable from here.
+
 ## Thinking-only models
 
 No off arm by design. Standalone scores, not deltas.

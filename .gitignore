@@ -7,3 +7,8 @@ __pycache__/
 *.pyc
 tmp/
 *.tgz
+
+# API keys are read from files OUTSIDE this repo; never let one land here.
+*.env
+.bench_*_env
+*_api_key*
