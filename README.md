@@ -42,7 +42,10 @@ is **not** a single-variable measurement of reasoning — hot resampling, a non-
 
 | Model | orig. | stack | off | on | best |
 |---|---|---|---|---|---|
+| gpt-5.6-luna ☁ | new | hosted API | — | **95** | **95** |
+| **Qwen3.8-Flash-Next @ medium** ‡ | new | vLLM NVFP4 | 67 | **91** | **91** |
 | **Muse Glimmer 30B** | new | GGUF | — | 80 / **88** | **88** |
+| claude-sonnet-5 ☁ | new | hosted API | — | **85** | **85** |
 | **Qwen3.8 27B @ medium** | b3 | MLX | 58 | **82** | **82** |
 | Gemma 4 26B A4B QAT | b3 | MLX | 54 | 82 † | 82 † |
 | **Gemma 4 26B A4B** | b3 | GGUF | 58 | **80** | **80** |
@@ -53,8 +56,8 @@ is **not** a single-variable measurement of reasoning — hot resampling, a non-
 | Ornith 1.5 35B A3B | new | GGUF | — | 66 / 62 | 66 |
 | Qwen3.6 35B A3B | b3 | MLX | 48 | 65 † | 65 † |
 | **Gemma 4 12B QAT** | b3 | vLLM | 47 | **64** | **64** |
-| **Nemotron 3.5 Lightning 30B A3B** | new | GGUF | 37 | **58** | **58** |
 | Qwen3.8 27B | b3 | GGUF | 60 | — | 60 |
+| **Nemotron 3.5 Lightning 30B A3B** | new | GGUF | 37 | **58** | **58** |
 | Qwen3-Coder-Next 80B | b3 | MLX | 53 | 52 | 53 |
 | Qwen3.5 9B FP8 | b3 | vLLM | 36 | 52 † | 52 † |
 | GLM 4.7 Flash | b3 | MLX | 35 | 47 † | 47 † |
@@ -64,30 +67,17 @@ is **not** a single-variable measurement of reasoning — hot resampling, a non-
 | GLM 4.7 Flash | b3 | GGUF | 5 (Q4) / 3 (Q8) | — | 5 |
 | DeepSeek VL2 | b3 | MLX | 1 | 1 | 1 |
 
-### Hosted reference points
+`†` not a single-variable measurement — hot resampling, a non-greedy profile, or 4-way concurrency.
+`‡` ran on a node also serving live traffic (41% of samples shared a batch).
+`☁` hosted API, single arm, **not greedy** — neither vendor allows a fixed temperature, so both sit
+on the ±4–8 floor rather than ±1. Sonnet's 85 carries a further caveat: it emitted **zero reasoning
+on all 104 tasks**, so it is a no-reasoning score with medium requested.
 
-Two frontier APIs on the same 104 tasks, `effort=medium`, single arm each, through a proxy so the
-graders and task set are byte-identical. **Not part of the ranking above** — a hosted endpoint is
-not a model you can run on your own hardware, and its version can change under you.
-
-| Model | total | note |
-|---|---|---|
-| gpt-5.6-luna | **95/104** | JS 15/15, the first perfect category on this tier |
-| claude-sonnet-5 | **85/104** | Bash 12/12, but **0 reasoning emitted on all 104 tasks** |
-
-Sonnet's is a *no-reasoning* score: its effort scale has no `none`, its thinking is adaptive, and
-asked for medium it chose not to think on every task. 85 with no trace at all would still place
-third here. Neither model is greedy — both APIs refuse a fixed temperature — so both carry the
-wide ±4–8 floor. **TypeScript beat both** (11 and 9 of 15, against Qwen3.8-Flash's 12), which is
-the clearest evidence yet that this tier has not saturated.
-
-**Qwen3.8-Flash-Next scores 91/104 — the highest local score — and is deliberately
-not listed above.** It ran on a node serving live traffic (41% of samples shared a
-batch), so it is not comparable to these arms; see [RESULTS.md](RESULTS.md). Its
-story is the Qwen3.8 `xhigh` failure reproduced on a second backend: at default
-effort 57% of its thinking tasks burned the whole budget and returned nothing
-(median trace 88,381 chars, 24-34h projected), and at `reasoning_effort=medium`
-the median trace falls to 4,494, caps drop to 1 in 104, and it finishes in 2.9h.
+**Read the top of this table with the markers, not the numbers.** The four highest entries are a
+hosted API, a local model measured on a shared node, a non-greedy thinking-only model, and a second
+hosted API — exactly one of the top four (Qwen3.8 27B @ medium, 82) is a clean single-variable
+local measurement. The ranking is legitimate as a capability ordering and misleading as a
+like-for-like comparison, which is why the clean table below exists.
 
 The three CUDA rows in bold replaced older confounded scores after the node was
 re-run serially: Gemma 4 12B's clean arm runs `presence_penalty=1.5` on **both**
@@ -95,7 +85,10 @@ arms because its plain-greedy thinking never terminates, and Mellum2 /
 Qwen2.5-Coder are 1-worker greedy re-runs of the arms that previously read
 45→36 and 36→31 at 4 workers.
 
-**Headroom held.** The best clean arm takes 79% of the suite where b3's leader took 96.5%.
+**Headroom held — and the ceiling is now measured, not assumed.** The best clean local arm takes
+79% of this suite where b3's leader took 96.5%. A frontier hosted model reaches 91%, so the
+remaining 21 tasks are not an artefact of the tier being unreasonable: something can do most of
+them. Nine tasks resist even that.
 
 **Muse's 88 leads the table and is still not ranked above Qwen3.8's 82.** Ornith 1.5 35B and Muse
 Glimmer run non-greedy by design, and their repeat runs moved **−4 and +8**. Two samples spanning

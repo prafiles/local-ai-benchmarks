@@ -256,28 +256,44 @@ single-variable measurement of reasoning, for the reasons in the table above.
 
 | # | Model | orig. suite | stack | off | on | best |
 |---|---|---|---|---|---|---|
-| 1 | Muse Glimmer 30B | new | GGUF | — | 80 / **88** | **88** |
-| 2 | Qwen3.8 27B @ medium | b3 | MLX | 58 | **82** | **82** |
-| 2 | Gemma 4 26B A4B QAT | b3 | MLX | 54 | 82 † | 82 † |
-| 4 | Gemma 4 26B A4B | b3 | GGUF | 58 | **80** | **80** |
-| 5 | Qwen3.6 27B | b3 | GGUF | 61 | **75** | **75** |
-| 5 | Qwen3.6 27B | b3 | MLX | 62 | 75 † | 75 † |
-| 7 | Qwen3.6 35B A3B | b3 | GGUF | 54 | **67** | **67** |
-| 8 | Ornith 1.5 35B A3B | new | GGUF | — | 66 / 62 | 66 |
-| 9 | Qwen3.6 35B A3B | b3 | MLX | 48 | 65 † | 65 † |
-| 10 | Gemma 4 12B QAT | b3 | vLLM | 47 | **64** | **64** |
-| 10 | Gemma 4 12B QAT | b3 | vLLM | 46 | 66 † | 66 † |
-| 7 | Nemotron 3 Super 120B A12B | new | vLLM NVFP4 | 60 | **71** | **71** |
-| 12 | Nemotron 3.5 Lightning 30B A3B | new | GGUF | 37 | **58** | **58** |
-| 12 | Qwen3.8 27B | b3 | GGUF | 60 | — | 60 |
-| 13 | Qwen3-Coder-Next 80B | b3 | MLX | 53 | 52 | 53 |
-| 14 | Qwen3.5 9B FP8 | b3 | vLLM | 36 | 52 † | 52 † |
-| 15 | GLM 4.7 Flash | b3 | MLX | 35 | 47 † | 47 † |
-| 16 | Mellum2 12B A2.5B | b3 | vLLM | 43 | **44** | **44** |
-| 17 | Ornith 1.5 9B | new | vLLM | — | 39 | 39 |
-| 18 | Qwen2.5-Coder 14B | b3 | vLLM | **37** | 35 | **37** |
-| 19 | GLM 4.7 Flash | b3 | GGUF | 5 (Q4) / 3 (Q8) | — | 5 |
-| 20 | DeepSeek VL2 | b3 | MLX | 1 | 1 | 1 |
+| 1 | gpt-5.6-luna ☁ | new | hosted API | — | **95** | **95** |
+| 2 | Qwen3.8-Flash-Next @ medium ‡ | new | vLLM NVFP4 | 67 | **91** | **91** |
+| 3 | Muse Glimmer 30B | new | GGUF | — | 80 / **88** | **88** |
+| 4 | claude-sonnet-5 ☁ | new | hosted API | — | **85** | **85** |
+| 5 | Qwen3.8 27B @ medium | b3 | MLX | 58 | **82** | **82** |
+| 5 | Gemma 4 26B A4B QAT | b3 | MLX | 54 | 82 † | 82 † |
+| 7 | Gemma 4 26B A4B | b3 | GGUF | 58 | **80** | **80** |
+| 8 | Qwen3.6 27B | b3 | GGUF | 61 | **75** | **75** |
+| 8 | Qwen3.6 27B | b3 | MLX | 62 | 75 † | 75 † |
+| 10 | Nemotron 3 Super 120B A12B | new | vLLM NVFP4 | 60 | **71** | **71** |
+| 11 | Qwen3.6 35B A3B | b3 | GGUF | 54 | **67** | **67** |
+| 12 | Ornith 1.5 35B A3B | new | GGUF | — | 66 / 62 | 66 |
+| 13 | Qwen3.6 35B A3B | b3 | MLX | 48 | 65 † | 65 † |
+| 14 | Gemma 4 12B QAT | b3 | vLLM | 47 | **64** | **64** |
+| 15 | Qwen3.8 27B | b3 | GGUF | 60 | — | 60 |
+| 16 | Nemotron 3.5 Lightning 30B A3B | new | GGUF | 37 | **58** | **58** |
+| 17 | Qwen3-Coder-Next 80B | b3 | MLX | 53 | 52 | 53 |
+| 18 | Qwen3.5 9B FP8 | b3 | vLLM | 36 | 52 † | 52 † |
+| 19 | GLM 4.7 Flash | b3 | MLX | 35 | 47 † | 47 † |
+| 20 | Mellum2 12B A2.5B | b3 | vLLM | 43 | **44** | **44** |
+| 21 | Ornith 1.5 9B | new | vLLM | — | 39 | 39 |
+| 22 | Qwen2.5-Coder 14B | b3 | vLLM | **37** | 35 | **37** |
+| 23 | GLM 4.7 Flash | b3 | GGUF | 5 (Q4) / 3 (Q8) | — | 5 |
+| 24 | DeepSeek VL2 | b3 | MLX | 1 | 1 | 1 |
+
+`†` not single-variable. `‡` shared node — 41% of samples had other traffic in the batch.
+`☁` hosted API, single arm, not greedy (neither vendor permits a fixed temperature).
+
+**Exactly one of the top four is a clean local measurement.** #1 is a hosted API, #2 ran on a
+shared node, #3 is thinking-only and non-greedy with an 8-task spread across its two runs, #4 is a
+hosted API that emitted no reasoning at all. Qwen3.8 27B @ medium at 82 is the highest score here
+that is a single-variable, greedy, exclusive-node measurement of a model you can run yourself.
+Sorting by the number alone gets that exactly backwards, which is what the markers are for.
+
+**The hosted rows are a yardstick, not competitors.** They cannot be run on your hardware, their
+versions change without notice, nothing about their serving is observable, and neither can be
+pinned to greedy. They are included because a tier with no ceiling reference cannot tell you
+whether 82 is close to solved or nowhere near it — the answer, from Luna's 95, is nowhere near.
 
 Muse's two runs and Ornith's two runs are shown as ranges; a thinking-only model
 runs non-greedy by design and two samples are a range, not a rank. Muse's 88 is
@@ -288,7 +304,9 @@ one to cite; its 4-worker t0.60 row is retained above it for continuity.
 Mellum2's and Qwen2.5-Coder's rows are their clean 1-worker re-runs; the old
 4-worker scores (45 → 36, 36 → 31) appear in the confound table.
 
-**Headroom held.** The best clean arm takes 79% of the suite, against b3's
+**Headroom held, and now bounded from above.** The best clean local arm takes
+79% of the suite and a frontier hosted model reaches 91%, which converts the
+remaining headroom from an open question into a measured gap. Against b3's
 96.5% — the tier still discriminates, which is what it was built for.
 
 Two rows need reading carefully. **Qwen3.8 on GGUF has no thinking arm at all**
