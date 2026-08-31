@@ -1,6 +1,6 @@
 # Hard tier — all results
 
-104 execution-graded tasks. Two machines, three backends. Generated from
+104 execution-graded tasks. Three machines, four backends. Generated from
 `harness/aggall.py`; see [HARD_TIER.md](HARD_TIER.md) for method. Rendered as an
 [interactive report](https://claude.ai/code/artifact/0758f1cc-e4e8-4dde-b414-aec5253e58d5).
 
@@ -42,6 +42,62 @@ terminates reliably on the short ones.
 
 Gemma 4 12B's arm required `presence_penalty=1.5` on **both** arms; at plain
 greedy its thinking arm does not terminate.
+
+## Qwen3.8-Flash-Next: the xhigh failure, reproduced and fixed again
+
+Spark node, vLLM, NVFP4/FP8, greedy both arms, 1 worker, 0 retries, 0 resamples.
+**41% of samples had other traffic in the batch**, so this pair is not comparable
+to the clean arms above — it is reported here, not there.
+
+| | Python | JS | TS | SQL | Bash | Git | **total** |
+|---|---|---|---|---|---|---|---|
+| off (`reasoning_effort=none`) | 20/30 | 9/15 | 3/15 | 16/20 | 11/12 | 8/12 | **67** |
+| on (`reasoning_effort=medium`) | 23/30 | 14/15 | **12/15** | 19/20 | 12/12 | 11/12 | **91** |
+| Δ | +3 | +5 | **+9** | +3 | +1 | +3 | **+24** |
+
+**At its own default effort this model does not terminate.** 20 of the first 35
+thinking tasks (57%) burned the entire 32000-token budget and returned nothing,
+with a **median trace of 88,381 characters**; the arm projected 24–34h. Told
+`reasoning_effort=medium`, the median trace falls to **4,494** — a 20× reduction
+— caps drop to **1 in 104**, and the arm finishes in 2.9h.
+
+That is the Qwen3.8-27B story exactly, on different hardware, a different serving
+stack and a different quantization. There the arm projected **79 hours** and was
+written up as a model that could not stop thinking, when the harness had simply
+never told it how much to think. Two independent reproductions make it a property
+of the family rather than an accident of one setup: **an unqualified thinking arm
+on a Qwen3.8 model measures its maximum effort default, not its thinking mode.**
+
+Three caveats, none of which the numbers survive without:
+
+- **The score is the tier's highest (91) and so is the off arm (67), but neither
+  is clean.** A shared node batches our requests with someone else's, and this
+  project measured batching moving scores by 2–3 tasks even under vLLM's own
+  batch-invariant kernels.
+- **TS 3 → 12 is the largest category move ever recorded here**, on the one
+  category that has resisted every model — the previous best was 10 and half the
+  tier scores ≤3. Worth re-running exclusively before anyone leans on it.
+- **The delta depends on which "off" switch is used** — see below.
+
+## Two ways to turn thinking off, 8 tasks apart
+
+Both switches zero the reasoning trace on this model. They do not produce the
+same baseline:
+
+| off mechanism | trace | total |
+|---|---|---|
+| `chat_template_kwargs.enable_thinking=false` | 0 ch | **75** |
+| `reasoning_effort=none` | 0 ch | **67** |
+
+Eight tasks is larger than several gains this repo publishes. **It is not
+attributed to the mechanism**, because the two runs also ran under different load
+(16.6 vs 32.2 tok/s decode), so 8 is an upper bound with contention folded in.
+Separating them needs both switches run back to back under matched conditions.
+
+The practical consequence is immediate: paired against the template off arm the
+same thinking arm reads **+16**, not +24. A delta is only meaningful when both
+arms use one mechanism — which is why the off arm was re-run rather than reused
+when the switch changed.
 
 ## Confounded measurements
 

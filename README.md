@@ -64,6 +64,14 @@ is **not** a single-variable measurement of reasoning — hot resampling, a non-
 | GLM 4.7 Flash | b3 | GGUF | 5 (Q4) / 3 (Q8) | — | 5 |
 | DeepSeek VL2 | b3 | MLX | 1 | 1 | 1 |
 
+**Qwen3.8-Flash-Next scores 91/104 — the highest on the tier — and is deliberately
+not listed above.** It ran on a node serving live traffic (41% of samples shared a
+batch), so it is not comparable to these arms; see [RESULTS.md](RESULTS.md). Its
+story is the Qwen3.8 `xhigh` failure reproduced on a second backend: at default
+effort 57% of its thinking tasks burned the whole budget and returned nothing
+(median trace 88,381 chars, 24-34h projected), and at `reasoning_effort=medium`
+the median trace falls to 4,494, caps drop to 1 in 104, and it finishes in 2.9h.
+
 The three CUDA rows in bold replaced older confounded scores after the node was
 re-run serially: Gemma 4 12B's clean arm runs `presence_penalty=1.5` on **both**
 arms because its plain-greedy thinking never terminates, and Mellum2 /
