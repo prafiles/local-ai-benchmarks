@@ -1,0 +1,12 @@
+{
+  "model": "gpt-5.6-luna",
+  "name": "api-default (temperature NOT settable)",
+  "sampling": {},
+  "why": "NOT greedy, and not by choice. This API rejects temperature=0 outright ('does not support 0 with this model. Only the default (1) value is supported'), so the greedy discipline every local arm in this repo uses is unavailable. Both arms therefore run at the API's fixed default, which puts them on the WIDE noise floor this project measured for non-greedy runs -- 4 to 8 tasks per repeat, not the +/-1 of a greedy arm. Any delta smaller than about 8 tasks is not separable from noise here. The pair is still single-variable in the thing being tested: both arms are identical except reasoning_effort.",
+  "arm_switch": {
+    "mechanism": "reasoning_effort",
+    "evidence": "none -> 0 reasoning tokens; medium -> 512-1024. Verified through the proxy on a hard-tier TS task, not a warm-up. 'minimal' is rejected by this model; supported values are none/low/medium/high.",
+    "caveat": "This API returns a reasoning token COUNT and never the reasoning text. think_chars in the results is therefore a placeholder sized to that count, not a transcript -- it proves reasoning happened and how much, and cannot be read."
+  },
+  "node": "hosted API via api_proxy.py, 1 worker"
+}

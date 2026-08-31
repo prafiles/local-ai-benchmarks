@@ -1,0 +1,12 @@
+{
+  "model": "claude-sonnet-5",
+  "name": "api-default (temperature deprecated)",
+  "sampling": {},
+  "why": "Single arm only -- an off/on pair CANNOT be built for this model, so it is reported as a standalone capability score, in the same category as the thinking-only models (Muse Glimmer, Ornith 1.5), not as a reasoning delta.",
+  "arm_switch": {
+    "mechanism": "NONE AVAILABLE",
+    "evidence": "output_config.effort accepts only low/medium/high/xhigh/max -- there is no 'none', so reasoning cannot be switched off. thinking.type.enabled is rejected for this model; only 'adaptive' is supported, which means the MODEL decides whether to think. On a hard-tier TS task it emitted 0 characters of thinking at medium AND at high, so even the on arm is not reliably a thinking arm. temperature is deprecated entirely for this model, so sampling cannot be pinned either.",
+    "consequence": "Any off/on delta for this model would be measuring the model's own adaptive choice plus whatever else moved, not the effect of reasoning. It is not measured here rather than measured badly."
+  },
+  "node": "hosted API via api_proxy.py, 1 worker"
+}
