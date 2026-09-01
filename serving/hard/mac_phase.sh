@@ -15,7 +15,7 @@
 #
 # Lives in ~/bench5 rather than /tmp, which a reboot erased mid-sweep on 08-24.
 set -u
-REPO=/Volumes/Store/Developer/AER/local-ai-benchmarks
+REPO=/Volumes/Store/Developer/AER/llm/local-ai-benchmarks
 LMS="$HOME/.lmstudio/bin/lms"
 export B4_OUT="$REPO/results/hard"
 export B4_CHOSEN_DIR="$REPO/results/mac"
@@ -80,7 +80,7 @@ run_repeat muse.run2 "bartowski/muse-glimmer-30b-gguf/muse-glimmer-30b-q8_0.gguf
 echo; echo "######## MAC PHASE DONE"; date
 python3 - <<'PY'
 import json, os
-H="/Volumes/Store/Developer/AER/local-ai-benchmarks/results/hard"
+H="/Volumes/Store/Developer/AER/llm/local-ai-benchmarks/results/hard"
 def sc(k):
     p=os.path.join(H,"ht_%s.graded.json"%k)
     if not os.path.exists(p): return None

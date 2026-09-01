@@ -12,7 +12,7 @@
 # comparable across models; this one is what makes the within-model delta mean
 # something. Different key, nothing overwritten.
 set -u
-REPO=/Volumes/Store/Developer/AER/local-ai-benchmarks
+REPO=/Volumes/Store/Developer/AER/llm/local-ai-benchmarks
 LMS="$HOME/.lmstudio/bin/lms"
 MODEL=glm-4.7-flash
 WIN=40960

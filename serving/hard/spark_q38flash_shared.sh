@@ -27,7 +27,7 @@
 #     rather than sitting on one side of the comparison.
 set -u
 
-REPO=/Volumes/Store/Developer/AER/local-ai-benchmarks
+REPO=/Volumes/Store/Developer/AER/llm/local-ai-benchmarks
 HOSTPORT="${SPARK_HOST:-10.0.0.21:8000}"
 MODEL=Qwen/Qwen3.8-Flash-Next
 KEY=q38flash

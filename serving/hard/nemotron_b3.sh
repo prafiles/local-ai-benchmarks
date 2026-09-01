@@ -20,7 +20,7 @@
 # reaches b3, and run b3 here with retries 0 and everything else identical.
 set -u
 
-REPO=/Volumes/Store/Developer/AER/local-ai-benchmarks
+REPO=/Volumes/Store/Developer/AER/llm/local-ai-benchmarks
 MODEL=nvidia-nemotron-3.5-lightning-30b-a3b
 KEY=nemotron
 CTX=40960
