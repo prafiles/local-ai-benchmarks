@@ -4,7 +4,7 @@
 #
 # Lives in ~/bench5, not /tmp: a reboot erased the previous driver mid-sweep.
 set -u
-REPO=/Volumes/Store/Developer/AER/local-ai-benchmarks
+REPO=/Volumes/Store/Developer/AER/llm/local-ai-benchmarks
 LMS="$HOME/.lmstudio/bin/lms"
 export B4_OUT="$REPO/results/hard"
 export B4_CHOSEN_DIR="$REPO/results/mac"   # omitting this aborts the thinking arm

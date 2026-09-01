@@ -22,7 +22,7 @@ import subprocess
 import sys
 import urllib.request
 
-REPO = "/Volumes/Store/Developer/AER/local-ai-benchmarks"
+REPO = "/Volumes/Store/Developer/AER/llm/local-ai-benchmarks"
 sys.path.insert(0, REPO + "/harness")
 import b3  # noqa: E402
 

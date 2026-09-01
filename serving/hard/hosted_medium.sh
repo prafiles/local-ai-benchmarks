@@ -10,7 +10,7 @@
 # Everything goes through api_proxy.py so b5.py, the task set, the extractor and
 # the graders are byte-identical to every local run.
 set -u
-REPO=/Volumes/Store/Developer/AER/local-ai-benchmarks
+REPO=/Volumes/Store/Developer/AER/llm/local-ai-benchmarks
 OUT="$REPO/results/hosted"
 source ~/.bench_anthropic_env
 source ~/.bench_openai_env

@@ -19,7 +19,7 @@
 # the ON arm sends nothing. See results/mac/chosen_nemotron.json.
 set -u
 
-REPO=/Volumes/Store/Developer/AER/local-ai-benchmarks
+REPO=/Volumes/Store/Developer/AER/llm/local-ai-benchmarks
 MODEL=nvidia-nemotron-3.5-lightning-30b-a3b
 KEY=nemotron
 CTX=40960          # every other GGUF run on this tier used 40960; GGUF honours

@@ -12,7 +12,7 @@
 # withdrawn, because a degenerate build proves nothing. If Q8_0 terminates, that
 # question is answered properly.
 set -u
-REPO=/Volumes/Store/Developer/AER/local-ai-benchmarks
+REPO=/Volumes/Store/Developer/AER/llm/local-ai-benchmarks
 LMS="$HOME/.lmstudio/bin/lms"
 KEY=glm47q8
 MODEL="unsloth/glm-4.7-flash-gguf/glm-4.7-flash-q8_0.gguf"
@@ -45,7 +45,7 @@ json.dump({"model": sys.argv[1], "name": "t0/greedy",
                   "reasoning off and 0/104 at 4x budget. Greedy thinking has aborted on "
                   "every GLM build so far (MLX 46h, Q4_K_S 87h); if it aborts here too "
                   "that is the model, and this time the evidence is not from a broken file."},
-          open("/Volumes/Store/Developer/AER/local-ai-benchmarks/results/mac/chosen_glm47q8.json","w"), indent=1)
+          open("/Volumes/Store/Developer/AER/llm/local-ai-benchmarks/results/mac/chosen_glm47q8.json","w"), indent=1)
 print("wrote chosen_glm47q8.json")
 PY
 

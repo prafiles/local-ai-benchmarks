@@ -1,0 +1,207 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "Qwen3.8 Flash Next — DGX Spark Performance Review",
+    "description": "Real-load observation of the 262K-context vLLM deployment, with no synthetic benchmark traffic.",
+    "generatedAt": "2026-08-29T11:44:00Z",
+    "sources": [
+      {
+        "id": "live_metrics",
+        "label": "DGX Spark live vLLM and host telemetry",
+        "query": {
+          "engine": "Prometheus and Linux host telemetry",
+          "sql": "WITH observations(interval, seconds, prompt_tps, generation_tps, mtp_acceptance, kv_end, gpu_util, running_end, waiting_end, preemptions, completed, position_1, position_2, position_3, avg_queue_s) AS (VALUES ('T0-T1',67,0.0,55.6866,0.6626634641,0.9249011858,0.96,4,2,0,1,0.8014411529,0.6573258607,0.5292233787,22.3112),('T1-T2',69,567.7246,12.0290,0.6690821256,0.9802371542,0.96,4,2,0,1,0.7826086957,0.6485507246,0.5760869565,117.6931),('T0-T2',136,288.0368,33.5368,0.6638251366,0.9802371542,0.96,4,2,0,2,0.7980327869,0.6557377049,0.5377049180,70.0021),('FOLLOWUP',359,950.0585,27.5125,0.6643448415,0.9249011858,0.96,4,0,6,8,NULL,NULL,NULL,NULL)) SELECT * FROM observations ORDER BY seconds",
+          "description": "Counter deltas from vLLM /metrics combined with nvidia-smi, free, vmstat, and Linux pressure-stall telemetry on the serving host.",
+          "language": "PromQL counter-delta analysis",
+          "executed_at": "2026-08-29T11:42:35Z",
+          "tables_used": ["vLLM /metrics", "nvidia-smi", "vmstat", "/proc/pressure/memory"],
+          "filters": ["Real user traffic only", "Primary interval 2026-08-29 11:34:20–11:36:36 UTC", "Follow-up through 11:42:35 UTC", "No generated benchmark requests"],
+          "metric_definitions": [
+            "Token throughput = counter increase divided by elapsed wall-clock seconds.",
+            "MTP acceptance = accepted speculative tokens divided by drafted speculative tokens.",
+            "Accepted tokens per draft step excludes the always-generated verifier bonus token.",
+            "Queue-time average covers requests completed inside the primary interval only.",
+            "KV utilization, GPU utilization, temperature, power, and request counts are endpoint snapshots rather than interval averages."
+          ]
+        }
+      },
+      {
+        "id": "vllm_docs",
+        "label": "vLLM optimization and speculative decoding documentation",
+        "href": "https://docs.vllm.ai/en/stable/configuration/optimization/",
+        "query": {
+          "engine": "Official documentation",
+          "description": "Current vLLM guidance for chunked prefill, batch-token tuning, preemption monitoring, and speculative decoding.",
+          "executed_at": "2026-08-29T11:40:00Z",
+          "tables_used": ["vLLM optimization documentation"],
+          "filters": ["Official vLLM sources only"],
+          "metric_definitions": []
+        }
+      },
+      {
+        "id": "model_card",
+        "label": "primitive-ai Qwen3.8 Flash Next NVFP4 model card",
+        "href": "https://huggingface.co/primitive-ai/Qwen3.8-Flash-Next-NVFP4",
+        "query": {
+          "engine": "Hugging Face model card",
+          "description": "Checkpoint-specific deployment notes for the quantized PLE table and MTP speculative decoding.",
+          "executed_at": "2026-08-29T11:41:00Z",
+          "tables_used": ["primitive-ai/Qwen3.8-Flash-Next-NVFP4 model card"],
+          "filters": ["Checkpoint-specific serving guidance"],
+          "metric_definitions": []
+        }
+      }
+    ],
+    "cards": [
+      {
+        "id": "gpu_card",
+        "description": "GPU utilization at the end of the primary real-load window.",
+        "dataset": "summary",
+        "sourceId": "live_metrics",
+        "metrics": [{"label": "GPU busy", "field": "gpu_util", "format": "percent"}]
+      },
+      {
+        "id": "kv_card",
+        "description": "KV cache utilization at the end of the primary observation window.",
+        "dataset": "summary",
+        "sourceId": "live_metrics",
+        "metrics": [
+          {"label": "KV cache used", "field": "kv_usage", "format": "percent"},
+          {"label": "Follow-up preemptions", "field": "followup_preemptions", "format": "number"}
+        ]
+      },
+      {
+        "id": "mtp_card",
+        "description": "Speculative-token efficiency across the primary interval.",
+        "dataset": "summary",
+        "sourceId": "live_metrics",
+        "metrics": [
+          {"label": "MTP token acceptance", "field": "mtp_acceptance", "format": "percent"},
+          {"label": "Accepted tokens per draft", "field": "accepted_per_draft", "format": "number"}
+        ]
+      },
+      {
+        "id": "queue_card",
+        "description": "Average queue time for the two requests completed during the primary interval.",
+        "dataset": "summary",
+        "sourceId": "live_metrics",
+        "metrics": [
+          {"label": "Average queue time", "field": "avg_queue_s", "format": "number"},
+          {"label": "Completed requests", "field": "completed_requests", "format": "number"}
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "pressure_chart",
+        "title": "Utilization and speculative acceptance",
+        "subtitle": "Compute and KV were saturated; speculative acceptance remained useful but declined by draft position.",
+        "type": "bar",
+        "dataset": "pressure_metrics",
+        "sourceId": "live_metrics",
+        "encodings": {
+          "x": {"field": "metric", "type": "nominal", "label": "Metric"},
+          "y": {"field": "rate", "type": "quantitative", "format": "percent", "label": "Rate"},
+          "tooltip": [
+            {"field": "rate", "type": "quantitative", "format": "percent", "label": "Rate"},
+            {"field": "scope", "type": "text", "label": "Scope"}
+          ]
+        },
+        "xAxisTitle": "Metric",
+        "yAxisTitle": "Percent",
+        "valueFormat": "percent",
+        "maxRows": 6,
+        "compatibleTypes": ["bar", "horizontalBar"]
+      }
+    ],
+    "tables": [
+      {
+        "id": "interval_table",
+        "title": "Observed real-load intervals",
+        "subtitle": "Counter deltas; aggregate row overlaps the two primary subintervals and is shown for convenience.",
+        "dataset": "intervals",
+        "sourceId": "live_metrics",
+        "density": "compact",
+        "defaultSort": {"field": "order", "direction": "asc"},
+        "columns": [
+          {"field": "order", "label": "#", "type": "number", "format": "number", "align": "right"},
+          {"field": "interval", "label": "Interval", "type": "text"},
+          {"field": "seconds", "label": "Seconds", "type": "number", "format": "number", "align": "right"},
+          {"field": "prompt_tps", "label": "Prompt tok/s", "type": "number", "format": "number", "align": "right"},
+          {"field": "generation_tps", "label": "Generation tok/s", "type": "number", "format": "number", "align": "right"},
+          {"field": "mtp_acceptance", "label": "MTP acceptance", "type": "percent", "format": "percent", "align": "right"},
+          {"field": "kv_end", "label": "KV at end", "type": "percent", "format": "percent", "align": "right"},
+          {"field": "running_end", "label": "Running", "type": "number", "format": "number", "align": "right"},
+          {"field": "waiting_end", "label": "Waiting", "type": "number", "format": "number", "align": "right"},
+          {"field": "preemptions", "label": "Preemptions", "type": "number", "format": "number", "align": "right"},
+          {"field": "completed", "label": "Completed", "type": "number", "format": "number", "align": "right"}
+        ]
+      }
+    ],
+    "blocks": [
+      {"id": "title", "type": "markdown", "body": "# Qwen3.8 Flash Next — DGX Spark Performance Review\n\nReal user traffic was observed without issuing synthetic benchmark requests."},
+      {"id": "summary_heading", "type": "markdown", "body": "## Technical summary\n\nThe deployment is compute-active and KV-constrained, not broadly underutilized. During the primary 136-second window the GPU reached 96%, all four scheduler slots were occupied, two requests waited, and KV usage reached 98%. A later six-minute follow-up cleared the queue but accumulated six KV preemptions, showing that long active contexts are forcing recomputation. MTP remains productive at 66.4% token acceptance and 1.99 accepted speculative tokens per draft step."},
+      {"id": "metrics", "type": "metric-strip", "cardIds": ["gpu_card", "kv_card", "mtp_card", "queue_card"]},
+      {"id": "pressure", "type": "chart", "chartId": "pressure_chart"},
+      {"id": "intervals_heading", "type": "markdown", "body": "## Interval evidence\n\nDecode-heavy periods reached roughly 70–85 output tok/s in vLLM's ten-second logs. Long prefills then displaced decode work, lowering the 136-second aggregate to 33.5 output tok/s. The wide variation is workload mix, not thermal throttling: the GPU held about 2,470 MHz at 74–75 °C."},
+      {"id": "intervals", "type": "table", "tableId": "interval_table"},
+      {"id": "diagnosis", "type": "markdown", "body": "## Diagnosis\n\n1. **KV pressure is the primary limiter.** Four active long contexts consume nearly the entire 359,916-token KV pool. The later preemptions confirm insufficient headroom for the live mix.\n2. **Large prefills create bursty coding latency.** With a 16,384-token batch budget, prefill bursts reached 3.4k–7.1k tok/s while generation temporarily fell near 1 tok/s.\n3. **MTP is helping, but its path is not ideal.** Draft positions one through three were accepted 79.8%, 65.6%, and 53.8% of the time. The current QSA backend cannot use fused multi-step draft decode and rebuilds attention metadata between draft steps.\n4. **Unified-memory I/O is a secondary constraint.** The host retained about 20 GiB available and showed little active swapping, but it continuously read roughly 40–46 MB/s while serving, consistent with the memory-mapped PLE table competing for page cache.\n5. **No thermal or clock throttle was observed.** Power was 48–52 W during the busiest samples, with stable clocks and temperature."},
+      {"id": "recommendations", "type": "markdown", "body": "## Recommendations\n\n**First change for interactive coding:** reduce `--max-num-batched-tokens` from 16,384 to 8,192. vLLM documents the tradeoff directly: smaller chunks improve inter-token latency, while larger chunks improve prefill/TTFT. This should smooth active streams during large prompt ingestion; it will not add KV capacity.\n\n**Choose one KV strategy:** either keep four active sequences and cautiously raise `--gpu-memory-utilization` from 0.77 to 0.79, or hold memory at 0.77 and reduce `--max-num-seqs` to 3. The first option may prevent recompute but steals about 2.4 GiB from PLE/OS page cache; the second improves per-request latency and avoids preemption at the cost of more queueing. Do not raise concurrency above four.\n\n**Keep MTP at three tokens for now.** The measured acceptance is healthy, and the checkpoint author reports that three tokens outperform two while one token fails to boot. Dynamic speculative sizing is not yet documented as tested for MTP, so enabling it here would be experimental. Revisit when vLLM adds a fused QSA multi-step path.\n\n**Preserve prefix caching and stabilize client prefixes.** Lifetime cache reuse was substantial, but the observed new long prompts had little reuse. OpenCode and Pi should keep system/tool descriptions byte-identical and append conversation turns instead of rebuilding prefixes.\n\n**Do not increase KV to the 31 GiB maximum suggested at startup.** On this 128 GB unified-memory host that would consume the current OS/page-cache headroom and likely increase PLE disk traffic or swapping."},
+      {"id": "methodology", "type": "markdown", "body": "## Methodology and definitions\n\nPrometheus counters were sampled at 11:34:20, 11:35:27, and 11:36:36 UTC, then differenced by elapsed time. A read-only follow-up at 11:42:35 UTC checked cumulative requests, tokens, speculative counters, preemptions, KV occupancy, and host state. GPU and memory snapshots came from `nvidia-smi`, `free`, `vmstat`, and Linux pressure-stall information. No requests were generated for this review."},
+      {"id": "limitations", "type": "markdown", "body": "## Limitations\n\nThe primary interval is short and contains only two completed requests, so its 70-second average queue time and one observed 151-second TTFT are directional, not stable percentiles. Throughput mixes prefill and decode phases and should not be compared directly with single-stream model-card benchmarks. The disk-read rate was sampled for eight seconds and identifies correlation, not a complete block-I/O attribution. No A/B restart was performed, so the proposed settings remain hypotheses until measured against another real-load window."},
+      {"id": "questions", "type": "markdown", "body": "## Further questions\n\nThe next real-load comparison should answer two narrow questions: does an 8,192-token prefill budget materially improve streaming smoothness, and does 0.79 memory utilization eliminate preemptions without increasing PLE I/O or memory pressure? Capture the same counters before and after each change separately so their effects remain attributable."}
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "status": "ready",
+    "generatedAt": "2026-08-29T11:44:00Z",
+    "datasets": {
+      "summary": [
+        {
+          "gpu_util": 0.96,
+          "kv_usage": 0.9802371542,
+          "mtp_acceptance": 0.6638251366,
+          "accepted_per_draft": 1.99147541,
+          "avg_queue_s": 70.00212833,
+          "completed_requests": 2,
+          "followup_preemptions": 6
+        }
+      ],
+      "pressure_metrics": [
+        {"metric": "GPU utilization", "rate": 0.96, "scope": "End of primary window"},
+        {"metric": "KV cache utilization", "rate": 0.9802371542, "scope": "End of primary window"},
+        {"metric": "MTP token acceptance", "rate": 0.6638251366, "scope": "Primary 136-second interval"},
+        {"metric": "Draft position 1", "rate": 0.7980327869, "scope": "Primary 136-second interval"},
+        {"metric": "Draft position 2", "rate": 0.6557377049, "scope": "Primary 136-second interval"},
+        {"metric": "Draft position 3", "rate": 0.537704918, "scope": "Primary 136-second interval"}
+      ],
+      "intervals": [
+        {"order": 1, "interval": "11:34:20–11:35:27", "seconds": 67, "prompt_tps": 0, "generation_tps": 55.6866, "mtp_acceptance": 0.6626634641, "kv_end": 0.9249011858, "running_end": 4, "waiting_end": 2, "preemptions": 0, "completed": 1},
+        {"order": 2, "interval": "11:35:27–11:36:36", "seconds": 69, "prompt_tps": 567.7246, "generation_tps": 12.029, "mtp_acceptance": 0.6690821256, "kv_end": 0.9802371542, "running_end": 4, "waiting_end": 2, "preemptions": 0, "completed": 1},
+        {"order": 3, "interval": "Primary aggregate", "seconds": 136, "prompt_tps": 288.0368, "generation_tps": 33.5368, "mtp_acceptance": 0.6638251366, "kv_end": 0.9802371542, "running_end": 4, "waiting_end": 2, "preemptions": 0, "completed": 2},
+        {"order": 4, "interval": "Follow-up to 11:42:35", "seconds": 359, "prompt_tps": 950.0585, "generation_tps": 27.5125, "mtp_acceptance": 0.6643448415, "kv_end": 0.9249011858, "running_end": 4, "waiting_end": 0, "preemptions": 6, "completed": 8}
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "live_metrics",
+      "label": "DGX Spark live vLLM and host telemetry",
+      "query": {
+        "engine": "Prometheus and Linux host telemetry",
+        "sql": "WITH observations(interval, seconds, prompt_tps, generation_tps, mtp_acceptance, kv_end, gpu_util, running_end, waiting_end, preemptions, completed, position_1, position_2, position_3, avg_queue_s) AS (VALUES ('T0-T1',67,0.0,55.6866,0.6626634641,0.9249011858,0.96,4,2,0,1,0.8014411529,0.6573258607,0.5292233787,22.3112),('T1-T2',69,567.7246,12.0290,0.6690821256,0.9802371542,0.96,4,2,0,1,0.7826086957,0.6485507246,0.5760869565,117.6931),('T0-T2',136,288.0368,33.5368,0.6638251366,0.9802371542,0.96,4,2,0,2,0.7980327869,0.6557377049,0.5377049180,70.0021),('FOLLOWUP',359,950.0585,27.5125,0.6643448415,0.9249011858,0.96,4,0,6,8,NULL,NULL,NULL,NULL)) SELECT * FROM observations ORDER BY seconds",
+        "description": "Read-only real-load counter snapshots and host telemetry.",
+        "language": "PromQL counter-delta analysis",
+        "executed_at": "2026-08-29T11:42:35Z",
+        "tables_used": ["vLLM /metrics", "nvidia-smi", "vmstat", "/proc/pressure/memory"],
+        "filters": ["No generated benchmark requests"],
+        "metric_definitions": ["Rates are counter deltas divided by elapsed seconds."]
+      }
+    },
+    {"id": "vllm_docs", "label": "vLLM optimization documentation", "href": "https://docs.vllm.ai/en/stable/configuration/optimization/"},
+    {"id": "model_card", "label": "Qwen3.8 Flash Next NVFP4 model card", "href": "https://huggingface.co/primitive-ai/Qwen3.8-Flash-Next-NVFP4"}
+  ]
+}

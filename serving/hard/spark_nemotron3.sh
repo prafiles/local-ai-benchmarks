@@ -11,7 +11,7 @@
 # ignored on THIS model, though it is the working switch on the other Nemotron).
 set -u
 
-REPO=/Volumes/Store/Developer/AER/local-ai-benchmarks
+REPO=/Volumes/Store/Developer/AER/llm/local-ai-benchmarks
 # Node address comes from the environment: this is a public repo.
 #   SPARK_HOST=host:port bash spark_nemotron3.sh
 HOSTPORT="${SPARK_HOST:?set SPARK_HOST, e.g. SPARK_HOST=<host>:8000}"
