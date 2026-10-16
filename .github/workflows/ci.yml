@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      BENCH_TMP: ${{ runner.temp }}/bench2
+      BENCH_TMP: /tmp/bench2
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
