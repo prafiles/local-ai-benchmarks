@@ -4,6 +4,7 @@
 Each task needs a fresh process (settings.configure runs once per process), so
 this stages all 50 and runs them as subprocesses inside ONE container.
 """
+
 import os
 import shutil
 import subprocess
@@ -28,10 +29,12 @@ print(json.dumps(bad))
 """
 
 # harness reads the case dir from $CASE instead of fixed /w paths
-HARNESS_CASE = HARNESS.replace('open("/w/sol.py")', 'open(os.environ["CASE"]+"/sol.py")') \
-                      .replace('open("/w/test.py")', 'open(os.environ["CASE"]+"/test.py")') \
-                      .replace('open("/w/seed.py")', 'open("/w/seed.py")') \
-                      .replace("import django, datetime", "import django, datetime, os")
+HARNESS_CASE = (
+    HARNESS.replace('open("/w/sol.py")', 'open(os.environ["CASE"]+"/sol.py")')
+    .replace('open("/w/test.py")', 'open(os.environ["CASE"]+"/test.py")')
+    .replace('open("/w/seed.py")', 'open("/w/seed.py")')
+    .replace("import django, datetime", "import django, datetime, os")
+)
 
 
 def main():
@@ -51,16 +54,34 @@ def main():
         open(os.path.join(d, "test.py"), "w").write(tests)
 
     p = subprocess.run(
-        ["docker", "run", "--rm", "--network", "none", "--memory", "2g",
-         "-v", f"{STAGE}:/w", "-w", "/w", "bench-py:1", "sh", "/w/_run.sh"],
-        capture_output=True, text=True, timeout=1800)
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            "--memory",
+            "2g",
+            "-v",
+            f"{STAGE}:/w",
+            "-w",
+            "/w",
+            "bench-py:1",
+            "sh",
+            "/w/_run.sh",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=1800,
+    )
     out = (p.stdout or "").strip().splitlines()
     if not out:
         print("no output; stderr:", (p.stderr or "")[-500:])
         return
     import json
+
     bad = json.loads(out[-1])
-    print(f"django: {len(T)-len(bad)}/{len(T)} references pass")
+    print(f"django: {len(T) - len(bad)}/{len(T)} references pass")
     for tid, why in bad:
         print(f"   BROKEN {tid}: {why}")
 

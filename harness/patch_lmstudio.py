@@ -37,13 +37,14 @@ Both changes are opt-in via env, so every published number keeps its meaning:
 
     patch_lmstudio.py [target_dir]      # default /root/bench2
 """
+
 import os
 import sys
 
 HERE = sys.argv[1] if len(sys.argv) > 1 else "/root/bench2"
 
 OLD_CAP = 'THINK_CAPABLE = ("gemma-4", "qwen3.5")'
-NEW_CAP = '''THINK_CAPABLE = ("gemma-4", "qwen3.5")
+NEW_CAP = """THINK_CAPABLE = ("gemma-4", "qwen3.5")
 # Extra substrings for models this list predates -- e.g. qwen3.6, whose name does
 # not match "qwen3.5" but which thinks by default. Misclassifying a thinking model
 # as non-thinking is the worst failure available here: it routes the model to the
@@ -57,16 +58,16 @@ THINK_CAPABLE += tuple(x.strip().lower() for x in
 # for servers that silently drop chat_template_kwargs (measured on LM Studio's
 # MLX engine) and where the model thinks by default -- there the ON arm sends
 # nothing and the OFF arm is the one carrying the flag.
-OFF_MECH = os.environ.get("B4_OFF_MECH", "template")'''
+OFF_MECH = os.environ.get("B4_OFF_MECH", "template")"""
 
-OLD_SAMP = '''    if can_think(model):
+OLD_SAMP = """    if can_think(model):
         # explicit either way: the flag is what separates the two arms
         tmpl = {"enable_thinking": bool(THINK)}
         tmpl.update(tmpl_extra)
         payload["chat_template_kwargs"] = tmpl
-    return payload'''
+    return payload"""
 
-NEW_SAMP = '''    if can_think(model):
+NEW_SAMP = """    if can_think(model):
         if OFF_MECH == "reasoning_effort":
             # This server ignores chat_template_kwargs, and the model thinks by
             # default, so only the OFF arm needs to say anything. Sending nothing
@@ -78,7 +79,7 @@ NEW_SAMP = '''    if can_think(model):
             tmpl = {"enable_thinking": bool(THINK)}
             tmpl.update(tmpl_extra)
             payload["chat_template_kwargs"] = tmpl
-    return payload'''
+    return payload"""
 
 for fname in ("b3.py", "b4.py"):
     p = os.path.join(HERE, fname)

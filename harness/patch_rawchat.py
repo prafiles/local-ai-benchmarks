@@ -34,13 +34,14 @@ anyway, so the multi-turn b4 path is deliberately not given a raw mode.
 
     patch_rawchat.py [target_dir]      # default /root/bench2
 """
+
 import os
 import sys
 
 HERE = sys.argv[1] if len(sys.argv) > 1 else "/root/bench2"
 p = os.path.join(HERE, "b3.py")
 
-ANCHOR = '''def _once(model, prompt, max_tokens, temp=None):'''
+ANCHOR = """def _once(model, prompt, max_tokens, temp=None):"""
 
 NEW = '''# ------------------------------------------------- broken-chat-template escape
 # Set only for a model whose server-side chat template is known broken; see
@@ -89,12 +90,12 @@ s = s.replace(ANCHOR, NEW, 1)
 
 # Route through the raw path when a format is configured. Done inside _once so
 # retries, escalation and the empty-answer logic are all unchanged.
-OLD_BODY = '''def _once(model, prompt, max_tokens, temp=None):
-    payload = sampling({"model": model,'''
-NEW_BODY = '''def _once(model, prompt, max_tokens, temp=None):
+OLD_BODY = """def _once(model, prompt, max_tokens, temp=None):
+    payload = sampling({"model": model,"""
+NEW_BODY = """def _once(model, prompt, max_tokens, temp=None):
     if RAW_FMT:
         return _once_raw(model, prompt, max_tokens, temp)
-    payload = sampling({"model": model,'''
+    payload = sampling({"model": model,"""
 assert OLD_BODY in s, "could not find _once body"
 s = s.replace(OLD_BODY, NEW_BODY, 1)
 

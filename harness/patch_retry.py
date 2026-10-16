@@ -21,6 +21,7 @@ retried task can still fail on its merits.
 The cost is recorded per task (`attempts`) so the retry rate is visible in the
 results rather than hidden inside a pass count.
 """
+
 p = "/root/bench2/b3.py"
 s = open(p).read()
 
@@ -28,7 +29,7 @@ if "RETRIES" in s:
     print("already patched")
     raise SystemExit(0)
 
-old = '''# ------------------------------------------------------------------- runner
+old = """# ------------------------------------------------------------------- runner
 def ask(model, prompt, max_tokens):
     payload = sampling({"model": model,
                         "messages": [{"role": "user",
@@ -48,7 +49,7 @@ def ask(model, prompt, max_tokens):
             "tok": d["usage"]["completion_tokens"],
             "think_chars": len(think),
             "finish": ch.get("finish_reason", ""),
-            "secs": round(time.time() - t0, 2)}'''
+            "secs": round(time.time() - t0, 2)}"""
 
 new = '''# ------------------------------------------------------------------- runner
 # Only ever spent on an EMPTY answer, never on a wrong one.

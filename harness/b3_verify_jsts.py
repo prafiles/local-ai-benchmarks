@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Verify every JS and TS reference against its own tests, in one container each."""
+
 import json
 import os
 import shutil
@@ -46,9 +47,26 @@ def run(name, rows, ext, script):
     open(os.path.join(d, "_run.sh"), "w").write(script)
 
     p = subprocess.run(
-        ["docker", "run", "--rm", "--network", "none", "--memory", "2g",
-         "-v", f"{d}:/w", "-w", "/w", "bench-node:1", "sh", "/w/_run.sh"],
-        capture_output=True, text=True, timeout=3600)
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            "--memory",
+            "2g",
+            "-v",
+            f"{d}:/w",
+            "-w",
+            "/w",
+            "bench-node:1",
+            "sh",
+            "/w/_run.sh",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=3600,
+    )
     bad = [ln.split()[1] for ln in p.stdout.splitlines() if ln.startswith("BAD")]
     ok = len([ln for ln in p.stdout.splitlines() if ln.startswith("OK")])
     print(f"{name}: {ok}/{len(rows)} references pass")

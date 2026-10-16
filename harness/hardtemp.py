@@ -23,6 +23,7 @@ and every spiral costs a full budget in wasted tokens.
 
     hardtemp.py <model> [budget] [passes]
 """
+
 import json
 import os
 import sys
@@ -35,8 +36,7 @@ import b3  # noqa: E402
 
 HERE_OUT = os.path.dirname(os.path.abspath(__file__))
 
-URL = os.environ.get("B4_URL",
-                     "http://localhost:8000/v1/chat/completions")
+URL = os.environ.get("B4_URL", "http://localhost:8000/v1/chat/completions")
 MODEL = sys.argv[1]
 BUDGET = int(sys.argv[2]) if len(sys.argv) > 2 else 8000
 PASSES = int(sys.argv[3]) if len(sys.argv) > 3 else 2
@@ -86,8 +86,11 @@ TASKS = {t[0]: t for t in b3.all_tasks()}
 def one(job):
     tid, samp = job
     _t, _c, _k, prompt, _mt = TASKS[tid]
-    payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}],
-               "max_tokens": BUDGET}
+    payload = {
+        "model": MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": BUDGET,
+    }
     # How thinking is requested is server-specific. vLLM honours the template
     # kwarg; LM Studio's MLX engine drops it silently and those models think by
     # default, so there the correct payload is one that says nothing at all.
@@ -96,21 +99,30 @@ def one(job):
     if os.environ.get("B4_OFF_MECH") != "reasoning_effort":
         payload["chat_template_kwargs"] = {"enable_thinking": True}
     payload.update(samp)
-    req = urllib.request.Request(URL, data=json.dumps(payload).encode(),
-                                 headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(
+        URL,
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json"},
+    )
     try:
         d = json.loads(urllib.request.urlopen(req, timeout=3600).read())
     except Exception as e:  # noqa: BLE001
         return {"tid": tid, "err": type(e).__name__, "ans": 0, "tok": 0}
     ch, msg = d["choices"][0], d["choices"][0]["message"]
-    return {"tid": tid,
-            "think": len(msg.get("reasoning") or msg.get("reasoning_content") or "") // 4,
-            "ans": len((msg.get("content") or "").strip()),
-            "tok": d["usage"]["completion_tokens"], "finish": ch["finish_reason"]}
+    return {
+        "tid": tid,
+        "think": len(msg.get("reasoning") or msg.get("reasoning_content") or "") // 4,
+        "ans": len((msg.get("content") or "").strip()),
+        "tok": d["usage"]["completion_tokens"],
+        "finish": ch["finish_reason"],
+    }
 
 
-print("### first-attempt temperature on the hard probes, budget=%d, %d passes"
-      % (BUDGET, PASSES), flush=True)
+print(
+    "### first-attempt temperature on the hard probes, budget=%d, %d passes"
+    % (BUDGET, PASSES),
+    flush=True,
+)
 out = {}
 for name, samp in CONFIGS:
     jobs = [(t, samp) for _ in range(PASSES) for t in HARD]
@@ -123,12 +135,24 @@ for name, samp in CONFIGS:
     per = {}
     for r in rows:
         per.setdefault(r["tid"], []).append(1 if r["ans"] > 0 else 0)
-    print("\n %-10s answered %2d/%d   tokens %6d   wall %4.0fs" % (name, ok, n, tok, time.time() - t0),
-          flush=True)
-    print("   " + "  ".join("%s %d/%d" % (t, sum(v), len(v)) for t, v in sorted(per.items())),
-          flush=True)
-    out[name] = {"samp": samp, "answered": ok, "n": n, "tokens": tok, "per": per,
-                 "rows": rows}
+    print(
+        "\n %-10s answered %2d/%d   tokens %6d   wall %4.0fs"
+        % (name, ok, n, tok, time.time() - t0),
+        flush=True,
+    )
+    print(
+        "   "
+        + "  ".join("%s %d/%d" % (t, sum(v), len(v)) for t, v in sorted(per.items())),
+        flush=True,
+    )
+    out[name] = {
+        "samp": samp,
+        "answered": ok,
+        "n": n,
+        "tokens": tok,
+        "per": per,
+        "rows": rows,
+    }
     json.dump(out, open(OUT_JSON, "w"), indent=1)
 
 best = max(out.items(), key=lambda kv: (kv[1]["answered"], -kv[1]["tokens"]))

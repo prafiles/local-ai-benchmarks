@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """600-task benchmark: runner + batched grader.
 
-    b3.py count
-    b3.py run <model> <out.json>
-    b3.py grade <out.json>
+b3.py count
+b3.py run <model> <out.json>
+b3.py grade <out.json>
 """
+
 import concurrent.futures
 import json
 import os
@@ -20,15 +21,15 @@ import urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-import b3_django as DJ      # noqa: E402
-import b3_git as GITM       # noqa: E402
-import b3_jsts as JSTS      # noqa: E402
-import b3_misc as M1        # noqa: E402
-import b3_misc2 as M2       # noqa: E402
-import b3_python as PY      # noqa: E402
-import b3_rag as RAG        # noqa: E402
-import b3_shell as SH       # noqa: E402
-import b3_sql as SQL        # noqa: E402
+import b3_django as DJ  # noqa: E402
+import b3_git as GITM  # noqa: E402
+import b3_jsts as JSTS  # noqa: E402
+import b3_misc as M1  # noqa: E402
+import b3_misc2 as M2  # noqa: E402
+import b3_python as PY  # noqa: E402
+import b3_rag as RAG  # noqa: E402
+import b3_shell as SH  # noqa: E402
+import b3_sql as SQL  # noqa: E402
 
 URL = os.environ.get("B4_URL", "http://localhost:8000/v1/chat/completions")
 TMP = os.environ.get("B4_TMP", "/root/bench2/tmp/run")
@@ -44,46 +45,139 @@ def all_tasks():
     """[(id, category, kind, prompt, max_tokens)]"""
     t = []
     for tid, spec, _tests, _r in PY.T:
-        t.append((tid, "Python", "py",
-                  "Write a Python " + spec + "\n\nOutput only the code, no explanation.", 900))
+        t.append(
+            (
+                tid,
+                "Python",
+                "py",
+                "Write a Python " + spec + "\n\nOutput only the code, no explanation.",
+                900,
+            )
+        )
     for tid, spec, _tests, _r in DJ.T:
-        t.append((tid, "Django", "django",
-                  DJ.CTX + "Write a " + spec + "\n\nOutput only the code, no explanation.", 700))
+        t.append(
+            (
+                tid,
+                "Django",
+                "django",
+                DJ.CTX
+                + "Write a "
+                + spec
+                + "\n\nOutput only the code, no explanation.",
+                700,
+            )
+        )
     for tid, prompt, _rows in SQL_TASKS:
         t.append((tid, "SQL", "sql", prompt, 400))
     for tid, spec, _tests, _r in JSTS.JS:
-        t.append((tid, "JS", "js", "Write JavaScript defining " + spec +
-                  " Export it with module.exports. Output only the code, no explanation.", 800))
+        t.append(
+            (
+                tid,
+                "JS",
+                "js",
+                "Write JavaScript defining "
+                + spec
+                + " Export it with module.exports. Output only the code, no explanation.",
+                800,
+            )
+        )
     for tid, spec, _tests, _r in JSTS.TS:
-        t.append((tid, "TS", "ts", "Write TypeScript that " + spec +
-                  " It must typecheck under --strict. Output only the code, no explanation.", 800))
+        t.append(
+            (
+                tid,
+                "TS",
+                "ts",
+                "Write TypeScript that "
+                + spec
+                + " It must typecheck under --strict. Output only the code, no explanation.",
+                800,
+            )
+        )
     for tid, _s, prompt, _c, _r in SH.BASH:
-        t.append((tid, "Bash", "bash",
-                  prompt + " Reply with a single shell command only, no explanation, no markdown.", 220))
+        t.append(
+            (
+                tid,
+                "Bash",
+                "bash",
+                prompt
+                + " Reply with a single shell command only, no explanation, no markdown.",
+                220,
+            )
+        )
     for tid, _s, prompt, _c, _r in GITM.GIT:
-        t.append((tid, "Git", "git",
-                  prompt + " Reply with a single shell command only, no explanation, no markdown.", 220))
+        t.append(
+            (
+                tid,
+                "Git",
+                "git",
+                prompt
+                + " Reply with a single shell command only, no explanation, no markdown.",
+                220,
+            )
+        )
     for tid, spec, _alias, _spec2, _r in M1.SSH_CFG:
-        t.append((tid, "SSH", "sshcfg", "Write an OpenSSH client config block for " + spec +
-                  ". Output only the config file content, no markdown.", 300))
+        t.append(
+            (
+                tid,
+                "SSH",
+                "sshcfg",
+                "Write an OpenSSH client config block for "
+                + spec
+                + ". Output only the config file content, no markdown.",
+                300,
+            )
+        )
     for tid, prompt, _pats, _r in M1.SSH_CMD:
-        t.append((tid, "SSH", "rubric", "Give the command to " + prompt +
-                  ". Reply with a single shell command only, no explanation, no markdown.", 220))
+        t.append(
+            (
+                tid,
+                "SSH",
+                "rubric",
+                "Give the command to "
+                + prompt
+                + ". Reply with a single shell command only, no explanation, no markdown.",
+                220,
+            )
+        )
     for tid, spec, _chk, _r in M1.GH_WF:
-        t.append((tid, "GitHub", "yaml", "Write a GitHub Actions workflow that " + spec +
-                  ". Output only the YAML, no markdown fences.", 700))
+        t.append(
+            (
+                tid,
+                "GitHub",
+                "yaml",
+                "Write a GitHub Actions workflow that "
+                + spec
+                + ". Output only the YAML, no markdown fences.",
+                700,
+            )
+        )
     for tid, prompt, _pats, _r in M1.GH_CLI:
-        t.append((tid, "GitHub", "rubric", "Using the GitHub CLI, " + prompt +
-                  ". Reply with a single shell command only, no explanation, no markdown.", 220))
+        t.append(
+            (
+                tid,
+                "GitHub",
+                "rubric",
+                "Using the GitHub CLI, "
+                + prompt
+                + ". Reply with a single shell command only, no explanation, no markdown.",
+                220,
+            )
+        )
     for tid, prompt, _pats, _r in DOCS_ALL:
         t.append((tid, "Docs", "rubric", prompt, 700))
     for tid, spec, _pats, _r in RN_ALL:
-        t.append((tid, "ReactNative", "rubric", "Write " + spec +
-                  " Output only the code, no explanation.", 800))
+        t.append(
+            (
+                tid,
+                "ReactNative",
+                "rubric",
+                "Write " + spec + " Output only the code, no explanation.",
+                800,
+            )
+        )
     for tid, prompt in RAG.tasks():
         t.append((tid, "RAG", "rag", prompt, 250))
     return t
-
 
 
 # --------------------------------------------------------------- reasoning
@@ -104,8 +198,11 @@ THINK_CAPABLE = ("gemma-4", "qwen3.5")
 # as non-thinking is the worst failure available here: it routes the model to the
 # prompted-CoT arm, whose baseline would then also be thinking, and every entry
 # for that model becomes a reasoning run with a baseline label.
-THINK_CAPABLE += tuple(x.strip().lower() for x in
-                       os.environ.get("B4_THINK_CAPABLE", "").split(",") if x.strip())
+THINK_CAPABLE += tuple(
+    x.strip().lower()
+    for x in os.environ.get("B4_THINK_CAPABLE", "").split(",")
+    if x.strip()
+)
 
 # How the two arms are separated. "template" is chat_template_kwargs, which is
 # what vLLM honours and what every published number used. "reasoning_effort" is
@@ -157,8 +254,7 @@ COT_SPLIT = False
 def after_mark(t):
     """Text after the last CoT marker; unchanged if the model did not use one."""
     i = t.rfind(COT_MARK)
-    return t[i + len(COT_MARK):] if i >= 0 else t
-
+    return t[i + len(COT_MARK) :] if i >= 0 else t
 
 
 def can_think(model):
@@ -205,9 +301,12 @@ def fit(prompt, mt):
         return want
     got = max(1024, room)
     if not CLAMPED:
-        print("    WARNING: window %d too small for budget %d; clamping to %d "
-              "(prompt ~%d tok). Further clamps counted, not printed."
-              % (WINDOW, want, got, len(prompt) // 3), flush=True)
+        print(
+            "    WARNING: window %d too small for budget %d; clamping to %d "
+            "(prompt ~%d tok). Further clamps counted, not printed."
+            % (WINDOW, want, got, len(prompt) // 3),
+            flush=True,
+        )
     CLAMPED.append(got)
     return got
 
@@ -266,11 +365,11 @@ RETRIES = int(os.environ.get("B4_RETRIES", "0"))
 REQ_TIMEOUT = int(os.environ.get("B4_TIMEOUT", "1800"))
 
 
-
 # Temperature to use on each retry, hottest last. Only reached after an empty
 # answer, so a task that works normally never sees these.
-ESCALATE = [float(x) for x in
-            os.environ.get("B4_ESCALATE", "0.9,1.0").split(",") if x.strip()]
+ESCALATE = [
+    float(x) for x in os.environ.get("B4_ESCALATE", "0.9,1.0").split(",") if x.strip()
+]
 
 
 # ------------------------------------------------- broken-chat-template escape
@@ -285,9 +384,9 @@ COMPLETIONS_URL = URL.replace("/chat/completions", "/completions")
 def _once_raw(model, prompt, max_tokens, temp=None):
     """One generation through /v1/completions, formatting the turn ourselves."""
     text = RAW_FMT.format(prompt=with_cot(model, prompt))
-    payload = sampling({"model": model,
-                        "prompt": text,
-                        "max_tokens": fit(text, max_tokens)}, model)
+    payload = sampling(
+        {"model": model, "prompt": text, "max_tokens": fit(text, max_tokens)}, model
+    )
     # A chat endpoint stops at the turn boundary for us; a raw completion will
     # happily begin a new user turn and answer itself, so the boundary has to be
     # supplied or the graded text ends up containing a whole invented dialogue.
@@ -297,16 +396,23 @@ def _once_raw(model, prompt, max_tokens, temp=None):
     payload.pop("reasoning_effort", None)
     if temp is not None:
         payload["temperature"] = temp
-    req = urllib.request.Request(COMPLETIONS_URL, data=json.dumps(payload).encode(),
-                                 headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(
+        COMPLETIONS_URL,
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json"},
+    )
     t0 = time.time()
     with urllib.request.urlopen(req, timeout=REQ_TIMEOUT) as r:
         d = json.loads(r.read())
     ch = d["choices"][0]
-    return {"text": ch.get("text") or "", "think": "", "think_chars": 0,
-            "tok": d.get("usage", {}).get("completion_tokens", 0),
-            "secs": round(time.time() - t0, 2),
-            "finish": ch.get("finish_reason", "")}
+    return {
+        "text": ch.get("text") or "",
+        "think": "",
+        "think_chars": 0,
+        "tok": d.get("usage", {}).get("completion_tokens", 0),
+        "secs": round(time.time() - t0, 2),
+        "finish": ch.get("finish_reason", ""),
+    }
 
 
 def _once(model, prompt, max_tokens, temp=None):
@@ -321,13 +427,17 @@ def _once(model, prompt, max_tokens, temp=None):
     msgs = [{"role": "user", "content": content}]
     if SYSTEM:
         msgs.insert(0, {"role": "system", "content": SYSTEM})
-    payload = sampling({"model": model,
-                        "messages": msgs,
-                        "max_tokens": fit(content, max_tokens)}, model)
+    payload = sampling(
+        {"model": model, "messages": msgs, "max_tokens": fit(content, max_tokens)},
+        model,
+    )
     if temp is not None:
         payload["temperature"] = temp
-    req = urllib.request.Request(URL, data=json.dumps(payload).encode(),
-                                 headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(
+        URL,
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json"},
+    )
     t0 = time.time()
     with urllib.request.urlopen(req, timeout=REQ_TIMEOUT) as r:
         d = json.loads(r.read())
@@ -342,12 +452,14 @@ def _once(model, prompt, max_tokens, temp=None):
     # left the answer sitting in `reasoning`. Keeping the tail of the trace is
     # what tells them apart -- an answer stranded in the trace ends in code, a
     # genuine non-answer ends mid-thought.
-    return {"text": msg.get("content") or "",
-            "tok": d["usage"]["completion_tokens"],
-            "think_chars": len(think),
-            "think_tail": think[-400:],
-            "finish": ch.get("finish_reason", ""),
-            "secs": round(time.time() - t0, 2)}
+    return {
+        "text": msg.get("content") or "",
+        "tok": d["usage"]["completion_tokens"],
+        "think_chars": len(think),
+        "think_tail": think[-400:],
+        "finish": ch.get("finish_reason", ""),
+        "secs": round(time.time() - t0, 2),
+    }
 
 
 def ask(model, prompt, max_tokens):
@@ -366,9 +478,16 @@ def ask(model, prompt, max_tokens):
         # the arm it is compared against is. Without this the greedy-only score
         # cannot be recovered afterwards and the confound can only be declared,
         # not measured. Costs almost nothing: a discarded attempt's text is "".
-        tries.append({"temp": temp, "text": r["text"], "finish": r["finish"],
-                      "tok": r["tok"], "think_chars": r["think_chars"],
-                      "think_tail": r.get("think_tail", "")})
+        tries.append(
+            {
+                "temp": temp,
+                "text": r["text"],
+                "finish": r["finish"],
+                "tok": r["tok"],
+                "think_chars": r["think_chars"],
+                "think_tail": r.get("think_tail", ""),
+            }
+        )
         if r["text"].strip():
             break
     r["attempts"] = len(used)
@@ -380,18 +499,29 @@ def ask(model, prompt, max_tokens):
 
 def run(model, out_path):
     tasks = all_tasks()
-    res = {"model": model, "items": {},
-           "arm": ("native" if (THINK and can_think(model))
-                   else "cot" if (COT and not can_think(model)) else "plain")}
+    res = {
+        "model": model,
+        "items": {},
+        "arm": (
+            "native"
+            if (THINK and can_think(model))
+            else "cot"
+            if (COT and not can_think(model))
+            else "plain"
+        ),
+    }
     if os.path.exists(out_path):
         try:
             prev = json.load(open(out_path))
             if prev.get("model") == model:
                 # keep only clean results; anything that errored gets another go
-                res["items"] = {k: v for k, v in prev.get("items", {}).items()
-                                if not v.get("error")}
-                print(f"  resuming: {len(res['items'])}/{len(tasks)} already done",
-                      flush=True)
+                res["items"] = {
+                    k: v for k, v in prev.get("items", {}).items() if not v.get("error")
+                }
+                print(
+                    f"  resuming: {len(res['items'])}/{len(tasks)} already done",
+                    flush=True,
+                )
         except Exception:  # noqa: BLE001
             print("  existing output unreadable, starting fresh", flush=True)
 
@@ -417,8 +547,11 @@ def run(model, out_path):
             if n % 10 == 0 or n == len(todo):
                 el = time.time() - t0
                 rate = el / n
-                print(f"  {len(res['items'])}/{len(tasks)}  {el/60:.1f}m elapsed, "
-                      f"~{rate*(len(todo)-n)/3600:.1f}h left", flush=True)
+                print(
+                    f"  {len(res['items'])}/{len(tasks)}  {el / 60:.1f}m elapsed, "
+                    f"~{rate * (len(todo) - n) / 3600:.1f}h left",
+                    flush=True,
+                )
                 with open(out_path + ".tmp", "w") as f:
                     json.dump(res, f)
                 os.replace(out_path + ".tmp", out_path)
@@ -464,10 +597,30 @@ def cmd_of(t):
 def container(image, stage, script, timeout=5400, mem="2g"):
     open(os.path.join(stage, "_run.sh"), "w").write(script)
     p = subprocess.run(
-        ["docker", "run", "--rm", "--network", "none", "--memory", mem,
-         "--pids-limit", "512", "-e", "HOME=/tmp", "-v", f"{stage}:/w", "-w", "/w",
-         image, "sh", "/w/_run.sh"],
-        capture_output=True, text=True, timeout=timeout)
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            "--memory",
+            mem,
+            "--pids-limit",
+            "512",
+            "-e",
+            "HOME=/tmp",
+            "-v",
+            f"{stage}:/w",
+            "-w",
+            "/w",
+            image,
+            "sh",
+            "/w/_run.sh",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
     return p.stdout, p.stderr
 
 
@@ -495,8 +648,11 @@ def parse_okbad(stdout, ids, label="?"):
             got[parts[1]] = parts[0] == "OK"
     silent = [i for i in ids if i not in got]
     if silent:
-        print("    WARNING: %d %s cases produced NO verdict (container died?): %s"
-              % (len(silent), label, silent[:6]), flush=True)
+        print(
+            "    WARNING: %d %s cases produced NO verdict (container died?): %s"
+            % (len(silent), label, silent[:6]),
+            flush=True,
+        )
     return {i: got.get(i, False) for i in ids}
 
 
@@ -519,13 +675,16 @@ def grade_py(items):
         cd = os.path.join(d, "cases", tid)
         os.makedirs(cd, exist_ok=True)
         open(os.path.join(cd, "m.py"), "w").write(
-            code_of(items[tid]["text"]) + "\n\n" + tests)
-    drv = ("import os, subprocess\n"
-           "for tid in sorted(os.listdir('/w/cases')):\n"
-           "    d='/w/cases/'+tid\n"
-           "    r=subprocess.run(['python','m.py'],capture_output=True,text=True,"
-           "timeout=60,cwd=d)\n"
-           "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n")
+            code_of(items[tid]["text"]) + "\n\n" + tests
+        )
+    drv = (
+        "import os, subprocess\n"
+        "for tid in sorted(os.listdir('/w/cases')):\n"
+        "    d='/w/cases/'+tid\n"
+        "    r=subprocess.run(['python','m.py'],capture_output=True,text=True,"
+        "timeout=60,cwd=d)\n"
+        "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n"
+    )
     open(os.path.join(d, "drv.py"), "w").write(drv)
     out, _e = container("bench-py:1", d, "python /w/drv.py\n")
     return parse_okbad(out, ids, "python")
@@ -537,9 +696,11 @@ def grade_django(items):
     open(os.path.join(d, "bench_app", "__init__.py"), "w").close()
     open(os.path.join(d, "bench_app", "models.py"), "w").write(DJ.MODELS)
     open(os.path.join(d, "seed.py"), "w").write(DJ.SEED)
-    h = (DJ.HARNESS.replace('open("/w/sol.py")', 'open(os.environ["CASE"]+"/sol.py")')
-                   .replace('open("/w/test.py")', 'open(os.environ["CASE"]+"/test.py")')
-                   .replace("import django, datetime", "import django, datetime, os"))
+    h = (
+        DJ.HARNESS.replace('open("/w/sol.py")', 'open(os.environ["CASE"]+"/sol.py")')
+        .replace('open("/w/test.py")', 'open(os.environ["CASE"]+"/test.py")')
+        .replace("import django, datetime", "import django, datetime, os")
+    )
     open(os.path.join(d, "h.py"), "w").write(h)
     ids = []
     for tid, _spec, tests, _r in DJ.T:
@@ -548,12 +709,14 @@ def grade_django(items):
         os.makedirs(cd, exist_ok=True)
         open(os.path.join(cd, "sol.py"), "w").write(code_of(items[tid]["text"]))
         open(os.path.join(cd, "test.py"), "w").write(tests)
-    drv = ("import os, subprocess\n"
-           "for tid in sorted(os.listdir('/w/cases')):\n"
-           "    e=dict(os.environ); e['CASE']='/w/cases/'+tid\n"
-           "    r=subprocess.run(['python','/w/h.py'],capture_output=True,text=True,"
-           "timeout=90,env=e,cwd='/w')\n"
-           "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n")
+    drv = (
+        "import os, subprocess\n"
+        "for tid in sorted(os.listdir('/w/cases')):\n"
+        "    e=dict(os.environ); e['CASE']='/w/cases/'+tid\n"
+        "    r=subprocess.run(['python','/w/h.py'],capture_output=True,text=True,"
+        "timeout=90,env=e,cwd='/w')\n"
+        "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n"
+    )
     open(os.path.join(d, "drv.py"), "w").write(drv)
     out, _e = container("bench-py:1", d, "cd /w && python /w/drv.py\n")
     return parse_okbad(out, ids, "django")
@@ -571,11 +734,15 @@ def grade_sql(items):
                 rows = con.execute(sql).fetchall()
 
                 def norm(rs):
-                    return [tuple(round(v, 2) if isinstance(v, float) else v for v in r)
-                            for r in rs]
+                    return [
+                        tuple(round(v, 2) if isinstance(v, float) else v for v in r)
+                        for r in rs
+                    ]
+
                 g, w = norm(rows), norm(expected)
-                ok = g == w or (len(g) == len(w) and
-                                all(a[:len(b)] == b for a, b in zip(g, w)))
+                ok = g == w or (
+                    len(g) == len(w) and all(a[: len(b)] == b for a, b in zip(g, w))
+                )
             except Exception:  # noqa: BLE001
                 ok = False
             finally:
@@ -593,13 +760,17 @@ def grade_js(items):
         os.makedirs(cd, exist_ok=True)
         # `module.exports = fn` and `module.exports = {fn}` are both valid answers;
         # normalise the former so the tests' destructuring works either way.
-        norm = ("\n;(function(){var m=module.exports;"
-                "if(typeof m==='function'&&m.name){var o={};o[m.name]=m;module.exports=o;}})();\n")
+        norm = (
+            "\n;(function(){var m=module.exports;"
+            "if(typeof m==='function'&&m.name){var o={};o[m.name]=m;module.exports=o;}})();\n"
+        )
         open(os.path.join(cd, "sol.js"), "w").write(code_of(items[tid]["text"]) + norm)
         open(os.path.join(cd, "t.js"), "w").write(tests)
-    script = ("for id in $(ls /w/cases); do\n"
-              "  if (cd /w/cases/$id && timeout 30 node t.js >/dev/null 2>&1); "
-              "then echo \"OK $id\"; else echo \"BAD $id\"; fi\ndone\n")
+    script = (
+        "for id in $(ls /w/cases); do\n"
+        "  if (cd /w/cases/$id && timeout 30 node t.js >/dev/null 2>&1); "
+        'then echo "OK $id"; else echo "BAD $id"; fi\ndone\n'
+    )
     out, _e = container("bench-node:1", d, script)
     return parse_okbad(out, ids, "js")
 
@@ -613,18 +784,23 @@ def grade_ts(items):
         os.makedirs(cd, exist_ok=True)
         open(os.path.join(cd, "sol.ts"), "w").write(code_of(items[tid]["text"]))
         open(os.path.join(cd, "t.ts"), "w").write(tests)
-    script = ("for id in $(ls /w/cases); do\n"
-              "  if (cd /w/cases/$id && timeout 90 tsc --strict --module commonjs "
-              "--target es2020 --types node "
-              "--typeRoots /usr/local/lib/node_modules/@types --outDir out sol.ts t.ts "
-              ">/dev/null 2>&1 && timeout 30 node out/t.js >/dev/null 2>&1); "
-              "then echo \"OK $id\"; else echo \"BAD $id\"; fi\ndone\n")
+    script = (
+        "for id in $(ls /w/cases); do\n"
+        "  if (cd /w/cases/$id && timeout 90 tsc --strict --module commonjs "
+        "--target es2020 --types node "
+        "--typeRoots /usr/local/lib/node_modules/@types --outDir out sol.ts t.ts "
+        ">/dev/null 2>&1 && timeout 30 node out/t.js >/dev/null 2>&1); "
+        'then echo "OK $id"; else echo "BAD $id"; fi\ndone\n'
+    )
     out, err = container("bench-node:1", d, script, timeout=7200, mem="6g")
     got = parse_okbad(out, ids, "ts")
     missing = [i for i in ids if (" " + i) not in out]
     if missing:
-        print("    WARNING: %d ts cases produced NO verdict (container died?): %s"
-              % (len(missing), missing[:5]), flush=True)
+        print(
+            "    WARNING: %d ts cases produced NO verdict (container died?): %s"
+            % (len(missing), missing[:5]),
+            flush=True,
+        )
         print("    stderr tail: %r" % (err[-300:],), flush=True)
     return got
 
@@ -635,18 +811,22 @@ def grade_shell(items, rows, name):
     for tid, setup, _p, chk, _r in rows:
         ids.append(tid)
         open(os.path.join(d, f"{tid}.setup"), "w").write(setup + "\n")
-        open(os.path.join(d, f"{tid}.cmd"), "w").write(cmd_of(items[tid]["text"]) + "\n")
+        open(os.path.join(d, f"{tid}.cmd"), "w").write(
+            cmd_of(items[tid]["text"]) + "\n"
+        )
         open(os.path.join(d, f"{tid}.chk"), "w").write(chk + "\n")
     open(os.path.join(d, "ids"), "w").write("\n".join(ids) + "\n")
-    script = ("mkdir -p /tmp/outs\n"
-              "for id in $(cat /w/ids); do\n"
-              "  rm -rf /tmp/b/$id; mkdir -p /tmp/b/$id; cd /tmp/b/$id\n"
-              "  sh /w/$id.setup >/dev/null 2>&1\n"
-              "  OUT=/tmp/outs/$id; export OUT\n"
-              "  timeout 30 sh /w/$id.cmd > \"$OUT\" 2>&1\n"
-              "  cd /tmp/b/$id\n"
-              "  if OUT=/tmp/outs/$id sh /w/$id.chk >/dev/null 2>&1; "
-              "then echo \"OK $id\"; else echo \"BAD $id\"; fi\ndone\n")
+    script = (
+        "mkdir -p /tmp/outs\n"
+        "for id in $(cat /w/ids); do\n"
+        "  rm -rf /tmp/b/$id; mkdir -p /tmp/b/$id; cd /tmp/b/$id\n"
+        "  sh /w/$id.setup >/dev/null 2>&1\n"
+        "  OUT=/tmp/outs/$id; export OUT\n"
+        '  timeout 30 sh /w/$id.cmd > "$OUT" 2>&1\n'
+        "  cd /tmp/b/$id\n"
+        "  if OUT=/tmp/outs/$id sh /w/$id.chk >/dev/null 2>&1; "
+        'then echo "OK $id"; else echo "BAD $id"; fi\ndone\n'
+    )
     out, _e = container("bench-sh:1", d, script)
     return parse_okbad(out, ids, name)
 
@@ -660,11 +840,13 @@ def grade_sshcfg(items):
         open(os.path.join(d, f"{tid}.cfg"), "w").write(code_of(items[tid]["text"]))
         open(os.path.join(d, f"{tid}.alias"), "w").write(alias + "\n")
     open(os.path.join(d, "ids"), "w").write("\n".join(ids) + "\n")
-    script = ("for id in $(cat /w/ids); do\n"
-              "  cp /w/$id.cfg /tmp/c && chmod 600 /tmp/c\n"
-              "  echo \"### $id\"\n"
-              "  ssh -G -F /tmp/c $(cat /w/$id.alias) 2>/dev/null | tr 'A-Z' 'a-z'\n"
-              "done\n")
+    script = (
+        "for id in $(cat /w/ids); do\n"
+        "  cp /w/$id.cfg /tmp/c && chmod 600 /tmp/c\n"
+        '  echo "### $id"\n'
+        "  ssh -G -F /tmp/c $(cat /w/$id.alias) 2>/dev/null | tr 'A-Z' 'a-z'\n"
+        "done\n"
+    )
     out, _e = container("bench-sh:1", d, script)
     blocks, cur = {}, None
     for ln in out.splitlines():
@@ -676,8 +858,12 @@ def grade_sshcfg(items):
             if len(p) == 2:
                 blocks[cur][p[0]] = p[1]
     # ssh -G normalises some booleans: `no` is reported as `false`, `yes` as `true`
-    equiv = {"no": {"no", "false"}, "yes": {"yes", "true"},
-             "false": {"no", "false"}, "true": {"yes", "true"}}
+    equiv = {
+        "no": {"no", "false"},
+        "yes": {"yes", "true"},
+        "false": {"no", "false"},
+        "true": {"yes", "true"},
+    }
 
     def matches(got_v, want_v):
         want_v = want_v.lower()
@@ -686,32 +872,33 @@ def grade_sshcfg(items):
     res = {}
     for tid in ids:
         got = blocks.get(tid, {})
-        res[tid] = bool(got) and all(matches(got.get(k, ""), v)
-                                     for k, v in specs[tid].items())
+        res[tid] = bool(got) and all(
+            matches(got.get(k, ""), v) for k, v in specs[tid].items()
+        )
     return res
 
 
 YAML_CHECKS = {
- "ci": "assert 'push' in s and 'pull_request' in s and 'main' in s\n"
-       "assert 'actions/checkout' in st and 'setup-python' in st and '3.12' in st\n"
-       "assert 'requirements.txt' in st and 'pytest' in st",
- "matrix": "m=json.dumps(j.get('strategy',{}).get('matrix',{}))\n"
-           "assert all(v in m for v in ('18','20','22'))\n"
-           "assert 'ubuntu-latest' in json.dumps(j.get('runs-on'))\n"
-           "assert 'actions/checkout' in st and 'npm test' in st",
- "cron": "assert 'schedule' in s and 'cron' in s and '4' in s\n"
-         "assert 'actions/checkout' in st and 'nightly.sh' in st",
- "needs": "assert 'push' in s and 'main' in s\n"
-          "assert any('needs' in jj for jj in d['jobs'].values())\n"
-          "assert 'build' in json.dumps(d['jobs'])",
- "dispatch": "assert 'workflow_dispatch' in s and 'environment' in s\n"
-             "assert 'environment' in st",
- "secret": "assert 'pull_request' in s\nassert 'API_TOKEN' in st and 'secrets' in st",
- "cache": "assert 'actions/cache' in st and '.npm' in st",
- "artifact": "assert 'upload-artifact' in st and 'build-output' in st and 'dist' in st",
- "timeout": "assert 'timeout-minutes' in json.dumps(j) and '15' in json.dumps(j)\n"
-            "assert 'continue-on-error' in st",
- "ifcond": "assert 'if' in json.dumps(j) and 'refs/heads/main' in json.dumps(j)",
+    "ci": "assert 'push' in s and 'pull_request' in s and 'main' in s\n"
+    "assert 'actions/checkout' in st and 'setup-python' in st and '3.12' in st\n"
+    "assert 'requirements.txt' in st and 'pytest' in st",
+    "matrix": "m=json.dumps(j.get('strategy',{}).get('matrix',{}))\n"
+    "assert all(v in m for v in ('18','20','22'))\n"
+    "assert 'ubuntu-latest' in json.dumps(j.get('runs-on'))\n"
+    "assert 'actions/checkout' in st and 'npm test' in st",
+    "cron": "assert 'schedule' in s and 'cron' in s and '4' in s\n"
+    "assert 'actions/checkout' in st and 'nightly.sh' in st",
+    "needs": "assert 'push' in s and 'main' in s\n"
+    "assert any('needs' in jj for jj in d['jobs'].values())\n"
+    "assert 'build' in json.dumps(d['jobs'])",
+    "dispatch": "assert 'workflow_dispatch' in s and 'environment' in s\n"
+    "assert 'environment' in st",
+    "secret": "assert 'pull_request' in s\nassert 'API_TOKEN' in st and 'secrets' in st",
+    "cache": "assert 'actions/cache' in st and '.npm' in st",
+    "artifact": "assert 'upload-artifact' in st and 'build-output' in st and 'dist' in st",
+    "timeout": "assert 'timeout-minutes' in json.dumps(j) and '15' in json.dumps(j)\n"
+    "assert 'continue-on-error' in st",
+    "ifcond": "assert 'if' in json.dumps(j) and 'refs/heads/main' in json.dumps(j)",
 }
 
 
@@ -723,19 +910,23 @@ def grade_yaml(items):
         cd = os.path.join(d, "cases", tid)
         os.makedirs(cd, exist_ok=True)
         open(os.path.join(cd, "w.yml"), "w").write(code_of(items[tid]["text"]))
-        body = ("import yaml, json\n"
-                "d=yaml.safe_load(open('w.yml'))\n"
-                "on=d.get('on', d.get(True))\n"
-                "s=json.dumps(on)\n"
-                "j=list(d['jobs'].values())[0]\n"
-                "st=json.dumps(d['jobs'])\n" + YAML_CHECKS[chk] + "\nprint('ok')\n")
+        body = (
+            "import yaml, json\n"
+            "d=yaml.safe_load(open('w.yml'))\n"
+            "on=d.get('on', d.get(True))\n"
+            "s=json.dumps(on)\n"
+            "j=list(d['jobs'].values())[0]\n"
+            "st=json.dumps(d['jobs'])\n" + YAML_CHECKS[chk] + "\nprint('ok')\n"
+        )
         open(os.path.join(cd, "chk.py"), "w").write(body)
-    drv = ("import os, subprocess\n"
-           "for tid in sorted(os.listdir('/w/cases')):\n"
-           "    d='/w/cases/'+tid\n"
-           "    r=subprocess.run(['python','chk.py'],capture_output=True,text=True,"
-           "timeout=30,cwd=d)\n"
-           "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n")
+    drv = (
+        "import os, subprocess\n"
+        "for tid in sorted(os.listdir('/w/cases')):\n"
+        "    d='/w/cases/'+tid\n"
+        "    r=subprocess.run(['python','chk.py'],capture_output=True,text=True,"
+        "timeout=30,cwd=d)\n"
+        "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n"
+    )
     open(os.path.join(d, "drv.py"), "w").write(drv)
     out, _e = container("bench-py:1", d, "python /w/drv.py\n")
     return parse_okbad(out, ids, "yaml")
@@ -771,9 +962,14 @@ def grade(path):
     data = json.load(open(path))
     COT_SPLIT = data.get("arm") == "cot"
     if COT_SPLIT:
-        used = sum(1 for v in data["items"].values() if COT_MARK in (v.get("text") or ""))
-        print("  CoT arm: %d/%d answers used the %s marker"
-              % (used, len(data["items"]), COT_MARK), flush=True)
+        used = sum(
+            1 for v in data["items"].values() if COT_MARK in (v.get("text") or "")
+        )
+        print(
+            "  CoT arm: %d/%d answers used the %s marker"
+            % (used, len(data["items"]), COT_MARK),
+            flush=True,
+        )
     items = data["items"]
     # A grader that dies on the first absent id cannot grade a partial run, and
     # dies at the worst possible moment on a complete one. Stub the gaps and say
@@ -782,31 +978,44 @@ def grade(path):
     want = [t[0] for t in all_tasks()]
     missing = [t for t in want if t not in have]
     if missing:
-        print("  NOTE: %d/%d tasks absent from %s -- scored 0, not graded: %s"
-              % (len(missing), len(want), os.path.basename(path),
-                 missing[:6] + (["..."] if len(missing) > 6 else [])), flush=True)
+        print(
+            "  NOTE: %d/%d tasks absent from %s -- scored 0, not graded: %s"
+            % (
+                len(missing),
+                len(want),
+                os.path.basename(path),
+                missing[:6] + (["..."] if len(missing) > 6 else []),
+            ),
+            flush=True,
+        )
         for tid in missing:
             items[tid] = {"text": "", "tok": 0, "secs": 0, "absent": True}
     ok = {}
-    for name, fn in (("python", lambda: grade_py(items)),
-                     ("django", lambda: grade_django(items)),
-                     ("sql", lambda: grade_sql(items)),
-                     ("js", lambda: grade_js(items)),
-                     ("ts", lambda: grade_ts(items)),
-                     ("bash", lambda: grade_shell(items, SH.BASH, "bash")),
-                     ("git", lambda: grade_shell(items, GITM.GIT, "git")),
-                     ("sshcfg", lambda: grade_sshcfg(items)),
-                     ("yaml", lambda: grade_yaml(items)),
-                     ("rubric", lambda: grade_rubric(items)),
-                     ("rag", lambda: grade_rag(items))):
+    for name, fn in (
+        ("python", lambda: grade_py(items)),
+        ("django", lambda: grade_django(items)),
+        ("sql", lambda: grade_sql(items)),
+        ("js", lambda: grade_js(items)),
+        ("ts", lambda: grade_ts(items)),
+        ("bash", lambda: grade_shell(items, SH.BASH, "bash")),
+        ("git", lambda: grade_shell(items, GITM.GIT, "git")),
+        ("sshcfg", lambda: grade_sshcfg(items)),
+        ("yaml", lambda: grade_yaml(items)),
+        ("rubric", lambda: grade_rubric(items)),
+        ("rag", lambda: grade_rag(items)),
+    ):
         print(f"  grading {name} ...", flush=True)
         ok.update(fn())
 
     out = {"model": data["model"], "results": {}}
     for tid, cat, _k, _p, _m in all_tasks():
         it = items.get(tid, {})
-        out["results"][tid] = {"ok": bool(ok.get(tid, False)), "cat": cat,
-                               "secs": it.get("secs", 0), "tok": it.get("tok", 0)}
+        out["results"][tid] = {
+            "ok": bool(ok.get(tid, False)),
+            "cat": cat,
+            "secs": it.get("secs", 0),
+            "tok": it.get("tok", 0),
+        }
         if it.get("absent"):
             out["results"][tid]["absent"] = True
     gp = path.replace(".json", ".graded.json")
@@ -824,7 +1033,7 @@ def grade(path):
     tok = sum(r["tok"] for r in out["results"].values())
     sec = sum(r["secs"] for r in out["results"].values())
     print(f"  {'TOTAL':<13} {tot[0]:>3}/{tot[1]}")
-    print(f"  decode: {tok} tok / {sec:.0f}s = {tok/max(sec,1):.1f} tok/s")
+    print(f"  decode: {tok} tok / {sec:.0f}s = {tok / max(sec, 1):.1f} tok/s")
     print(f"graded -> {gp}")
 
 
@@ -833,6 +1042,7 @@ if __name__ == "__main__":
     if a == "count":
         t = all_tasks()
         from collections import Counter
+
         print(f"total {len(t)}")
         for c, n in sorted(Counter(x[1] for x in t).items()):
             print(f"  {c:<13} {n}")

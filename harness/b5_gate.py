@@ -14,6 +14,7 @@ The null arm is the other half. A grader that scores empty strings above zero is
 rewarding something other than the answer, and every number it produces is
 inflated by that amount.
 """
+
 import json
 import os
 import sys
@@ -21,11 +22,11 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-import b5             # noqa: E402
+import b5  # noqa: E402
 import b5_jsts as JSTS  # noqa: E402
 import b5_python as PY  # noqa: E402
-import b5_shell as SH   # noqa: E402
-import b5_sql as SQL    # noqa: E402
+import b5_shell as SH  # noqa: E402
+import b5_sql as SQL  # noqa: E402
 
 
 def refs():
@@ -49,18 +50,21 @@ def main(mode):
     r = refs()
     items = {}
     for tid, _cat, _kind, _p, _mt in b5.all_tasks():
-        items[tid] = {"text": (r[tid] if mode == "ref" else ""),
-                      "tok": 0, "secs": 0}
+        items[tid] = {"text": (r[tid] if mode == "ref" else ""), "tok": 0, "secs": 0}
     path = os.path.join(b5.TMP, "gate_%s.json" % mode)
     os.makedirs(b5.TMP, exist_ok=True)
-    json.dump({"model": "oracle/" + mode, "arm": "plain", "items": items}, open(path, "w"))
+    json.dump(
+        {"model": "oracle/" + mode, "arm": "plain", "items": items}, open(path, "w")
+    )
     b5.grade(path)
     got = json.load(open(path.replace(".json", ".graded.json")))
     score = sum(1 for v in got["results"].values() if v["ok"])
     n = len(got["results"])
     want = n if mode == "ref" else 0
-    print("\nGATE %s: %d/%d, expected %d -- %s"
-          % (mode, score, n, want, "PASS" if score == want else "FAIL"))
+    print(
+        "\nGATE %s: %d/%d, expected %d -- %s"
+        % (mode, score, n, want, "PASS" if score == want else "FAIL")
+    )
     if score != want:
         bad = [k for k, v in got["results"].items() if v["ok"] != (mode == "ref")]
         print("  offending: %s" % bad)

@@ -26,17 +26,18 @@ Two problems when the sweep runs against LM Studio.
 
     patch_hardtemp_mac.py [target_dir]      # default /root/bench2
 """
+
 import os
 import sys
 
 HERE = sys.argv[1] if len(sys.argv) > 1 else "/root/bench2"
 p = os.path.join(HERE, "hardtemp.py")
 
-OLD_CFG = '''CONFIGS = [
+OLD_CFG = """CONFIGS = [
     ("t0.6/k20", {"temperature": 0.6, "top_p": 0.95, "top_k": 20}),
     ("t0.8/k20", {"temperature": 0.8, "top_p": 0.95, "top_k": 20}),
     ("t1.0/k64", {"temperature": 1.0, "top_p": 0.95, "top_k": 64}),
-]'''
+]"""
 
 NEW_CFG = '''CONFIGS = [
     ("t0.6/k20", {"temperature": 0.6, "top_p": 0.95, "top_k": 20}),
@@ -66,10 +67,10 @@ def _parse_configs(spec):
 if os.environ.get("B4_HARD_CONFIGS"):
     CONFIGS = _parse_configs(os.environ["B4_HARD_CONFIGS"])'''
 
-OLD_PAY = '''    payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}],
-               "max_tokens": BUDGET, "chat_template_kwargs": {"enable_thinking": True}}'''
+OLD_PAY = """    payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}],
+               "max_tokens": BUDGET, "chat_template_kwargs": {"enable_thinking": True}}"""
 
-NEW_PAY = '''    payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}],
+NEW_PAY = """    payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}],
                "max_tokens": BUDGET}
     # How thinking is requested is server-specific. vLLM honours the template
     # kwarg; LM Studio's MLX engine drops it silently and those models think by
@@ -77,7 +78,7 @@ NEW_PAY = '''    payload = {"model": MODEL, "messages": [{"role": "user", "conte
     # Sending the kwarg anyway would still have measured thinking mode, but for
     # the wrong reason -- see patch_lmstudio.py.
     if os.environ.get("B4_OFF_MECH") != "reasoning_effort":
-        payload["chat_template_kwargs"] = {"enable_thinking": True}'''
+        payload["chat_template_kwargs"] = {"enable_thinking": True}"""
 
 s = open(p).read()
 if "B4_HARD_CONFIGS" in s:

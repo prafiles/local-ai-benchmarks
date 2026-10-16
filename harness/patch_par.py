@@ -22,6 +22,7 @@ concurrency makes the run non-reproducible at the token level. It already was --
 these configs sample at temperature > 0 because greedy decoding does not
 terminate. Nothing about a fixed seed survives that either way.
 """
+
 import re
 
 p = "/root/bench2/b3.py"
@@ -31,16 +32,16 @@ if "PROFILES" in s:
     print("already patched")
     raise SystemExit(0)
 
-old_sampling = '''def sampling(payload, model):
+old_sampling = """def sampling(payload, model):
     payload["temperature"] = TEMP
     if TEMP > 0:
         payload["top_p"] = TOPP
     if can_think(model):
         # explicit either way: the flag is what separates the two arms
         payload["chat_template_kwargs"] = {"enable_thinking": bool(THINK)}
-    return payload'''
+    return payload"""
 
-new_sampling = '''# Measured per model by tune.py, not copied off a model card and hoped for.
+new_sampling = """# Measured per model by tune.py, not copied off a model card and hoped for.
 # The entry that matters is the one for thinking mode: greedy decoding sends both
 # reasoning models into a loop that eats the whole budget and returns no answer.
 PROFILES = json.loads(os.environ.get("B4_PROFILES", "{}"))
@@ -63,15 +64,19 @@ def sampling(payload, model):
     if can_think(model):
         # explicit either way: the flag is what separates the two arms
         payload["chat_template_kwargs"] = {"enable_thinking": bool(THINK)}
-    return payload'''
+    return payload"""
 
 assert old_sampling in s, "sampling() did not match"
 s = s.replace(old_sampling, new_sampling, 1)
 
 # ---------------------------------------------------------------- runner
-old_run = s[s.index("def run(model, out_path):"):s.index("# ------------------------------------------------------------------ helpers")]
+old_run = s[
+    s.index("def run(model, out_path):") : s.index(
+        "# ------------------------------------------------------------------ helpers"
+    )
+]
 
-new_run = '''def run(model, out_path):
+new_run = """def run(model, out_path):
     tasks = all_tasks()
     res = {"model": model, "items": {}}
     if os.path.exists(out_path):
@@ -124,14 +129,17 @@ new_run = '''def run(model, out_path):
     print(f"saved -> {out_path}")
 
 
-'''
+"""
 
 s = s.replace(old_run, new_run, 1)
 
 # imports
-s = s.replace("import json\nimport os\n",
-              "import concurrent.futures\nimport json\nimport os\n", 1)
-s = s.replace("import sys\nimport time\n", "import sys\nimport threading\nimport time\n", 1)
+s = s.replace(
+    "import json\nimport os\n", "import concurrent.futures\nimport json\nimport os\n", 1
+)
+s = s.replace(
+    "import sys\nimport time\n", "import sys\nimport threading\nimport time\n", 1
+)
 assert "import threading" in s and "import concurrent.futures" in s
 
 open(p, "w").write(s)

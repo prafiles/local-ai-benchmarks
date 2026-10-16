@@ -16,6 +16,7 @@ a NEW tier and are meaningless once it saturates:
 
     aggb5.py [out.json]
 """
+
 import json
 import os
 import sys
@@ -35,8 +36,12 @@ MODELS = [
     # Prompted through /v1/completions, not the chat template -- see
     # patch_rawchat.py. Its answers are coherent prose and syntactically
     # plausible code, so this is a capability floor and not a template artefact.
-    ("dsvl2", "DeepSeek VL2", "27B MoE / 4B active, vision-language",
-     "raw /v1/completions, broken chat template"),
+    (
+        "dsvl2",
+        "DeepSeek VL2",
+        "27B MoE / 4B active, vision-language",
+        "raw /v1/completions, broken chat template",
+    ),
 ]
 
 
@@ -46,16 +51,28 @@ def load(p):
 
 
 def scores(g):
-    return ({k: v["ok"] for k, v in g["results"].items()},
-            {k: v["cat"] for k, v in g["results"].items()})
+    return (
+        {k: v["ok"] for k, v in g["results"].items()},
+        {k: v["cat"] for k, v in g["results"].items()},
+    )
 
 
-out = {"hard": {}, "meta": {"host": "Apple M2 Max 64GB", "server": "LM Studio / MLX",
-                            "workers": 1, "off_mechanism": "reasoning_effort=none",
-                            "tasks": N_TASKS, "grading": "execution only"}}
+out = {
+    "hard": {},
+    "meta": {
+        "host": "Apple M2 Max 64GB",
+        "server": "LM Studio / MLX",
+        "workers": 1,
+        "off_mechanism": "reasoning_effort=none",
+        "tasks": N_TASKS,
+        "grading": "execution only",
+    },
+}
 
 print("=" * 78)
-print("HARD TIER -- %d execution-graded tasks, LM Studio / MLX on Apple M2 Max" % N_TASKS)
+print(
+    "HARD TIER -- %d execution-graded tasks, LM Studio / MLX on Apple M2 Max" % N_TASKS
+)
 print("=" * 78)
 
 for key, label, params, note in MODELS:
@@ -63,6 +80,7 @@ for key, label, params, note in MODELS:
     on_g = load("ht_%s.graded.json" % key)
     on_raw = load("ht_%s.json" % key)
     off_raw = load("hb_%s.json" % key)
+
     # An aborted arm leaves a short graded file behind, and a short file scores
     # like a catastrophe: GLM's 5-task partial graded 2/104, which read as a
     # collapse under reasoning rather than a run that stopped early. A score is
@@ -75,8 +93,10 @@ for key, label, params, note in MODELS:
         # is the count actually executed.
         n = g.get("ran", len(g.get("results", {})))
         if n < N_TASKS:
-            print("  %-24s %s arm PARTIAL (%d/%d tasks) -- not scored"
-                  % (label, what, n, N_TASKS))
+            print(
+                "  %-24s %s arm PARTIAL (%d/%d tasks) -- not scored"
+                % (label, what, n, N_TASKS)
+            )
             return False
         return True
 
@@ -108,8 +128,11 @@ for key, label, params, note in MODELS:
         # because only the second is a single-variable comparison.
         d["resampled"] = sum(1 for v in items.values() if v.get("attempts", 1) > 1)
         if items:
-            d["on_greedy"] = sum(1 for i, ok in ons.items()
-                                 if ok and items.get(i, {}).get("attempts", 1) == 1)
+            d["on_greedy"] = sum(
+                1
+                for i, ok in ons.items()
+                if ok and items.get(i, {}).get("attempts", 1) == 1
+            )
             d["greedy_delta"] = d["on_greedy"] - d["off"]
 
     d["percat"] = {}
@@ -127,43 +150,74 @@ for key, label, params, note in MODELS:
     d["off_capped"] = sum(1 for v in oi.values() if v.get("finish") == "length")
 
     out["hard"][key] = d
-    print("\n  %-24s %-22s off %d/%d%s"
-          % (label, params, d["off"], N_TASKS,
-             "  ->  on %d  (%+d)" % (d["on"], d["delta"]) if d["on"] is not None else
-             "   (reasoning arm not run)"))
-    print("     per category: " + "  ".join(
-        "%s %d/%d" % (c, d["percat"][c]["off"], d["percat"][c]["n"]) for c in CATS))
-    print("     off arm: %s tokens, %d answers hit the output cap"
-          % (format(d["off_tokens"], ","), d["off_capped"]))
+    print(
+        "\n  %-24s %-22s off %d/%d%s"
+        % (
+            label,
+            params,
+            d["off"],
+            N_TASKS,
+            "  ->  on %d  (%+d)" % (d["on"], d["delta"])
+            if d["on"] is not None
+            else "   (reasoning arm not run)",
+        )
+    )
+    print(
+        "     per category: "
+        + "  ".join(
+            "%s %d/%d" % (c, d["percat"][c]["off"], d["percat"][c]["n"]) for c in CATS
+        )
+    )
+    print(
+        "     off arm: %s tokens, %d answers hit the output cap"
+        % (format(d["off_tokens"], ","), d["off_capped"])
+    )
     if d["on"] is not None:
-        print("     on arm: flips +%d / -%d | %s tokens | think:answer %.1fx | empty %d"
-              % (d["gained"], d["lost"], format(d["tokens"], ","),
-                 d["think_answer"], d["empty"]))
+        print(
+            "     on arm: flips +%d / -%d | %s tokens | think:answer %.1fx | empty %d"
+            % (
+                d["gained"],
+                d["lost"],
+                format(d["tokens"], ","),
+                d["think_answer"],
+                d["empty"],
+            )
+        )
         # The other way an arm stops being single-variable: its profile is not
         # the greedy the off arm always uses. Every off arm runs B4_PROFILES='{}'
         # -> temperature 0, so a thinking arm with any other sampling differs
         # from it in two ways at once. Qwen3.6-MoE (t1.0/p0.95/k64) and GLM
         # (t1.0/p0.95) both do, and neither was visibly flagged before.
-        chosen = os.path.join(os.environ.get("B4_CHOSEN_DIR", ""),
-                              "chosen_%s.json" % key)
+        chosen = os.path.join(
+            os.environ.get("B4_CHOSEN_DIR", ""), "chosen_%s.json" % key
+        )
         try:
             samp = json.load(open(chosen)).get("sampling", {})
         except Exception:  # noqa: BLE001
             samp = None
         if samp is not None and samp != {"temperature": 0.0}:
             d["on_sampling"] = samp
-            print("     CONFOUND: on arm sampled at %s, off arm at greedy -- the arms "
-                  "differ in sampling as well as reasoning." % samp)
+            print(
+                "     CONFOUND: on arm sampled at %s, off arm at greedy -- the arms "
+                "differ in sampling as well as reasoning." % samp
+            )
         if d.get("resampled"):
             # "greedy-only" is the wrong word when the profile is not greedy --
             # Qwen3.6-MoE runs t1.0/p0.95/k64, so its first-attempt score is
             # profile-only, not greedy-only. Say which one it actually is.
-            word = ("greedy-only" if samp == {"temperature": 0.0}
-                    else "profile-only")
-            print("     CONFOUND: %d/%d answers came from a HOTTER resample, not the "
-                  "profile. %s: %d/%d (%+d vs off) -- the resample-free number."
-                  % (d["resampled"], N_TASKS, word.capitalize(), d["on_greedy"],
-                     N_TASKS, d["greedy_delta"]))
+            word = "greedy-only" if samp == {"temperature": 0.0} else "profile-only"
+            print(
+                "     CONFOUND: %d/%d answers came from a HOTTER resample, not the "
+                "profile. %s: %d/%d (%+d vs off) -- the resample-free number."
+                % (
+                    d["resampled"],
+                    N_TASKS,
+                    word.capitalize(),
+                    d["on_greedy"],
+                    N_TASKS,
+                    d["greedy_delta"],
+                )
+            )
 
 ran = list(out["hard"].values())
 if ran:
@@ -178,18 +232,30 @@ if ran:
         if x.get("resampled"):
             return x.get("on_greedy", x["on"])
         return x["on"]
+
     best_key = max(ran, key=cmp_score)
     best = cmp_score(best_key)
     worst_row = min(ran, key=cmp_score)
     worst = cmp_score(worst_row)
     print("\n" + "=" * 78)
     print("  models measured: %d" % len(ran))
-    print("  leader: %s at %d/%d (%.0f%%) -- HEADROOM %d tasks%s"
-          % (best_key["label"], best, N_TASKS, 100.0 * best / N_TASKS, N_TASKS - best,
-             "  [greedy-only; raw resampled score %d]" % best_key["on"]
-             if best_key.get("resampled") and best_key["on"] != best else ""))
-    print("  SPREAD best to worst: %d tasks (%.0f%% of the suite)"
-          % (best - worst, 100.0 * (best - worst) / N_TASKS))
+    print(
+        "  leader: %s at %d/%d (%.0f%%) -- HEADROOM %d tasks%s"
+        % (
+            best_key["label"],
+            best,
+            N_TASKS,
+            100.0 * best / N_TASKS,
+            N_TASKS - best,
+            "  [greedy-only; raw resampled score %d]" % best_key["on"]
+            if best_key.get("resampled") and best_key["on"] != best
+            else "",
+        )
+    )
+    print(
+        "  SPREAD best to worst: %d tasks (%.0f%% of the suite)"
+        % (best - worst, 100.0 * (best - worst) / N_TASKS)
+    )
     print("  for comparison, the b3 tier's leader scored 579/600 = 96.5%, and its")
     print("  top three models spanned 11 tasks against a ~6-task noise floor.")
 

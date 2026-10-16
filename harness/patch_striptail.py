@@ -15,18 +15,19 @@ answer was ever produced.
 
 An unclosed <think> means everything after it is deliberation, so drop it.
 """
+
 p = "/root/bench2/b3.py"
 s = open(p).read()
 
-old = '''def strip_think(t):
-    return re.sub(r"<think>.*?</think>", "", t, flags=re.S)'''
+old = """def strip_think(t):
+    return re.sub(r"<think>.*?</think>", "", t, flags=re.S)"""
 
-new = '''def strip_think(t):
+new = """def strip_think(t):
     t = re.sub(r"<think>.*?</think>", "", t, flags=re.S)
     # An unclosed <think> means the cap landed mid-thought: everything after it is
     # deliberation, never an answer. Left in, it would be graded AS the answer, and
     # a rubric can match a model reasoning aloud in the task's own vocabulary.
-    return re.sub(r"<think>.*\\Z", "", t, flags=re.S)'''
+    return re.sub(r"<think>.*\\Z", "", t, flags=re.S)"""
 
 if "unclosed <think>" in s:
     print("already patched")

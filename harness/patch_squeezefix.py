@@ -23,6 +23,7 @@ The distinction is recorded: `no_room` marks a prompt that cannot fit the window
 at all, which is a different fact from a model answering badly, and a different
 fact again from Qwen2.5-Coder's ceiling where the server refuses outright.
 """
+
 p = "/root/bench2/b4.py"
 s = open(p).read()
 
@@ -30,7 +31,7 @@ if "SQUEEZE_MAX" in s:
     print("already patched")
     raise SystemExit(0)
 
-old = '''    cap = budget(max_tokens)
+old = """    cap = budget(max_tokens)
     squeezed = 0
     t0 = time.time()
     while True:
@@ -51,9 +52,9 @@ old = '''    cap = budget(max_tokens)
             if room <= 64 or room >= cap:
                 raise
             cap = room
-            squeezed += 1'''
+            squeezed += 1"""
 
-new = '''    cap = budget(max_tokens)
+new = """    cap = budget(max_tokens)
     squeezed = 0
     t0 = time.time()
     # A real squeeze resolves on the first retry. More than a couple of rounds
@@ -82,17 +83,20 @@ new = '''    cap = budget(max_tokens)
             squeezed += 1
     else:
         raise NoRoom("prompt does not fit the window after %d squeezes (cap %d)"
-                     % (SQUEEZE_MAX, cap))'''
+                     % (SQUEEZE_MAX, cap))"""
 
 assert old in s, "squeeze loop did not match"
 s = s.replace(old, new, 1)
 
 # a named exception so "the window could not hold this session" is distinguishable
 # in the results from an ordinary transport failure
-s = s.replace("RETRIES = int(os.environ.get(\"B4_RETRIES\", \"0\"))",
-              "class NoRoom(Exception):\n"
-              "    \"\"\"The prompt alone exceeds the context window.\"\"\"\n\n\n"
-              "RETRIES = int(os.environ.get(\"B4_RETRIES\", \"0\"))", 1)
+s = s.replace(
+    'RETRIES = int(os.environ.get("B4_RETRIES", "0"))',
+    "class NoRoom(Exception):\n"
+    '    """The prompt alone exceeds the context window."""\n\n\n'
+    'RETRIES = int(os.environ.get("B4_RETRIES", "0"))',
+    1,
+)
 
 open(p, "w").write(s)
 print("b4.py: squeeze bounded to 3 rounds; NoRoom raised when the prompt cannot fit")

@@ -13,6 +13,7 @@ meaning; only the override is new.
 
     patch_endpoint.py [target_dir]      # default /root/bench2
 """
+
 import os
 import sys
 
@@ -20,16 +21,24 @@ HERE = sys.argv[1] if len(sys.argv) > 1 else "/root/bench2"
 
 SUBS = {
     "b3.py": [
-        ('URL = "http://localhost:8000/v1/chat/completions"',
-         'URL = os.environ.get("B4_URL", "http://localhost:8000/v1/chat/completions")'),
-        ('TMP = "/root/bench2/tmp/run"',
-         'TMP = os.environ.get("B4_TMP", "/root/bench2/tmp/run")'),
+        (
+            'URL = "http://localhost:8000/v1/chat/completions"',
+            'URL = os.environ.get("B4_URL", "http://localhost:8000/v1/chat/completions")',
+        ),
+        (
+            'TMP = "/root/bench2/tmp/run"',
+            'TMP = os.environ.get("B4_TMP", "/root/bench2/tmp/run")',
+        ),
     ],
     "b4.py": [
-        ('URL = "http://localhost:8000/v1/chat/completions"',
-         'URL = os.environ.get("B4_URL", "http://localhost:8000/v1/chat/completions")'),
-        ('TMP = "/root/bench2/tmp/b4"',
-         'TMP = os.environ.get("B4_TMP", "/root/bench2/tmp/b4")'),
+        (
+            'URL = "http://localhost:8000/v1/chat/completions"',
+            'URL = os.environ.get("B4_URL", "http://localhost:8000/v1/chat/completions")',
+        ),
+        (
+            'TMP = "/root/bench2/tmp/b4"',
+            'TMP = os.environ.get("B4_TMP", "/root/bench2/tmp/b4")',
+        ),
     ],
 }
 

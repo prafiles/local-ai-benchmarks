@@ -30,6 +30,7 @@ finish_reason is mapped so b5's cap counter keeps working: anything that means
 "ran out of room" becomes "length", everything else "stop". Getting this wrong
 would silently report truncated answers as clean stops.
 """
+
 import json
 import os
 import sys
@@ -55,24 +56,35 @@ def via_openai(req):
     # temperature deliberately not forwarded -- only the default is accepted.
     if req.get("reasoning_effort"):
         body["reasoning_effort"] = req["reasoning_effort"]
-    d = post("https://api.openai.com/v1/chat/completions", body,
-             {"content-type": "application/json",
-              "authorization": "Bearer " + OPENAI_KEY})
+    d = post(
+        "https://api.openai.com/v1/chat/completions",
+        body,
+        {"content-type": "application/json", "authorization": "Bearer " + OPENAI_KEY},
+    )
     ch = d["choices"][0]
     usage = d.get("usage", {}) or {}
-    rtok = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens", 0) or 0
+    rtok = (usage.get("completion_tokens_details") or {}).get(
+        "reasoning_tokens", 0
+    ) or 0
     fin = "length" if ch.get("finish_reason") == "length" else "stop"
     return {
-        "choices": [{"message": {
-            "role": "assistant",
-            "content": ch["message"].get("content") or "",
-            # Placeholder: this API returns a reasoning token COUNT and never the
-            # text. b5 only measures len(), so a marker of the right magnitude
-            # keeps think_chars meaningful without inventing a trace.
-            "reasoning_content": ("█" * rtok) if rtok else ""},
-            "finish_reason": fin}],
-        "usage": {"completion_tokens": usage.get("completion_tokens", 0),
-                  "prompt_tokens": usage.get("prompt_tokens", 0)},
+        "choices": [
+            {
+                "message": {
+                    "role": "assistant",
+                    "content": ch["message"].get("content") or "",
+                    # Placeholder: this API returns a reasoning token COUNT and never the
+                    # text. b5 only measures len(), so a marker of the right magnitude
+                    # keeps think_chars meaningful without inventing a trace.
+                    "reasoning_content": ("█" * rtok) if rtok else "",
+                },
+                "finish_reason": fin,
+            }
+        ],
+        "usage": {
+            "completion_tokens": usage.get("completion_tokens", 0),
+            "prompt_tokens": usage.get("prompt_tokens", 0),
+        },
         "_reasoning_tokens": rtok,
     }
 
@@ -84,27 +96,47 @@ def via_anthropic(req):
             system = m["content"]
         else:
             msgs.append({"role": m["role"], "content": m["content"]})
-    body = {"model": req["model"], "messages": msgs,
-            "max_tokens": req.get("max_tokens", 8000)}
+    body = {
+        "model": req["model"],
+        "messages": msgs,
+        "max_tokens": req.get("max_tokens", 8000),
+    }
     if system:
         body["system"] = system
     eff = req.get("reasoning_effort")
     if eff and eff != "none":
         body["thinking"] = {"type": "adaptive"}
         body["output_config"] = {"effort": eff}
-    d = post("https://api.anthropic.com/v1/messages", body,
-             {"content-type": "application/json", "x-api-key": ANTHROPIC_KEY,
-              "anthropic-version": "2023-06-01"})
+    d = post(
+        "https://api.anthropic.com/v1/messages",
+        body,
+        {
+            "content-type": "application/json",
+            "x-api-key": ANTHROPIC_KEY,
+            "anthropic-version": "2023-06-01",
+        },
+    )
     text = "".join(b.get("text", "") for b in d["content"] if b["type"] == "text")
-    think = "".join(b.get("thinking", "") for b in d["content"] if b["type"] == "thinking")
+    think = "".join(
+        b.get("thinking", "") for b in d["content"] if b["type"] == "thinking"
+    )
     fin = "length" if d.get("stop_reason") == "max_tokens" else "stop"
     u = d.get("usage", {}) or {}
     return {
-        "choices": [{"message": {"role": "assistant", "content": text,
-                                 "reasoning_content": think},
-                     "finish_reason": fin}],
-        "usage": {"completion_tokens": u.get("output_tokens", 0),
-                  "prompt_tokens": u.get("input_tokens", 0)},
+        "choices": [
+            {
+                "message": {
+                    "role": "assistant",
+                    "content": text,
+                    "reasoning_content": think,
+                },
+                "finish_reason": fin,
+            }
+        ],
+        "usage": {
+            "completion_tokens": u.get("output_tokens", 0),
+            "prompt_tokens": u.get("input_tokens", 0),
+        },
     }
 
 

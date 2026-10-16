@@ -7,20 +7,21 @@ contiguous block of BADs -- indistinguishable from the model getting them wrong.
 That is the worst kind of harness bug, so it now warns when a case produces no
 verdict at all.
 """
+
 p = "/root/bench2/b3.py"
 s = open(p).read()
 
-old = '''    out, _e = container("bench-node:1", d, script, timeout=7200)
-    return parse_okbad(out, ids)'''
+old = """    out, _e = container("bench-node:1", d, script, timeout=7200)
+    return parse_okbad(out, ids)"""
 
-new = '''    out, err = container("bench-node:1", d, script, timeout=7200, mem="6g")
+new = """    out, err = container("bench-node:1", d, script, timeout=7200, mem="6g")
     got = parse_okbad(out, ids)
     missing = [i for i in ids if (" " + i) not in out]
     if missing:
         print("    WARNING: %d ts cases produced NO verdict (container died?): %s"
               % (len(missing), missing[:5]), flush=True)
         print("    stderr tail: %r" % (err[-300:],), flush=True)
-    return got'''
+    return got"""
 
 if "produced NO verdict" in s:
     print("already patched")

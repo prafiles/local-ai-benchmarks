@@ -12,6 +12,7 @@ Any probe that passes here is one where a model can score by saying nothing.
 
     nulloracle4.py [out.json]
 """
+
 import json
 import os
 import subprocess
@@ -25,8 +26,14 @@ import b4  # noqa: E402
 dst = sys.argv[1] if len(sys.argv) > 1 else "/tmp/nulloracle4.json"
 ids = [p["id"] for _cat, p in b4.probes()]
 empty = {i: {"text": "", "tok": 0, "secs": 0, "ptok": 0, "finish": "stop"} for i in ids}
-json.dump({"model": "NULL-ORACLE4(empty answers)", "deep": dict(empty),
-           "shallow": dict(empty)}, open(dst, "w"))
+json.dump(
+    {
+        "model": "NULL-ORACLE4(empty answers)",
+        "deep": dict(empty),
+        "shallow": dict(empty),
+    },
+    open(dst, "w"),
+)
 print("built %d empty answers x2 buckets -> %s" % (len(ids), dst), flush=True)
 
 subprocess.run([sys.executable, os.path.join(HERE, "b4.py"), "grade", dst], check=True)
@@ -36,7 +43,15 @@ bad = sorted(k for k, v in g.items() if v["deep"] or v["shallow"])
 print("\n===== NULL ORACLE (long context)")
 print("  probes passing on an EMPTY answer: %d/%d" % (len(bad), len(g)))
 for k in bad:
-    print("    %-10s %-12s deep=%s shallow=%s"
-          % (k, g[k]["cat"], g[k]["deep"], g[k]["shallow"]))
-print("\n  %s" % ("clean -- no probe can be passed by saying nothing" if not bad
-                  else "^ defective: check satisfied before the model acts"))
+    print(
+        "    %-10s %-12s deep=%s shallow=%s"
+        % (k, g[k]["cat"], g[k]["deep"], g[k]["shallow"])
+    )
+print(
+    "\n  %s"
+    % (
+        "clean -- no probe can be passed by saying nothing"
+        if not bad
+        else "^ defective: check satisfied before the model acts"
+    )
+)

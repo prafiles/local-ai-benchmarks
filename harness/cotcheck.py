@@ -17,6 +17,7 @@
 
     cotcheck.py <model> <baseline.json> [workers]
 """
+
 import json
 import os
 import sys
@@ -27,8 +28,7 @@ from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import b3  # noqa: E402
 
-URL = os.environ.get("B4_URL",
-                     "http://localhost:8000/v1/chat/completions")
+URL = os.environ.get("B4_URL", "http://localhost:8000/v1/chat/completions")
 MODEL = sys.argv[1]
 BASE = sys.argv[2]
 WORKERS = int(sys.argv[3]) if len(sys.argv) > 3 else 4
@@ -37,8 +37,20 @@ TASKS = {t[0]: t for t in b3.all_tasks()}
 prev = json.load(open(BASE))["items"]
 
 # mix of short-answer and long-form, all present in the baseline
-REPRO = [t for t in ["py-001", "sh-001", "git-001", "sql-001", "js-001",
-                     "rag-001", "ssh-001", "doc-001"] if t in prev]
+REPRO = [
+    t
+    for t in [
+        "py-001",
+        "sh-001",
+        "git-001",
+        "sql-001",
+        "js-001",
+        "rag-001",
+        "ssh-001",
+        "doc-001",
+    ]
+    if t in prev
+]
 HARD = ["py-001", "dj-001", "sql-001", "ts-001", "sh-001", "doc-001"]
 
 
@@ -46,17 +58,28 @@ def ask(tid, cot, budget):
     _t, _c, _k, prompt, mt = TASKS[tid]
     if cot:
         prompt = b3.COT_PREFIX + prompt
-    payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}],
-               "max_tokens": budget if cot else mt, "temperature": 0}
-    req = urllib.request.Request(URL, data=json.dumps(payload).encode(),
-                                 headers={"Content-Type": "application/json"})
+    payload = {
+        "model": MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": budget if cot else mt,
+        "temperature": 0,
+    }
+    req = urllib.request.Request(
+        URL,
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json"},
+    )
     try:
         d = json.loads(urllib.request.urlopen(req, timeout=3600).read())
     except Exception as e:  # noqa: BLE001
         return {"tid": tid, "err": type(e).__name__}
     ch, msg = d["choices"][0], d["choices"][0]["message"]
-    return {"tid": tid, "text": msg.get("content") or "",
-            "tok": d["usage"]["completion_tokens"], "finish": ch["finish_reason"]}
+    return {
+        "tid": tid,
+        "text": msg.get("content") or "",
+        "tok": d["usage"]["completion_tokens"],
+        "finish": ch["finish_reason"],
+    }
 
 
 print("### %s   workers=%d" % (MODEL, WORKERS), flush=True)
@@ -74,10 +97,19 @@ for r in rows:
     new = r["text"].strip()
     ok = old == new
     same += ok
-    print("   %-9s %s" % (r["tid"], "identical" if ok else
-                          "DIFFERS (old %d ch, new %d ch)" % (len(old), len(new))),
-          flush=True)
-print("   -> %d/%d identical in %.0fs" % (same, len(rows), time.time() - t0), flush=True)
+    print(
+        "   %-9s %s"
+        % (
+            r["tid"],
+            "identical"
+            if ok
+            else "DIFFERS (old %d ch, new %d ch)" % (len(old), len(new)),
+        ),
+        flush=True,
+    )
+print(
+    "   -> %d/%d identical in %.0fs" % (same, len(rows), time.time() - t0), flush=True
+)
 
 print("\n-- 2. does prompted CoT terminate at temperature 0? (budget 8000)", flush=True)
 t0 = time.time()
@@ -92,7 +124,13 @@ for r in rows:
     tag = "<think>" in r["text"]
     closed = "</think>" in r["text"]
     answered += bool(body)
-    print("   %-9s tok %5d  %-9s think-tag=%s closed=%s  answer %4d ch"
-          % (r["tid"], r["tok"], r["finish"], tag, closed, len(body)), flush=True)
-print("   -> %d/%d produced an answer after the trace, in %.0fs"
-      % (answered, len(rows), time.time() - t0), flush=True)
+    print(
+        "   %-9s tok %5d  %-9s think-tag=%s closed=%s  answer %4d ch"
+        % (r["tid"], r["tok"], r["finish"], tag, closed, len(body)),
+        flush=True,
+    )
+print(
+    "   -> %d/%d produced an answer after the trace, in %.0fs"
+    % (answered, len(rows), time.time() - t0),
+    flush=True,
+)

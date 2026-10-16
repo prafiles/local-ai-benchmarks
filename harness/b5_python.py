@@ -26,14 +26,14 @@ fails, which is the entire point -- on the b3 tier the same models score 95%.
 
 # (id, spec, tests, reference)
 T = [
-
-("hpy-001",
- "function `cmp_semver(a, b)` comparing two SemVer 2.0.0 version strings, returning -1, 0 or 1. "
- "Precedence is by major, minor, patch numerically; a version WITH a pre-release sorts BEFORE the "
- "same version without one; pre-release identifiers are compared dot-separated left to right, "
- "numeric identifiers compare numerically and sort before alphanumeric ones, a longer identifier "
- "list wins when all preceding identifiers are equal; build metadata after `+` is ignored entirely.",
- """
+    (
+        "hpy-001",
+        "function `cmp_semver(a, b)` comparing two SemVer 2.0.0 version strings, returning -1, 0 or 1. "
+        "Precedence is by major, minor, patch numerically; a version WITH a pre-release sorts BEFORE the "
+        "same version without one; pre-release identifiers are compared dot-separated left to right, "
+        "numeric identifiers compare numerically and sort before alphanumeric ones, a longer identifier "
+        "list wins when all preceding identifiers are equal; build metadata after `+` is ignored entirely.",
+        """
 c=cmp_semver
 assert c('1.0.0','1.0.1')==-1 and c('1.0.1','1.0.0')==1 and c('1.0.0','1.0.0')==0
 assert c('1.0.0-alpha','1.0.0')==-1, 'prerelease sorts before release'
@@ -49,7 +49,7 @@ assert c('1.0.0-rc.1','1.0.0')==-1
 assert c('2.0.0','10.0.0')==-1 and c('1.2.0','1.10.0')==-1
 assert c('1.0.0-1','1.0.0-2')==-1 and c('1.0.0-2','1.0.0-10')==-1
 """,
- """
+        """
 def _pre(p):
     out=[]
     for x in p.split('.'):
@@ -67,17 +67,18 @@ def cmp_semver(a,b):
     if pb is None: return -1
     if pa!=pb: return -1 if pa<pb else 1
     return 0
-"""),
-
-("hpy-002",
- "function `gitignore_match(pattern, path)` returning True when a .gitignore pattern matches a "
- "path. `path` is slash-separated and never starts with a slash. Rules: a pattern with no slash "
- "(other than a trailing one) matches at any depth; a pattern containing a slash anywhere except "
- "the end is anchored at the root; a leading slash anchors at the root; a trailing slash means the "
- "pattern only matches a directory, and for this function a path is a directory when it ends with "
- "a slash; `*` never matches a slash; `?` matches one non-slash character; `**/` matches zero or "
- "more leading directories; `/**` at the end matches everything inside; `[abc]` is a character class.",
- """
+""",
+    ),
+    (
+        "hpy-002",
+        "function `gitignore_match(pattern, path)` returning True when a .gitignore pattern matches a "
+        "path. `path` is slash-separated and never starts with a slash. Rules: a pattern with no slash "
+        "(other than a trailing one) matches at any depth; a pattern containing a slash anywhere except "
+        "the end is anchored at the root; a leading slash anchors at the root; a trailing slash means the "
+        "pattern only matches a directory, and for this function a path is a directory when it ends with "
+        "a slash; `*` never matches a slash; `?` matches one non-slash character; `**/` matches zero or "
+        "more leading directories; `/**` at the end matches everything inside; `[abc]` is a character class.",
+        """
 m=gitignore_match
 assert m('*.log','a.log') and m('*.log','deep/nested/a.log'), 'unanchored matches at depth'
 assert not m('*.log','a.log.txt')
@@ -92,7 +93,7 @@ assert m('?.txt','a.txt') and not m('?.txt','ab.txt') and not m('?.txt','a/txt')
 assert m('[abc].py','b.py') and not m('[abc].py','d.py')
 assert m('*.log','x/y/z/deep.log')
 """,
- """
+        """
 import re
 def _seg(p):
     out=''
@@ -124,17 +125,18 @@ def gitignore_match(pattern,path):
     if tail_all: rx+='/.+'
     rx=('' if anchored else '(?:.*/)?')+rx
     return re.fullmatch(rx,target) is not None
-"""),
-
-("hpy-003",
- "function `parse_range(header, size)` implementing the RFC 7233 Range header for `bytes`. "
- "Return a list of (start, end) inclusive byte offsets, or None if the header is unsatisfiable or "
- "malformed. `bytes=0-499` is the first 500 bytes; `bytes=500-` runs to the end; `bytes=-500` is "
- "the LAST 500 bytes; an end past the last byte is clamped; a suffix length larger than the "
- "resource yields the whole resource; multiple comma-separated ranges are all returned in the "
- "order given; a range whose start is at or past `size` is unsatisfiable; if every range in the "
- "set is unsatisfiable return None, but a set with at least one satisfiable range drops the bad ones.",
- """
+""",
+    ),
+    (
+        "hpy-003",
+        "function `parse_range(header, size)` implementing the RFC 7233 Range header for `bytes`. "
+        "Return a list of (start, end) inclusive byte offsets, or None if the header is unsatisfiable or "
+        "malformed. `bytes=0-499` is the first 500 bytes; `bytes=500-` runs to the end; `bytes=-500` is "
+        "the LAST 500 bytes; an end past the last byte is clamped; a suffix length larger than the "
+        "resource yields the whole resource; multiple comma-separated ranges are all returned in the "
+        "order given; a range whose start is at or past `size` is unsatisfiable; if every range in the "
+        "set is unsatisfiable return None, but a set with at least one satisfiable range drops the bad ones.",
+        """
 p=parse_range
 assert p('bytes=0-499',10000)==[(0,499)]
 assert p('bytes=500-',1000)==[(500,999)]
@@ -150,7 +152,7 @@ assert p('bytes=-0',1000) is None, 'zero-length suffix is unsatisfiable'
 assert p('bytes=5-3',1000) is None
 assert p('bytes=0-499, 900-',1000)==[(0,499),(900,999)]
 """,
- """
+        """
 def parse_range(header,size):
     if not isinstance(header,str) or not header.startswith('bytes='): return None
     out=[]; any_bad=False
@@ -174,13 +176,14 @@ def parse_range(header,size):
             out.append((st,en))
     if not out: return None
     return out
-"""),
-
-("hpy-004",
- "function `round_money(amount, places)` rounding a `decimal.Decimal` to `places` decimal digits "
- "using banker's rounding (round half to even), returning a Decimal quantized to exactly that many "
- "places. It must not go through float at any point.",
- """
+""",
+    ),
+    (
+        "hpy-004",
+        "function `round_money(amount, places)` rounding a `decimal.Decimal` to `places` decimal digits "
+        "using banker's rounding (round half to even), returning a Decimal quantized to exactly that many "
+        "places. It must not go through float at any point.",
+        """
 from decimal import Decimal as D
 r=round_money
 assert r(D('2.5'),0)==D('2') and r(D('3.5'),0)==D('4'), 'half to EVEN, not half up'
@@ -193,22 +196,23 @@ assert str(r(D('1.0000'),2))=='1.00'
 assert r(D('0.125'),2)==D('0.12') and r(D('0.135'),2)==D('0.14')
 assert r(D('1234567890123456789.5'),0)==D('1234567890123456790')
 """,
- """
+        """
 from decimal import Decimal, ROUND_HALF_EVEN, getcontext
 def round_money(amount,places):
     getcontext().prec=60
     q=Decimal(1).scaleb(-places)
     return amount.quantize(q,rounding=ROUND_HALF_EVEN)
-"""),
-
-("hpy-005",
- "function `unified_diff(a, b, context=3)` taking two lists of lines and returning a list of "
- "unified-diff output lines with no trailing newlines. Use a longest-common-subsequence diff. "
- "Each hunk header is `@@ -<astart>,<alen> +<bstart>,<blen> @@` with 1-based starts, body lines are "
- "prefixed with a space, `-` or `+`, hunks include up to `context` unchanged lines on each side and "
- "overlapping hunks are merged into one. Return an empty list when the inputs are identical. "
- "Emit no `---`/`+++` file header.",
- """
+""",
+    ),
+    (
+        "hpy-005",
+        "function `unified_diff(a, b, context=3)` taking two lists of lines and returning a list of "
+        "unified-diff output lines with no trailing newlines. Use a longest-common-subsequence diff. "
+        "Each hunk header is `@@ -<astart>,<alen> +<bstart>,<blen> @@` with 1-based starts, body lines are "
+        "prefixed with a space, `-` or `+`, hunks include up to `context` unchanged lines on each side and "
+        "overlapping hunks are merged into one. Return an empty list when the inputs are identical. "
+        "Emit no `---`/`+++` file header.",
+        """
 u=unified_diff
 assert u(['a','b'],['a','b'])==[]
 r=u(['a','b','c'],['a','x','c'],1)
@@ -226,7 +230,7 @@ assert sum(1 for l in r2 if l.startswith('@@'))==1, 'overlapping hunks must merg
 assert [l for l in r2 if l[0] in '-+']==['-5','+five','-16','+sixteen']
 r3=u([],['n'],3); assert r3==['@@ -0,0 +1,1 @@','+n'], r3
 """,
- """
+        """
 def _lcs(a,b):
     n,m=len(a),len(b)
     dp=[[0]*(m+1) for _ in range(n+1)]
@@ -267,14 +271,15 @@ def unified_diff(a,b,context=3):
         out.append('@@ -%d,%d +%d,%d @@'%(ai if al else ai-1,al,bi if bl else bi-1,bl))
         out.extend(t+v for t,v in seg)
     return out
-"""),
-
-("hpy-006",
- "function `damerau(a, b)` returning the unrestricted Damerau-Levenshtein edit distance -- "
- "insertion, deletion, substitution AND transposition of two ADJACENT characters, each cost 1, "
- "where a transposed pair may itself have been edited (the unrestricted, not the optimal-string-"
- "alignment, variant).",
- """
+""",
+    ),
+    (
+        "hpy-006",
+        "function `damerau(a, b)` returning the unrestricted Damerau-Levenshtein edit distance -- "
+        "insertion, deletion, substitution AND transposition of two ADJACENT characters, each cost 1, "
+        "where a transposed pair may itself have been edited (the unrestricted, not the optimal-string-"
+        "alignment, variant).",
+        """
 d=damerau
 assert d('','')==0 and d('a','')==1 and d('','ab')==2
 assert d('ca','abc')==2, 'unrestricted variant: OSA would say 3'
@@ -286,7 +291,7 @@ assert d('abcdef','abcdef')==0
 assert d('a cat','an abct')==3, 'the canonical case: the RESTRICTED variant says 4'
 assert d('xy','yx')==1 and d('xyz','zyx')==2
 """,
- """
+        """
 def damerau(a,b):
     da={}
     la,lb=len(a),len(b)
@@ -309,14 +314,15 @@ def damerau(a,b):
                             d[k][l]+(i-k-1)+1+(j-l-1))
         da[a[i-1]]=i
     return d[la+1][lb+1]
-"""),
-
-("hpy-007",
- "class `LFUCache` with `__init__(self, capacity)`, `get(self, key)` returning -1 when absent and "
- "`put(self, key, value)`. Evict the least frequently used key; break frequency ties by evicting "
- "the least recently used among them. Both operations must be O(1) -- the tests run 200000 "
- "operations and a scan-for-minimum implementation will not finish in time. A capacity of 0 accepts nothing.",
- """
+""",
+    ),
+    (
+        "hpy-007",
+        "class `LFUCache` with `__init__(self, capacity)`, `get(self, key)` returning -1 when absent and "
+        "`put(self, key, value)`. Evict the least frequently used key; break frequency ties by evicting "
+        "the least recently used among them. Both operations must be O(1) -- the tests run 200000 "
+        "operations and a scan-for-minimum implementation will not finish in time. A capacity of 0 accepts nothing.",
+        """
 c=LFUCache(2)
 c.put(1,1); c.put(2,2)
 assert c.get(1)==1
@@ -337,7 +343,7 @@ for i in range(200000):
     big.get(i%1500)
 assert time.time()-t0 < 20, 'must be O(1) per operation'
 """,
- """
+        """
 class LFUCache:
     def __init__(self,capacity):
         self.cap=capacity
@@ -368,14 +374,15 @@ class LFUCache:
         self.v[key]=value; self.f[key]=1
         self.buckets.setdefault(1,{})[key]=None
         self.minf=1
-"""),
-
-("hpy-008",
- "function `schedule(jobs)` solving weighted interval scheduling: `jobs` is a list of "
- "(start, end, weight) with half-open intervals, so a job ending at t does not conflict with one "
- "starting at t. Return the maximum total weight of a non-overlapping subset. The tests include "
- "100000 jobs, so an O(n^2) inner scan will time out -- sort and binary-search.",
- """
+""",
+    ),
+    (
+        "hpy-008",
+        "function `schedule(jobs)` solving weighted interval scheduling: `jobs` is a list of "
+        "(start, end, weight) with half-open intervals, so a job ending at t does not conflict with one "
+        "starting at t. Return the maximum total weight of a non-overlapping subset. The tests include "
+        "100000 jobs, so an O(n^2) inner scan will time out -- sort and binary-search.",
+        """
 s=schedule
 assert s([])==0
 assert s([(0,1,5)])==5
@@ -392,7 +399,7 @@ for _ in range(100000):
 t0=time.time(); r=s(jobs); assert time.time()-t0<25, 'needs O(n log n)'
 assert isinstance(r,int) and r>0
 """,
- """
+        """
 import bisect
 def schedule(jobs):
     if not jobs: return 0
@@ -403,12 +410,13 @@ def schedule(jobs):
         k=bisect.bisect_right(ends,s,0,i)
         dp[i+1]=max(dp[i],dp[k]+w)
     return dp[-1]
-"""),
-
-("hpy-009",
- "function `lis_length(a)` returning the length of the longest STRICTLY increasing subsequence. "
- "The tests run 200000 elements, so the O(n^2) dynamic program will time out.",
- """
+""",
+    ),
+    (
+        "hpy-009",
+        "function `lis_length(a)` returning the length of the longest STRICTLY increasing subsequence. "
+        "The tests run 200000 elements, so the O(n^2) dynamic program will time out.",
+        """
 l=lis_length
 assert l([])==0 and l([5])==1
 assert l([10,9,2,5,3,7,101,18])==4
@@ -422,7 +430,7 @@ t0=time.time(); r=l(a); assert time.time()-t0<20, 'needs O(n log n)'
 assert 1<r<len(a)
 assert l(list(range(100000)))==100000
 """,
- """
+        """
 import bisect
 def lis_length(a):
     tails=[]
@@ -431,14 +439,15 @@ def lis_length(a):
         if i==len(tails): tails.append(x)
         else: tails[i]=x
     return len(tails)
-"""),
-
-("hpy-010",
- "function `topk(stream, k)` returning the k largest values from an iterable of (value, label) "
- "pairs, as a list ordered by value descending. Ties in value are broken by ARRIVAL ORDER: the "
- "item seen first ranks higher. It must hold at most k+1 items in memory at any time, so it cannot "
- "sort the input -- the tests pass a generator of 500000 items and assert peak memory stays flat.",
- """
+""",
+    ),
+    (
+        "hpy-010",
+        "function `topk(stream, k)` returning the k largest values from an iterable of (value, label) "
+        "pairs, as a list ordered by value descending. Ties in value are broken by ARRIVAL ORDER: the "
+        "item seen first ranks higher. It must hold at most k+1 items in memory at any time, so it cannot "
+        "sort the input -- the tests pass a generator of 500000 items and assert peak memory stays flat.",
+        """
 t=topk
 assert t([],3)==[]
 assert t([(1,'a')],3)==[(1,'a')]
@@ -457,7 +466,7 @@ peak=tracemalloc.get_traced_memory()[1]; tracemalloc.stop()
 assert len(r)==10 and r==sorted(r,key=lambda x:-x[0])
 assert peak < 2_000_000, 'must not buffer the stream (peak %d bytes)'%peak
 """,
- """
+        """
 import heapq
 def topk(stream,k):
     if k<=0: return []
@@ -467,15 +476,17 @@ def topk(stream,k):
         if len(h)>k: heapq.heappop(h)
     out=sorted(h,key=lambda x:(-x[0],-x[1]))
     return [(v,lab) for v,_i,lab in out]
-"""),
-("hpy-011",
- "function `parse_duration(s)` parsing an ISO-8601 duration into a total number of seconds as a "
- "float, or raising ValueError if it is not a valid duration. The form is "
- "`PnYnMnDTnHnMnS`; a leading `-` negates the whole duration; the `M` before `T` is months and "
- "the one after is minutes; the seconds field may be fractional; any field may be omitted but at "
- "least one must be present; the `T` must be absent when no time fields follow. Use 365 days for a "
- "year and 30 days for a month.",
- """
+""",
+    ),
+    (
+        "hpy-011",
+        "function `parse_duration(s)` parsing an ISO-8601 duration into a total number of seconds as a "
+        "float, or raising ValueError if it is not a valid duration. The form is "
+        "`PnYnMnDTnHnMnS`; a leading `-` negates the whole duration; the `M` before `T` is months and "
+        "the one after is minutes; the seconds field may be fractional; any field may be omitted but at "
+        "least one must be present; the `T` must be absent when no time fields follow. Use 365 days for a "
+        "year and 30 days for a month.",
+        """
 p=parse_duration
 D=86400.0
 assert p('PT1S')==1.0 and p('PT1M')==60.0 and p('PT1H')==3600.0
@@ -490,7 +501,7 @@ for bad in ['P','','PT','1D','P1D T1H','PT1D','P1S','PTS','X1D','P-1D','p1d']:
         p(bad); raise SystemExit('accepted invalid duration %r'%bad)
     except ValueError: pass
 """,
- """
+        """
 import re
 _RX=re.compile(r'^(-)?P(?!$)(?:(\\d+(?:\\.\\d+)?)Y)?(?:(\\d+(?:\\.\\d+)?)M)?'
                r'(?:(\\d+(?:\\.\\d+)?)D)?(?:T(?!$)(?:(\\d+(?:\\.\\d+)?)H)?'
@@ -505,17 +516,18 @@ def parse_duration(s):
     f=lambda x: float(x) if x is not None else 0.0
     tot=f(y)*365*86400+f(mo)*30*86400+f(d)*86400+f(h)*3600+f(mi)*60+f(sec)
     return -tot if neg else tot
-"""),
-
-("hpy-012",
- "function `next_fire(expr, after)` returning the next datetime strictly after `after` at which a "
- "5-field cron expression fires (minute hour day-of-month month day-of-week), with seconds and "
- "microseconds zero. Each field supports `*`, a number, `a-b`, `*/s`, `a-b/s` and comma-separated "
- "lists of those. Day-of-week is 0-6 with 0 = Sunday. The day rule is the standard one: when BOTH "
- "day-of-month and day-of-week are restricted (neither is `*`) the expression fires on a day "
- "matching EITHER field, but when only one is restricted only that one applies. Raise ValueError on "
- "a malformed expression.",
- """
+""",
+    ),
+    (
+        "hpy-012",
+        "function `next_fire(expr, after)` returning the next datetime strictly after `after` at which a "
+        "5-field cron expression fires (minute hour day-of-month month day-of-week), with seconds and "
+        "microseconds zero. Each field supports `*`, a number, `a-b`, `*/s`, `a-b/s` and comma-separated "
+        "lists of those. Day-of-week is 0-6 with 0 = Sunday. The day rule is the standard one: when BOTH "
+        "day-of-month and day-of-week are restricted (neither is `*`) the expression fires on a day "
+        "matching EITHER field, but when only one is restricted only that one applies. Raise ValueError on "
+        "a malformed expression.",
+        """
 from datetime import datetime as DT
 n=next_fire
 assert n('* * * * *', DT(2024,1,1,0,0))==DT(2024,1,1,0,1), 'strictly after'
@@ -535,7 +547,7 @@ for bad in ['* * * *','* * * * * *','60 * * * *','* 24 * * *','0 0 0 * *','0 0 *
         n(bad, DT(2024,1,1)); raise SystemExit('accepted invalid cron %r'%bad)
     except ValueError: pass
 """,
- """
+        """
 from datetime import datetime, timedelta
 def _field(spec,lo,hi):
     out=set()
@@ -586,15 +598,16 @@ def next_fire(expr,after):
             t=t+timedelta(minutes=1); continue
         return t
     raise ValueError('no fire time')
-"""),
-
-("hpy-013",
- "function `wildcard_match(pattern, s)` returning True when the whole of `s` matches a glob "
- "pattern in which `*` matches any run of characters including empty and `?` matches exactly one "
- "character. No other metacharacters. It must run in time proportional to len(pattern)*len(s) at "
- "worst -- the tests include a 20000-character adversarial case on which naive backtracking "
- "recursion takes exponential time. Do not build a regex.",
- """
+""",
+    ),
+    (
+        "hpy-013",
+        "function `wildcard_match(pattern, s)` returning True when the whole of `s` matches a glob "
+        "pattern in which `*` matches any run of characters including empty and `?` matches exactly one "
+        "character. No other metacharacters. It must run in time proportional to len(pattern)*len(s) at "
+        "worst -- the tests include a 20000-character adversarial case on which naive backtracking "
+        "recursion takes exponential time. Do not build a regex.",
+        """
 w=wildcard_match
 assert w('','') and not w('','a') and w('*','') and w('*','anything')
 assert w('a?c','abc') and not w('a?c','ac') and not w('a?c','abbc')
@@ -611,7 +624,7 @@ assert w('*'*500+'b', 'a'*n+'b')
 assert not w(('a*'*400)+'c', 'a'*4000)
 assert time.time()-t0 < 20, 'exponential backtracking'
 """,
- """
+        """
 def wildcard_match(pattern,s):
     i=j=0; star=-1; mark=0
     while i<len(s):
@@ -625,15 +638,16 @@ def wildcard_match(pattern,s):
             return False
     while j<len(pattern) and pattern[j]=='*': j+=1
     return j==len(pattern)
-"""),
-
-("hpy-014",
- "function `evaluate(expr)` evaluating an arithmetic expression string and returning a number. "
- "Support integers and decimals, `+ - * / % **`, parentheses, and unary minus and plus. Precedence "
- "from loosest: `+ -`, then `* / %`, then `**`, then unary. `**` is RIGHT-associative and binds "
- "TIGHTER than a unary minus on its left, so `-2**2` is -4 and `2**3**2` is 512. `/` is true "
- "division. Raise ValueError on a malformed expression. Do not call eval or exec.",
- """
+""",
+    ),
+    (
+        "hpy-014",
+        "function `evaluate(expr)` evaluating an arithmetic expression string and returning a number. "
+        "Support integers and decimals, `+ - * / % **`, parentheses, and unary minus and plus. Precedence "
+        "from loosest: `+ -`, then `* / %`, then `**`, then unary. `**` is RIGHT-associative and binds "
+        "TIGHTER than a unary minus on its left, so `-2**2` is -4 and `2**3**2` is 512. `/` is true "
+        "division. Raise ValueError on a malformed expression. Do not call eval or exec.",
+        """
 e=evaluate
 import inspect
 src=inspect.getsource(evaluate)
@@ -654,7 +668,7 @@ for bad in ['','1+','(1','1)','1++','*2','1 2','()','1+*2']:
         e(bad); raise SystemExit('accepted %r'%bad)
     except ValueError: pass
 """,
- """
+        """
 import re
 _TOK=re.compile(r'\\s*(\\d+\\.\\d+|\\d+|\\*\\*|[-+*/%()])')
 def _lex(s):
@@ -716,14 +730,15 @@ def evaluate(expr):
     v=addsub()
     if pos[0]!=len(toks): raise ValueError('trailing %r'%peek())
     return v
-"""),
-
-("hpy-015",
- "function `window_medians(a, k)` returning the median of every contiguous window of length k in "
- "`a`, as a list of floats. For an even k the median is the mean of the two middle values. Return "
- "an empty list when k is larger than the input. The tests run 200000 elements with k=1000, so "
- "re-sorting each window will time out.",
- """
+""",
+    ),
+    (
+        "hpy-015",
+        "function `window_medians(a, k)` returning the median of every contiguous window of length k in "
+        "`a`, as a list of floats. For an even k the median is the mean of the two middle values. Return "
+        "an empty list when k is larger than the input. The tests run 200000 elements with k=1000, so "
+        "re-sorting each window will time out.",
+        """
 w=window_medians
 assert w([],3)==[] and w([1,2],3)==[]
 assert w([1,3,-1,-3,5,3,6,7],3)==[1.0,-1.0,-1.0,3.0,5.0,6.0]
@@ -740,7 +755,7 @@ import statistics
 for i in (0, 1234, len(r)-1):
     assert abs(r[i]-statistics.median(a[i:i+1000]))<1e-9, i
 """,
- """
+        """
 import heapq
 def window_medians(a,k):
     n=len(a)
@@ -767,15 +782,17 @@ def window_medians(a,k):
         if i>=k-1:
             out.append(float(-lo[0]) if k%2 else (-lo[0]+hi[0])/2.0)
     return out
-"""),
-("hpy-016",
- "class `RollbackDSU` with `__init__(self, n)`, `find(self, x)`, `union(self, a, b)` returning "
- "True when it merged two distinct sets and False otherwise, `snapshot(self)` returning an opaque "
- "token, and `rollback(self, token)` undoing every union performed since that token was taken. "
- "Snapshots nest, and rolling back to an older token also undoes the newer ones. Union by size or "
- "rank is required; path compression is not allowed because it cannot be undone. `components(self)` "
- "returns the current number of disjoint sets.",
- """
+""",
+    ),
+    (
+        "hpy-016",
+        "class `RollbackDSU` with `__init__(self, n)`, `find(self, x)`, `union(self, a, b)` returning "
+        "True when it merged two distinct sets and False otherwise, `snapshot(self)` returning an opaque "
+        "token, and `rollback(self, token)` undoing every union performed since that token was taken. "
+        "Snapshots nest, and rolling back to an older token also undoes the newer ones. Union by size or "
+        "rank is required; path compression is not allowed because it cannot be undone. `components(self)` "
+        "returns the current number of disjoint sets.",
+        """
 d=RollbackDSU(6)
 assert d.components()==6
 assert d.union(0,1) is True and d.union(0,1) is False
@@ -803,7 +820,7 @@ for _ in range(100000):
 big.rollback(tok)
 assert time.time()-t0<25
 """,
- """
+        """
 class RollbackDSU:
     def __init__(self,n):
         self.p=list(range(n)); self.sz=[1]*n; self.log=[]; self.n=n
@@ -826,16 +843,17 @@ class RollbackDSU:
             self.p[rb]=rb; self.sz[ra]=osz; self.n+=1
     def components(self):
         return self.n
-"""),
-
-("hpy-017",
- "class `WildcardTrie` with `add(self, word)`, `remove(self, word)` returning True when the word "
- "was present, and `search(self, pattern)` returning the sorted list of stored words matching a "
- "pattern in which `.` matches exactly one character and every other character is literal. A "
- "pattern matches only whole words. Removing a word must not leave it findable, and adding the "
- "same word twice then removing it once must leave it present. The tests store 20000 words and run "
- "2000 dotted searches, so re-scanning every stored word per search will time out.",
- """
+""",
+    ),
+    (
+        "hpy-017",
+        "class `WildcardTrie` with `add(self, word)`, `remove(self, word)` returning True when the word "
+        "was present, and `search(self, pattern)` returning the sorted list of stored words matching a "
+        "pattern in which `.` matches exactly one character and every other character is literal. A "
+        "pattern matches only whole words. Removing a word must not leave it findable, and adding the "
+        "same word twice then removing it once must leave it present. The tests store 20000 words and run "
+        "2000 dotted searches, so re-scanning every stored word per search will time out.",
+        """
 t=WildcardTrie()
 for w in ['bad','dad','mad','mat','ma']: t.add(w)
 assert t.search('bad')==['bad']
@@ -864,7 +882,7 @@ for _ in range(2000):
 assert time.time()-t0<25, 'must not rescan the dictionary per query'
 assert hits>=2000
 """,
- """
+        """
 class _Node:
     __slots__=('kids','cnt')
     def __init__(self): self.kids={}; self.cnt=0
@@ -900,15 +918,16 @@ class WildcardTrie:
                 go(n.kids[c],i+1,acc+c)
         go(self.root,0,'')
         return sorted(out)
-"""),
-
-("hpy-018",
- "function `subtract(base, cuts)` where `base` and `cuts` are lists of HALF-OPEN integer intervals "
- "[start, end). Return the sorted, minimal list of half-open intervals covering every point in "
- "`base` that is not in any interval of `cuts`. Adjacent surviving intervals that touch must be "
- "merged into one; empty intervals must never appear in the output; the inputs may overlap "
- "themselves and need not be sorted.",
- """
+""",
+    ),
+    (
+        "hpy-018",
+        "function `subtract(base, cuts)` where `base` and `cuts` are lists of HALF-OPEN integer intervals "
+        "[start, end). Return the sorted, minimal list of half-open intervals covering every point in "
+        "`base` that is not in any interval of `cuts`. Adjacent surviving intervals that touch must be "
+        "merged into one; empty intervals must never appear in the output; the inputs may overlap "
+        "themselves and need not be sorted.",
+        """
 s=subtract
 assert s([],[])==[] and s([],[(0,5)])==[]
 assert s([(0,10)],[])==[(0,10)]
@@ -924,7 +943,7 @@ assert s([(0,10)],[(5,5)])==[(0,10)], 'empty cut is a no-op'
 assert s([(3,3)],[])==[], 'empty base yields nothing'
 assert s([(0,3),(10,13)],[(1,11)])==[(0,1),(11,13)]
 """,
- """
+        """
 def _norm(xs):
     xs=sorted((a,b) for a,b in xs if a<b)
     out=[]
@@ -951,17 +970,18 @@ def subtract(base,cuts):
         if merged and a<=merged[-1][1]: merged[-1][1]=max(merged[-1][1],e)
         else: merged.append([a,e])
     return [(a,e) for a,e in merged if a<e]
-"""),
-
-("hpy-019",
- "class `TokenBucket` with `__init__(self, capacity, refill_per_sec, clock)` where `clock` is a "
- "zero-argument callable returning a float time, and `take(self, n=1)` returning True when n "
- "tokens were available and consumed, False otherwise. The bucket starts full, refills "
- "continuously and fractionally at `refill_per_sec` (not in whole-token steps), never exceeds "
- "`capacity`, and never goes negative. A failed `take` consumes nothing. A request for more than "
- "`capacity` tokens can never succeed. Time never moves backwards, but the same instant may be "
- "observed repeatedly.",
- """
+""",
+    ),
+    (
+        "hpy-019",
+        "class `TokenBucket` with `__init__(self, capacity, refill_per_sec, clock)` where `clock` is a "
+        "zero-argument callable returning a float time, and `take(self, n=1)` returning True when n "
+        "tokens were available and consumed, False otherwise. The bucket starts full, refills "
+        "continuously and fractionally at `refill_per_sec` (not in whole-token steps), never exceeds "
+        "`capacity`, and never goes negative. A failed `take` consumes nothing. A request for more than "
+        "`capacity` tokens can never succeed. Time never moves backwards, but the same instant may be "
+        "observed repeatedly.",
+        """
 t=[0.0]
 b=TokenBucket(10,1.0,lambda:t[0])
 assert b.take(10) is True and b.take(1) is False, 'starts full'
@@ -984,7 +1004,7 @@ assert b3.take(2) and not b3.take(1)
 t2[0]=0.25
 assert b3.take(1) and not b3.take(1)
 """,
- """
+        """
 class TokenBucket:
     def __init__(self,capacity,refill_per_sec,clock):
         self.cap=float(capacity); self.rate=float(refill_per_sec)
@@ -1002,16 +1022,17 @@ class TokenBucket:
             if self.tokens<0: self.tokens=0.0
             return True
         return False
-"""),
-
-("hpy-020",
- "function `transfer_all(accounts, ops)` where `accounts` is a list of starting integer balances "
- "and `ops` is a list of (src, dst, amount). Apply every operation, each in its own thread, using "
- "one `threading.Lock` per account so that a transfer holds both locks while it moves the money. "
- "It must not deadlock when transfers run in both directions between the same pair, and a transfer "
- "whose source lacks the funds at the moment it holds the locks is skipped. Return the final "
- "balance list. There must be exactly one lock per account and both must be held during the move.",
- """
+""",
+    ),
+    (
+        "hpy-020",
+        "function `transfer_all(accounts, ops)` where `accounts` is a list of starting integer balances "
+        "and `ops` is a list of (src, dst, amount). Apply every operation, each in its own thread, using "
+        "one `threading.Lock` per account so that a transfer holds both locks while it moves the money. "
+        "It must not deadlock when transfers run in both directions between the same pair, and a transfer "
+        "whose source lacks the funds at the moment it holds the locks is skipped. Return the final "
+        "balance list. There must be exactly one lock per account and both must be held during the move.",
+        """
 import time, threading
 f=transfer_all
 assert f([10,10],[])==[10,10]
@@ -1034,7 +1055,7 @@ assert sum(out)==sum(start), 'money was created or destroyed: %s'%out
 assert all(x>=0 for x in out)
 assert threading.active_count()<50
 """,
- """
+        """
 import threading
 def transfer_all(accounts,ops):
     locks=[threading.Lock() for _ in accounts]
@@ -1048,14 +1069,16 @@ def transfer_all(accounts,ops):
     for t in ts: t.start()
     for t in ts: t.join()
     return accounts
-"""),
-("hpy-021",
- "function `deep_copy(obj)` returning a deep copy of a structure built from dicts, lists, sets, "
- "tuples and scalars. It must preserve the SHARING graph: two references to the same object in the "
- "input become two references to one copy in the output, and reference cycles are copied rather "
- "than causing infinite recursion. Strings, ints, floats, bools and None are returned as-is. Do not "
- "import or use the `copy` or `pickle` modules.",
- """
+""",
+    ),
+    (
+        "hpy-021",
+        "function `deep_copy(obj)` returning a deep copy of a structure built from dicts, lists, sets, "
+        "tuples and scalars. It must preserve the SHARING graph: two references to the same object in the "
+        "input become two references to one copy in the output, and reference cycles are copied rather "
+        "than causing infinite recursion. Strings, ints, floats, bools and None are returned as-is. Do not "
+        "import or use the `copy` or `pickle` modules.",
+        """
 import inspect
 src=inspect.getsource(deep_copy)
 assert 'copy' not in src.replace('deep_copy','').replace('_copy','') or 'import copy' not in src
@@ -1085,7 +1108,7 @@ assert isinstance(r,list), 'deep nesting must not blow the stack'
 both=[shared,shared,{'k':shared}]
 cb=d(both); assert cb[0] is cb[1] is cb[2]['k']
 """,
- """
+        """
 def deep_copy(obj):
     memo={}
     def go(o):
@@ -1115,16 +1138,17 @@ def deep_copy(obj):
             new=tuple(go(i) for i in o); memo[k]=new; return new
         return o
     return go(obj)
-"""),
-
-("hpy-022",
- "function `natural_key(s)` returning a sort key such that `sorted(names, key=natural_key)` orders "
- "strings the way a file manager does: runs of digits compare numerically and everything else "
- "compares as lowercase text, with case used only to break an otherwise exact tie (lowercase "
- "first). Leading zeros do not change the numeric value but a shorter zero-padded run sorts before "
- "a longer one of equal value. The key must be comparable across strings that start with a digit "
- "and strings that do not.",
- """
+""",
+    ),
+    (
+        "hpy-022",
+        "function `natural_key(s)` returning a sort key such that `sorted(names, key=natural_key)` orders "
+        "strings the way a file manager does: runs of digits compare numerically and everything else "
+        "compares as lowercase text, with case used only to break an otherwise exact tie (lowercase "
+        "first). Leading zeros do not change the numeric value but a shorter zero-padded run sorts before "
+        "a longer one of equal value. The key must be comparable across strings that start with a digit "
+        "and strings that do not.",
+        """
 k=natural_key
 S=lambda xs: sorted(xs,key=k)
 assert S(['a2','a10','a1'])==['a1','a2','a10']
@@ -1139,7 +1163,7 @@ assert S(['v1.10.0','v1.9.0','v1.2.0'])==['v1.2.0','v1.9.0','v1.10.0']
 assert S(['a1b2','a1b10'])==['a1b2','a1b10']
 assert k('a')==k('a') and (k('a')<k('b'))
 """,
- """
+        """
 import re
 _SP=re.compile(r'(\\d+)')
 def natural_key(s):
@@ -1151,15 +1175,16 @@ def natural_key(s):
         elif p:
             key.append((0,0,0,p.lower()))
     return (key,tuple((c.isupper(),c) for c in s))
-"""),
-
-("hpy-023",
- "two functions `to_base(n, alphabet)` and `from_base(s, alphabet)` converting between an integer "
- "and its representation in an arbitrary positional base given by a string of distinct digit "
- "characters, lowest value first. Zero is the single first character of the alphabet. A negative "
- "number is prefixed with `-`. `from_base` must raise ValueError on an empty string or on a "
- "character not in the alphabet. They must round-trip for any integer including very large ones.",
- """
+""",
+    ),
+    (
+        "hpy-023",
+        "two functions `to_base(n, alphabet)` and `from_base(s, alphabet)` converting between an integer "
+        "and its representation in an arbitrary positional base given by a string of distinct digit "
+        "characters, lowest value first. Zero is the single first character of the alphabet. A negative "
+        "number is prefixed with `-`. `from_base` must raise ValueError on an empty string or on a "
+        "character not in the alphabet. They must round-trip for any integer including very large ones.",
+        """
 A='0123456789abcdef'
 B='ab'
 assert to_base(0,A)=='0' and to_base(255,A)=='ff' and to_base(-255,A)=='-ff'
@@ -1182,7 +1207,7 @@ for _ in range(300):
     for al in (A,B,'zyx'):
         assert from_base(to_base(v,al),al)==v, (v,al)
 """,
- """
+        """
 def to_base(n,alphabet):
     b=len(alphabet)
     if b<2: raise ValueError('base too small')
@@ -1203,18 +1228,19 @@ def from_base(s,alphabet):
         if ch not in idx: raise ValueError('bad digit %r'%ch)
         v=v*b+idx[ch]
     return -v if neg else v
-"""),
-
-("hpy-024",
- "function `parse_csv_stream(chunks)` consuming an iterable of string CHUNKS of a CSV document and "
- "yielding each complete row as a list of field strings, as soon as that row is complete. Follow "
- "RFC 4180: fields may be quoted with `\\\"`, a quoted field may contain commas, CRLF and doubled "
- "`\\\"\\\"` meaning one quote; `\\\\r\\\\n`, `\\\\n` and `\\\\r` all end a row outside quotes; a trailing newline "
- "does not produce an extra empty row, but a final row without a newline is still yielded. Chunk "
- "boundaries fall at arbitrary positions, including inside a quoted field, between the two "
- "characters of a CRLF, and between the two characters of an escaped quote. Raise ValueError if the "
- "document ends inside an unterminated quoted field.",
- """
+""",
+    ),
+    (
+        "hpy-024",
+        "function `parse_csv_stream(chunks)` consuming an iterable of string CHUNKS of a CSV document and "
+        "yielding each complete row as a list of field strings, as soon as that row is complete. Follow "
+        'RFC 4180: fields may be quoted with `\\"`, a quoted field may contain commas, CRLF and doubled '
+        '`\\"\\"` meaning one quote; `\\\\r\\\\n`, `\\\\n` and `\\\\r` all end a row outside quotes; a trailing newline '
+        "does not produce an extra empty row, but a final row without a newline is still yielded. Chunk "
+        "boundaries fall at arbitrary positions, including inside a quoted field, between the two "
+        "characters of a CRLF, and between the two characters of an escaped quote. Raise ValueError if the "
+        "document ends inside an unterminated quoted field.",
+        """
 p=parse_csv_stream
 L=lambda *c: list(p(iter(c)))
 assert L('a,b\\nc,d\\n')==[['a','b'],['c','d']]
@@ -1248,7 +1274,7 @@ try:
     L('"unterminated\\n'); raise SystemExit('accepted unterminated quote')
 except ValueError: pass
 """,
- """
+        """
 def parse_csv_stream(chunks):
     field=[]; row=[]; inq=False; qpend=False; cr=False; started=False
     for chunk in chunks:
@@ -1283,15 +1309,16 @@ def parse_csv_stream(chunks):
     if field or row or started:
         row.append(''.join(field))
         yield row
-"""),
-
-("hpy-025",
- "function `merge_sorted(iterables)` returning an ITERATOR over the merged ascending sequence of "
- "several already-sorted iterables, stable across sources so that equal values come out in source "
- "order. It must be lazy and memory-bounded: it holds at most one pending item per source, so it "
- "works on infinite sources and on 1000 sources of 1000 items without buffering them. Equal values "
- "must not be deduplicated.",
- """
+""",
+    ),
+    (
+        "hpy-025",
+        "function `merge_sorted(iterables)` returning an ITERATOR over the merged ascending sequence of "
+        "several already-sorted iterables, stable across sources so that equal values come out in source "
+        "order. It must be lazy and memory-bounded: it holds at most one pending item per source, so it "
+        "works on infinite sources and on 1000 sources of 1000 items without buffering them. Equal values "
+        "must not be deduplicated.",
+        """
 import itertools
 m=merge_sorted
 assert list(m([]))==[]
@@ -1319,7 +1346,7 @@ it2=m([counted(),counted()])
 next(it2); next(it2)
 assert pulled[0]<=4, 'not lazy: pulled %d'%pulled[0]
 """,
- """
+        """
 import heapq
 def merge_sorted(iterables):
     h=[]
@@ -1336,14 +1363,16 @@ def merge_sorted(iterables):
             try: heapq.heappush(h,(next(it),i,it))
             except StopIteration: pass
     return gen()
-"""),
-("hpy-026",
- "function `skyline(buildings)` where each building is (left, right, height) with `right` "
- "exclusive. Return the skyline as a list of [x, height] key points in ascending x, where each "
- "point is the left end of a horizontal segment at that height, consecutive points never repeat a "
- "height, and the last point drops to height 0. The tests include 100000 buildings, so an O(n^2) "
- "sweep will time out.",
- """
+""",
+    ),
+    (
+        "hpy-026",
+        "function `skyline(buildings)` where each building is (left, right, height) with `right` "
+        "exclusive. Return the skyline as a list of [x, height] key points in ascending x, where each "
+        "point is the left end of a horizontal segment at that height, consecutive points never repeat a "
+        "height, and the last point drops to height 0. The tests include 100000 buildings, so an O(n^2) "
+        "sweep will time out.",
+        """
 s=skyline
 assert s([])==[]
 assert s([(0,2,3)])==[[0,3],[2,0]]
@@ -1363,7 +1392,7 @@ assert time.time()-t0<25, 'needs an O(n log n) sweep'
 assert r[-1][1]==0 and all(r[i][0]<r[i+1][0] for i in range(len(r)-1))
 assert all(r[i][1]!=r[i+1][1] for i in range(len(r)-1))
 """,
- """
+        """
 import heapq
 def skyline(buildings):
     if not buildings: return []
@@ -1385,16 +1414,17 @@ def skyline(buildings):
         h=-heap[0][0]
         if not out or out[-1][1]!=h: out.append([x,h])
     return out
-"""),
-
-("hpy-027",
- "function `shortest_path(graph, src, dst)` where `graph` maps a node to a list of "
- "(neighbour, weight) with non-negative integer weights, directed. Return (total_cost, path) with "
- "`path` the list of nodes from src to dst inclusive, or (None, []) when dst is unreachable. When "
- "several paths tie on cost, return the one with the FEWEST edges, and among those the "
- "lexicographically smallest node sequence. src == dst costs 0. The tests run a 200000-node graph, "
- "so a scan-for-minimum Dijkstra will time out -- use a heap.",
- """
+""",
+    ),
+    (
+        "hpy-027",
+        "function `shortest_path(graph, src, dst)` where `graph` maps a node to a list of "
+        "(neighbour, weight) with non-negative integer weights, directed. Return (total_cost, path) with "
+        "`path` the list of nodes from src to dst inclusive, or (None, []) when dst is unreachable. When "
+        "several paths tie on cost, return the one with the FEWEST edges, and among those the "
+        "lexicographically smallest node sequence. src == dst costs 0. The tests run a 200000-node graph, "
+        "so a scan-for-minimum Dijkstra will time out -- use a heap.",
+        """
 sp=shortest_path
 g={'a':[('b',1),('c',4)],'b':[('c',2),('d',5)],'c':[('d',1)],'d':[]}
 assert sp(g,'a','d')==(4,['a','b','c','d'])
@@ -1423,7 +1453,7 @@ for a,b in zip(path,path[1:]):
     tot+=min(w for n,w in big[a] if n==b)
 assert tot==c, (tot,c)
 """,
- """
+        """
 import heapq
 def shortest_path(graph,src,dst):
     if src==dst and src in graph: return (0,[src])
@@ -1452,16 +1482,17 @@ def shortest_path(graph,src,dst):
     path=[dst]
     while path[-1]!=src: path.append(prev[path[-1]])
     return (best[dst][0],path[::-1])
-"""),
-
-("hpy-028",
- "function `backoff_delays(attempts, base, cap, rng)` returning the list of sleep durations for a "
- "retry policy using AWS-style FULL JITTER: the delay for attempt i (counting from 0) is "
- "`rng.uniform(0, min(cap, base * 2**i))`. `attempts` is the number of retries, so the list has "
- "that many entries and an `attempts` of 0 returns an empty list. The exponential term must be "
- "capped BEFORE the jitter is drawn, not after, and `rng.uniform` must be called exactly once per "
- "attempt in order.",
- """
+""",
+    ),
+    (
+        "hpy-028",
+        "function `backoff_delays(attempts, base, cap, rng)` returning the list of sleep durations for a "
+        "retry policy using AWS-style FULL JITTER: the delay for attempt i (counting from 0) is "
+        "`rng.uniform(0, min(cap, base * 2**i))`. `attempts` is the number of retries, so the list has "
+        "that many entries and an `attempts` of 0 returns an empty list. The exponential term must be "
+        "capped BEFORE the jitter is drawn, not after, and `rng.uniform` must be called exactly once per "
+        "attempt in order.",
+        """
 import random
 b=backoff_delays
 assert b(0,1.0,30.0,random.Random(1))==[]
@@ -1483,17 +1514,18 @@ rr=random.Random(0)
 out=b(20,1.0,60.0,rr)
 assert len(out)==20 and all(0<=x<=60 for x in out)
 """,
- """
+        """
 def backoff_delays(attempts,base,cap,rng):
     return [rng.uniform(0,min(cap,base*(2**i))) for i in range(attempts)]
-"""),
-
-("hpy-029",
- "function `topo_lex(graph)` where `graph` maps a node to the list of nodes that DEPEND ON it "
- "(its successors). Return the lexicographically smallest topological ordering of all nodes, or "
- "None when the graph has a cycle. Nodes appearing only as a successor are still nodes. The tests "
- "run 200000 nodes, so repeatedly scanning for the smallest ready node will time out -- use a heap.",
- """
+""",
+    ),
+    (
+        "hpy-029",
+        "function `topo_lex(graph)` where `graph` maps a node to the list of nodes that DEPEND ON it "
+        "(its successors). Return the lexicographically smallest topological ordering of all nodes, or "
+        "None when the graph has a cycle. Nodes appearing only as a successor are still nodes. The tests "
+        "run 200000 nodes, so repeatedly scanning for the smallest ready node will time out -- use a heap.",
+        """
 t=topo_lex
 assert t({})==[]
 assert t({'a':[]})==['a']
@@ -1518,7 +1550,7 @@ pos={n:i for i,n in enumerate(r)}
 for u,vs in g.items():
     for v in vs: assert pos[u]<pos[v]
 """,
- """
+        """
 import heapq
 def topo_lex(graph):
     nodes=set(graph)
@@ -1535,17 +1567,18 @@ def topo_lex(graph):
             indeg[v]-=1
             if indeg[v]==0: heapq.heappush(h,v)
     return out if len(out)==len(nodes) else None
-"""),
-
-("hpy-030",
- "class `Spreadsheet` with `set(self, cell, value)` and `get(self, cell)`. A value is either a "
- "number or a formula string starting with `=`. A formula is cell references and integer literals "
- "joined by `+`, `-` and `*` with the usual precedence, e.g. `=A1+B2*2`. `get` returns the current "
- "computed number; an unset cell reads as 0. Changing a cell must be visible through every formula "
- "that transitively depends on it. A `set` that would create a reference cycle must raise "
- "ValueError and leave the sheet exactly as it was. `get` must be O(1) amortised -- the tests build "
- "a 5000-deep dependency chain and then read the far end 5000 times.",
- """
+""",
+    ),
+    (
+        "hpy-030",
+        "class `Spreadsheet` with `set(self, cell, value)` and `get(self, cell)`. A value is either a "
+        "number or a formula string starting with `=`. A formula is cell references and integer literals "
+        "joined by `+`, `-` and `*` with the usual precedence, e.g. `=A1+B2*2`. `get` returns the current "
+        "computed number; an unset cell reads as 0. Changing a cell must be visible through every formula "
+        "that transitively depends on it. A `set` that would create a reference cycle must raise "
+        "ValueError and leave the sheet exactly as it was. `get` must be O(1) amortised -- the tests build "
+        "a 5000-deep dependency chain and then read the far end 5000 times.",
+        """
 import time
 s=Spreadsheet()
 assert s.get('A1')==0
@@ -1570,7 +1603,7 @@ for _ in range(5000): s3.get('A5000')
 assert time.time()-t0<5, 'get must not re-evaluate the chain'
 s3.set('A1',2); assert s3.get('A5000')==5001
 """,
- """
+        """
 import re
 _REF=re.compile(r'[A-Z]+\\d+')
 _TOK=re.compile(r'\\s*([A-Z]+\\d+|\\d+|[-+*])')
@@ -1646,7 +1679,8 @@ class Spreadsheet:
         assert done==len(aff)
     def get(self,cell):
         return self.val.get(cell,0)
-"""),
+""",
+    ),
 ]
 
 

@@ -11,6 +11,7 @@ Missing tasks are reported rather than passed over silently: a task absent from
 the file scores 0 in the totals either way, and the difference between "the model
 got it wrong" and "the task never ran" has to stay visible.
 """
+
 p = "/root/bench2/b3.py"
 s = open(p).read()
 
@@ -18,12 +19,12 @@ if "MISSING_OK" in s:
     print("already patched")
     raise SystemExit(0)
 
-old = '''def grade(path):
+old = """def grade(path):
     data = json.load(open(path))
     items = data["items"]
-    ok = {}'''
+    ok = {}"""
 
-new = '''MISSING_OK = True
+new = """MISSING_OK = True
 
 
 def grade(path):
@@ -41,19 +42,19 @@ def grade(path):
                  missing[:6] + (["..."] if len(missing) > 6 else [])), flush=True)
         for tid in missing:
             items[tid] = {"text": "", "tok": 0, "secs": 0, "absent": True}
-    ok = {}'''
+    ok = {}"""
 
 assert old in s, "grade() head did not match"
 s = s.replace(old, new, 1)
 
 # carry the flag into the graded file so a partial grade is never mistaken for a
 # complete one downstream
-old_row = '''        out["results"][tid] = {"ok": bool(ok.get(tid, False)), "cat": cat,
-                               "secs": it.get("secs", 0), "tok": it.get("tok", 0)}'''
-new_row = '''        out["results"][tid] = {"ok": bool(ok.get(tid, False)), "cat": cat,
+old_row = """        out["results"][tid] = {"ok": bool(ok.get(tid, False)), "cat": cat,
+                               "secs": it.get("secs", 0), "tok": it.get("tok", 0)}"""
+new_row = """        out["results"][tid] = {"ok": bool(ok.get(tid, False)), "cat": cat,
                                "secs": it.get("secs", 0), "tok": it.get("tok", 0)}
         if it.get("absent"):
-            out["results"][tid]["absent"] = True'''
+            out["results"][tid]["absent"] = True"""
 assert old_row in s, "result row did not match"
 s = s.replace(old_row, new_row, 1)
 
