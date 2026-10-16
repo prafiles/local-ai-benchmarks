@@ -38,7 +38,7 @@ from b2_tasks import (  # noqa: E402
 )
 
 URL = "http://localhost:8000/v1/chat/completions"
-TMP = "/root/bench2/tmp"
+TMP = os.environ.get("BENCH_TMP", "/root/bench2/tmp")
 IMG_PY, IMG_NODE, IMG_SH = "bench-py:1", "bench-node:1", "bench-sh:1"
 
 # ------------------------------------------------------------------ sandboxes

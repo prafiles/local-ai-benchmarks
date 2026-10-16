@@ -6,7 +6,6 @@ Any FAIL here is a harness bug, not a model result.
 
 import sys
 
-sys.path.insert(0, "/root/bench2")
 import b2  # noqa: E402
 from b2_tasks import BASH, DJANGO, GIT, JS, PYTHON, SQL, SSH, TS  # noqa: E402
 
@@ -229,3 +228,5 @@ print(
     f"\n{len(checks) - bad}/{len(checks)} harnesses verified"
     + ("" if not bad else f"  <-- {bad} HARNESS BUG(S)")
 )
+
+sys.exit(bool(bad))
