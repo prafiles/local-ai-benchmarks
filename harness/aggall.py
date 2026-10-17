@@ -22,6 +22,7 @@ Three things it does that aggb5.py does not:
 
     aggall.py
 """
+
 import json
 import os
 
@@ -31,27 +32,30 @@ REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
 # key, label, note. THINK_ONLY models have no off arm by design.
 MAC_MLX = [
-    ("gemma26",   "Gemma 4 26B A4B QAT",   "MLX 4bit"),
-    ("q38",       "Qwen3.8 27B",           "MLX; on arm inherited the model's xhigh default"),
-    ("q38effort", "Qwen3.8 27B @ medium",  "MLX; effort=medium -- the corrected arm"),
-    ("q36",       "Qwen3.6 27B",           "MLX"),
-    ("q36moe",    "Qwen3.6 35B A3B",       "MLX"),
-    ("glm47",     "GLM 4.7 Flash",         "MLX 6bit"),
-    ("qcn",       "Qwen3-Coder-Next 80B",  "MLX; prompted CoT, no native thinking"),
-    ("dsvl2",     "DeepSeek VL2",          "MLX; raw /v1/completions, broken chat template"),
+    ("gemma26", "Gemma 4 26B A4B QAT", "MLX 4bit"),
+    ("q38", "Qwen3.8 27B", "MLX; on arm inherited the model's xhigh default"),
+    ("q38effort", "Qwen3.8 27B @ medium", "MLX; effort=medium -- the corrected arm"),
+    ("q36", "Qwen3.6 27B", "MLX"),
+    ("q36moe", "Qwen3.6 35B A3B", "MLX"),
+    ("glm47", "GLM 4.7 Flash", "MLX 6bit"),
+    ("qcn", "Qwen3-Coder-Next 80B", "MLX; prompted CoT, no native thinking"),
+    ("dsvl2", "DeepSeek VL2", "MLX; raw /v1/completions, broken chat template"),
 ]
 MAC_GGUF = [
-    ("gemma26gguf",  "Gemma 4 26B A4B",   "GGUF; MLX thinking arm is mlx-engine#337"),
-    ("q36gguf",      "Qwen3.6 27B",       "GGUF Q4_K_S"),
-    ("q36moegguf",   "Qwen3.6 35B A3B",   "GGUF UD-Q4_K_S"),
-    ("glm47gguf",    "GLM 4.7 Flash",     "GGUF Q4_K_S"),
-    ("q38gguf",      "Qwen3.8 27B",       "GGUF; reasoning_effort silently ignored here"),
-    ("ornith35",     "Ornith 1.5 35B A3B","GGUF Q8_0, thinking-only"),
-    ("muse",         "Muse Glimmer 30B",  "GGUF Q8_0, thinking-only"),
+    ("gemma26gguf", "Gemma 4 26B A4B", "GGUF; MLX thinking arm is mlx-engine#337"),
+    ("q36gguf", "Qwen3.6 27B", "GGUF Q4_K_S"),
+    ("q36moegguf", "Qwen3.6 35B A3B", "GGUF UD-Q4_K_S"),
+    ("glm47gguf", "GLM 4.7 Flash", "GGUF Q4_K_S"),
+    ("q38gguf", "Qwen3.8 27B", "GGUF; reasoning_effort silently ignored here"),
+    ("ornith35", "Ornith 1.5 35B A3B", "GGUF Q8_0, thinking-only"),
+    ("muse", "Muse Glimmer 30B", "GGUF Q8_0, thinking-only"),
     # The arm switch was probed per model rather than assumed from the backend:
     # reasoning_effort works here and is ignored on q38gguf above, both GGUF.
-    ("nemotron",     "Nemotron 3.5 Lightning 30B A3B",
-                     "GGUF Q4_K_M; greedy BOTH arms, 0 retries"),
+    (
+        "nemotron",
+        "Nemotron 3.5 Lightning 30B A3B",
+        "GGUF Q4_K_M; greedy BOTH arms, 0 retries",
+    ),
 ]
 # Labels here are taken from the "model" field inside each result file, not
 # from the run key. The keys are short ("qwen", "q35") and do not say which
@@ -59,41 +63,55 @@ MAC_GGUF = [
 # 9B, not a 32B. Guessing from the key produced a table that compared the Mac's
 # Qwen3.6-27B against a completely different model on CUDA.
 CUDA = [
-    ("gemma",       "Gemma 4 12B QAT",          "vLLM w4a16, 4 workers"),
-    ("gemmagreedy", "Gemma 4 12B QAT",          "vLLM, greedy @4w -- does not terminate"),
-    ("q35",         "Qwen3.5 9B FP8",           "vLLM, 4 workers"),
-    ("qwen",        "Qwen2.5-Coder 14B AWQ",    "vLLM, 4 workers"),
-    ("mellum",      "Mellum2 12B A2.5B FP8",    "vLLM, 4 workers"),
-    ("ornith9",     "Ornith 1.5 9B",            "vLLM, thinking-only, 4 workers"),
+    ("gemma", "Gemma 4 12B QAT", "vLLM w4a16, 4 workers"),
+    ("gemmagreedy", "Gemma 4 12B QAT", "vLLM, greedy @4w -- does not terminate"),
+    ("q35", "Qwen3.5 9B FP8", "vLLM, 4 workers"),
+    ("qwen", "Qwen2.5-Coder 14B AWQ", "vLLM, 4 workers"),
+    ("mellum", "Mellum2 12B A2.5B FP8", "vLLM, 4 workers"),
+    ("ornith9", "Ornith 1.5 9B", "vLLM, thinking-only, 4 workers"),
     # The 1-worker re-run: greedy on BOTH arms, so these are the only CUDA arms
     # that could ever have been single-variable. Both native thinking arms abort
     # at greedy regardless of worker count, which is itself the result.
-    ("q35.w1",      "Qwen3.5 9B FP8",           "vLLM, 1 worker, greedy both arms"),
-    ("gemma.w1",    "Gemma 4 12B QAT",          "vLLM, 1 worker, greedy both arms"),
-    ("mellum.w1",   "Mellum2 12B A2.5B FP8",    "vLLM, 1 worker, greedy both arms"),
-    ("qwen.w1",     "Qwen2.5-Coder 14B AWQ",    "vLLM, 1 worker, greedy both arms"),
+    ("q35.w1", "Qwen3.5 9B FP8", "vLLM, 1 worker, greedy both arms"),
+    ("gemma.w1", "Gemma 4 12B QAT", "vLLM, 1 worker, greedy both arms"),
+    ("mellum.w1", "Mellum2 12B A2.5B FP8", "vLLM, 1 worker, greedy both arms"),
+    ("qwen.w1", "Qwen2.5-Coder 14B AWQ", "vLLM, 1 worker, greedy both arms"),
     # greedy + presence_penalty 1.5 on BOTH arms. The penalty is a shared brake,
     # not a confound -- it is what makes Gemma's thinking arm terminate at all,
     # and applying it to one arm only is what would break the pair. This is the
     # node's one clean native measurement; q35 spirals through the same brake.
-    ("gemma.pp",    "Gemma 4 12B QAT",          "vLLM, 1 worker, greedy + presence_penalty 1.5 both arms"),
-    ("q35.pp",      "Qwen3.5 9B FP8",           "vLLM, 1 worker, greedy + presence_penalty 1.5 both arms"),
+    (
+        "gemma.pp",
+        "Gemma 4 12B QAT",
+        "vLLM, 1 worker, greedy + presence_penalty 1.5 both arms",
+    ),
+    (
+        "q35.pp",
+        "Qwen3.5 9B FP8",
+        "vLLM, 1 worker, greedy + presence_penalty 1.5 both arms",
+    ),
 ]
 SPARK = [
     # The arm switch here is chat_template_kwargs, and reasoning_effort is
     # silently ignored -- the exact inverse of Nemotron 3.5 on LM Studio GGUF.
     # Same vendor, same model family, opposite switch: it is a property of the
     # model and its template, not of the vendor or the serving stack.
-    ("nemotron3", "Nemotron 3 Super 120B A12B",
-                  "vLLM NVFP4, 1 worker, greedy BOTH arms, 0 retries"),
+    (
+        "nemotron3",
+        "Nemotron 3 Super 120B A12B",
+        "vLLM NVFP4, 1 worker, greedy BOTH arms, 0 retries",
+    ),
     # Both switches work on this model -- reasoning_effort AND
     # chat_template_kwargs -- where Nemotron 3.5 honours only the first and
     # Nemotron 3 Super only the second. Three models, three behaviours.
     # SHARED NODE: our concurrency is 1, but the server batched our requests
     # with live traffic throughout, so this pair is not comparable to the
     # exclusive-node arms above. contention_q38flash.tsv records how much.
-    ("q38flash",  "Qwen3.8-Flash-Next",
-                  "vLLM NVFP4/FP8, 1 worker, greedy BOTH arms, 0 retries -- SHARED node"),
+    (
+        "q38flash",
+        "Qwen3.8-Flash-Next",
+        "vLLM NVFP4/FP8, 1 worker, greedy BOTH arms, 0 retries -- SHARED node",
+    ),
 ]
 THINK_ONLY = {"muse", "ornith35", "ornith9"}
 
@@ -115,8 +133,13 @@ def totals(g):
 
 
 def percat(ok, cat):
-    return {c: (sum(1 for i in ok if cat[i] == c and ok[i]),
-                sum(1 for i in cat if cat[i] == c)) for c in CATS}
+    return {
+        c: (
+            sum(1 for i in ok if cat[i] == c and ok[i]),
+            sum(1 for i in cat if cat[i] == c),
+        )
+        for c in CATS
+    }
 
 
 def confounds(raw, key, profdir, stack_workers=1):
@@ -148,16 +171,20 @@ def confounds(raw, key, profdir, stack_workers=1):
                 pass
         shared = sum(1 for v in vals if v > 1)
         if vals and shared:
-            out.append("SHARED node: %d/%d samples (%.0f%%) had other traffic in "
-                       "the batch -- our workers=1, but the server batched anyway"
-                       % (shared, len(vals), 100.0 * shared / len(vals)))
+            out.append(
+                "SHARED node: %d/%d samples (%.0f%%) had other traffic in "
+                "the batch -- our workers=1, but the server batched anyway"
+                % (shared, len(vals), 100.0 * shared / len(vals))
+            )
     # Prefer the controls the run recorded about itself. Files written before
     # 2026-08-24 have no res["run"], so those still need the sibling profile --
     # but a new run is audited from its own bytes, which is the point.
     run = (raw or {}).get("run")
     if run:
-        temps = [v.get("temperature", 0.0)
-                 for v in json.loads(run.get("profiles") or "{}").values()]
+        temps = [
+            v.get("temperature", 0.0)
+            for v in json.loads(run.get("profiles") or "{}").values()
+        ]
         if any(t != 0.0 for t in temps):
             out.append("profile is t%.2f, not greedy" % max(temps))
         if run.get("workers", 1) != 1:
@@ -179,8 +206,10 @@ def confounds(raw, key, profdir, stack_workers=1):
     # own greedy run, and the 1-worker control (q35.w1a/w1b) scored 37 twice
     # against 36 and 34 for the same model at 4.
     if stack_workers and stack_workers != 1:
-        out.append("%d concurrent workers -- this node reproduced only 46/104 "
-                   "of its own greedy run at this setting" % stack_workers)
+        out.append(
+            "%d concurrent workers -- this node reproduced only 46/104 "
+            "of its own greedy run at this setting" % stack_workers
+        )
     return out
 
 
@@ -189,12 +218,17 @@ def report(title, here, models, profdir, stack_workers=1):
     print(title)
     print("=" * 78)
     for key, label, note in models:
-        off_g, on_g = load(here, "hb_%s.graded.json" % key), load(here, "ht_%s.graded.json" % key)
+        off_g, on_g = (
+            load(here, "hb_%s.graded.json" % key),
+            load(here, "ht_%s.graded.json" % key),
+        )
         on_raw = load(here, "ht_%s.json" % key)
         for g, what in ((off_g, "off"), (on_g, "on")):
             if g and ran(g) < N:
-                print("  %-24s %s arm PARTIAL (%d/%d ran) -- not scored"
-                      % (label, what, ran(g), N))
+                print(
+                    "  %-24s %s arm PARTIAL (%d/%d ran) -- not scored"
+                    % (label, what, ran(g), N)
+                )
         off_g = off_g if off_g and ran(off_g) >= N else None
         on_g = on_g if on_g and ran(on_g) >= N else None
 
@@ -207,29 +241,49 @@ def report(title, here, models, profdir, stack_workers=1):
             n_, _ = totals(on_g)
             ot, nt = sum(o.values()), sum(n_.values())
             arm = (on_raw or {}).get("arm", "?")
-            armtag = {"native": "native", "cot": "prompted CoT", "plain": "PLAIN(!)"}.get(arm, arm)
-            print("\n  %-24s off %3d  ->  on %3d  (%+d)   [%s]  %s"
-                  % (label, ot, nt, nt - ot, armtag, note))
+            armtag = {
+                "native": "native",
+                "cot": "prompted CoT",
+                "plain": "PLAIN(!)",
+            }.get(arm, arm)
+            print(
+                "\n  %-24s off %3d  ->  on %3d  (%+d)   [%s]  %s"
+                % (label, ot, nt, nt - ot, armtag, note)
+            )
             po, pn = percat(o, cat), percat(n_, cat)
-            print("     " + "  ".join("%s %d->%d/%d" % (c, po[c][0], pn[c][0], po[c][1])
-                                      for c in CATS))
+            print(
+                "     "
+                + "  ".join(
+                    "%s %d->%d/%d" % (c, po[c][0], pn[c][0], po[c][1]) for c in CATS
+                )
+            )
             gained = sum(1 for i in o if not o[i] and n_[i])
             lost = sum(1 for i in o if o[i] and not n_[i])
             print("     flips +%d / -%d" % (gained, lost), end="")
             cf = confounds(on_raw, key, profdir, stack_workers)
-            print(" | CONFOUNDED: " + "; ".join(cf) if cf
-                  else " | clean: greedy, unresampled")
+            print(
+                " | CONFOUNDED: " + "; ".join(cf)
+                if cf
+                else " | clean: greedy, unresampled"
+            )
         elif on_g and key in THINK_ONLY:
             n_, cat = totals(on_g)
             pn = percat(n_, cat)
-            print("\n  %-24s      thinking-only %3d/%d      %s" % (label, sum(n_.values()), N, note))
-            print("     " + "  ".join("%s %d/%d" % (c, pn[c][0], pn[c][1]) for c in CATS))
+            print(
+                "\n  %-24s      thinking-only %3d/%d      %s"
+                % (label, sum(n_.values()), N, note)
+            )
+            print(
+                "     " + "  ".join("%s %d/%d" % (c, pn[c][0], pn[c][1]) for c in CATS)
+            )
             print("     no off arm by design -- a standalone score, not a delta")
         else:
             g = off_g or on_g
             t, cat = totals(g)
-            print("\n  %-24s %s arm only %3d/%d      %s"
-                  % (label, "off" if off_g else "on", sum(t.values()), N, note))
+            print(
+                "\n  %-24s %s arm only %3d/%d      %s"
+                % (label, "off" if off_g else "on", sum(t.values()), N, note)
+            )
 
 
 MACOUT = os.path.join(REPO, "results", "hard")

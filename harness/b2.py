@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Runner + grader for the 50-task agentic benchmark and RAG set.
 
-    b2.py setup                    build sandbox images
-    b2.py run <model> <out.json>   query the vLLM endpoint
-    b2.py grade <out.json>         grade and emit <out>.graded.json
+b2.py setup                    build sandbox images
+b2.py run <model> <out.json>   query the vLLM endpoint
+b2.py grade <out.json>         grade and emit <out>.graded.json
 """
+
 import json
 import os
 import re
@@ -18,12 +19,26 @@ import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from b2_tasks import (  # noqa: E402
-    BASH, DJANGO, DJANGO_MODELS, DOCS, GIT, GITHUB, JS, PYTHON, RAG, RAG_DOC,
-    REFUSAL, RN, SQL, SQL_SCHEMA, SSH, TS,
+    BASH,
+    DJANGO,
+    DJANGO_MODELS,
+    DOCS,
+    GIT,
+    GITHUB,
+    JS,
+    PYTHON,
+    RAG,
+    RAG_DOC,
+    REFUSAL,
+    RN,
+    SQL,
+    SQL_SCHEMA,
+    SSH,
+    TS,
 )
 
 URL = "http://localhost:8000/v1/chat/completions"
-TMP = "/root/bench2/tmp"
+TMP = os.environ.get("BENCH_TMP", "/root/bench2/tmp")
 IMG_PY, IMG_NODE, IMG_SH = "bench-py:1", "bench-node:1", "bench-sh:1"
 
 # ------------------------------------------------------------------ sandboxes
@@ -31,9 +46,11 @@ DOCKERFILES = {
     # pyyaml must be baked in: graders run with --network none
     IMG_PY: "FROM python:3.12-slim\nRUN pip install --no-cache-dir django==5.1.4 pyyaml==6.0.2\n",
     IMG_NODE: "FROM node:22-alpine\nRUN npm i -g typescript@5.6.3 @types/node@22\n",
-    IMG_SH: ("FROM alpine:3.20\n"
-             "RUN apk add --no-cache git openssh-client tar coreutils findutils "
-             "grep sed bash gzip\n"),
+    IMG_SH: (
+        "FROM alpine:3.20\n"
+        "RUN apk add --no-cache git openssh-client tar coreutils findutils "
+        "grep sed bash gzip\n"
+    ),
 }
 
 
@@ -44,8 +61,9 @@ def setup():
         with open(os.path.join(d, "Dockerfile"), "w") as f:
             f.write(df)
         print(f"building {tag} ...", flush=True)
-        p = subprocess.run(["docker", "build", "-q", "-t", tag, d],
-                           capture_output=True, text=True)
+        p = subprocess.run(
+            ["docker", "build", "-q", "-t", tag, d], capture_output=True, text=True
+        )
         print("  ok" if p.returncode == 0 else f"  FAILED: {p.stderr[-400:]}")
         shutil.rmtree(d, ignore_errors=True)
 
@@ -64,18 +82,48 @@ def sandbox(image, files, script, timeout=180):
             f.write(script)
         os.chmod(d, 0o777)
         p = subprocess.run(
-            ["docker", "run", "--rm", "--network", "none", "--memory", "1g",
-             "--pids-limit", "256", "-e", "HOME=/w", "-v", f"{d}:/w", "-w", "/w",
-             image, "sh", "/w/_run.sh"],
-            capture_output=True, text=True, timeout=timeout,
+            [
+                "docker",
+                "run",
+                "--rm",
+                "--network",
+                "none",
+                "--memory",
+                "1g",
+                "--pids-limit",
+                "256",
+                "-e",
+                "HOME=/w",
+                "-v",
+                f"{d}:/w",
+                "-w",
+                "/w",
+                image,
+                "sh",
+                "/w/_run.sh",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
         )
         return p.returncode == 0, (p.stdout or "")[-8000:], (p.stderr or "")[-300:]
     except subprocess.TimeoutExpired:
         return False, "", "harness timeout"
     finally:
-        subprocess.run(["docker", "run", "--rm", "-v", f"{d}:/x", "alpine",
-                        "sh", "-c", "rm -rf /x/* /x/.[!.]* 2>/dev/null || true"],
-                       capture_output=True)
+        subprocess.run(
+            [
+                "docker",
+                "run",
+                "--rm",
+                "-v",
+                f"{d}:/x",
+                "alpine",
+                "sh",
+                "-c",
+                "rm -rf /x/* /x/.[!.]* 2>/dev/null || true",
+            ],
+            capture_output=True,
+        )
         shutil.rmtree(d, ignore_errors=True)
 
 
@@ -98,34 +146,53 @@ def all_prompts():
     for tid, _setup, prompt, _chk in GIT:
         out.append((tid, "Git", "git", prompt, 200))
     for tid, prompt, alias, spec in SSH:
-        out.append((tid, "SSH", "sshcfg" if alias else "rubric", prompt,
-                    300 if alias else 200))
+        out.append(
+            (tid, "SSH", "sshcfg" if alias else "rubric", prompt, 300 if alias else 200)
+        )
     for tid, prompt, spec in GITHUB:
-        out.append((tid, "GitHub", "yaml" if isinstance(spec, str) else "rubric",
-                    prompt, 700 if isinstance(spec, str) else 200))
+        out.append(
+            (
+                tid,
+                "GitHub",
+                "yaml" if isinstance(spec, str) else "rubric",
+                prompt,
+                700 if isinstance(spec, str) else 200,
+            )
+        )
     for tid, prompt, _pats in DOCS:
         out.append((tid, "Docs", "rubric", prompt, 600))
     for tid, prompt, _pats in RN:
         out.append((tid, "ReactNative", "rubric", prompt, 700))
     for tid, q, _pats, _unans in RAG:
-        p = ("Answer the question using ONLY the document below. If the document does not "
-             "contain the answer, say so explicitly and do not guess.\n\n"
-             f"--- DOCUMENT ---\n{RAG_DOC}\n--- END ---\n\nQuestion: {q}")
+        p = (
+            "Answer the question using ONLY the document below. If the document does not "
+            "contain the answer, say so explicitly and do not guess.\n\n"
+            f"--- DOCUMENT ---\n{RAG_DOC}\n--- END ---\n\nQuestion: {q}"
+        )
         out.append((tid, "RAG", "rag", p, 250))
     return out
 
 
 def ask(model, prompt, max_tokens):
-    payload = {"model": model, "messages": [{"role": "user", "content": prompt}],
-               "max_tokens": max_tokens, "temperature": 0}
-    req = urllib.request.Request(URL, data=json.dumps(payload).encode(),
-                                 headers={"Content-Type": "application/json"})
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": max_tokens,
+        "temperature": 0,
+    }
+    req = urllib.request.Request(
+        URL,
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json"},
+    )
     t0 = time.time()
     with urllib.request.urlopen(req, timeout=1200) as r:
         d = json.loads(r.read())
-    return {"text": d["choices"][0]["message"]["content"] or "",
-            "tok": d["usage"]["completion_tokens"],
-            "secs": round(time.time() - t0, 2)}
+    return {
+        "text": d["choices"][0]["message"]["content"] or "",
+        "tok": d["usage"]["completion_tokens"],
+        "secs": round(time.time() - t0, 2),
+    }
 
 
 def run(model, out_path):
@@ -195,8 +262,13 @@ print("OK")
 
 
 def g_django(text, tests):
-    files = {"bench_app/__init__.py": "", "bench_app/models.py": DJANGO_MODELS,
-             "sol.py": code_of(text), "test.py": tests, "h.py": DJ_HARNESS}
+    files = {
+        "bench_app/__init__.py": "",
+        "bench_app/models.py": DJANGO_MODELS,
+        "sol.py": code_of(text),
+        "test.py": tests,
+        "h.py": DJ_HARNESS,
+    }
     ok, _o, err = sandbox(IMG_PY, files, "timeout 60 python /w/h.py\n")
     return ok, err.strip().splitlines()[-1][:110] if err.strip() else ""
 
@@ -219,12 +291,12 @@ def g_sql(text, expected):
         for r in rs:
             out.append(tuple(round(v, 2) if isinstance(v, float) else v for v in r))
         return out
+
     got, want = norm(rows), norm(expected)
     if got == want:
         return True, ""
     # tolerate extra trailing columns only if the leading ones match exactly
-    if len(got) == len(want) and all(
-            g[:len(w)] == w for g, w in zip(got, want)):
+    if len(got) == len(want) and all(g[: len(w)] == w for g, w in zip(got, want)):
         return True, ""
     return False, f"got {got[:3]}"
 
@@ -235,10 +307,12 @@ def g_js(text, tests):
     return ok, err.strip().splitlines()[-1][:110] if err.strip() else ""
 
 
-TSC = ("cd /w && timeout 90 tsc --strict --module commonjs --target es2020 "
-       "--types node --typeRoots /usr/local/lib/node_modules/@types "
-       "--outDir out sol.ts t.ts 2>&1 | head -5 && "
-       "test -f out/t.js && timeout 30 node out/t.js\n")
+TSC = (
+    "cd /w && timeout 90 tsc --strict --module commonjs --target es2020 "
+    "--types node --typeRoots /usr/local/lib/node_modules/@types "
+    "--outDir out sol.ts t.ts 2>&1 | head -5 && "
+    "test -f out/t.js && timeout 30 node out/t.js\n"
+)
 
 
 def g_ts(text, tests):
@@ -252,8 +326,10 @@ def g_shell(text, setup_sh, checker, image=IMG_SH):
     cmd = cmd_of(strip_think(text))
     if not cmd:
         return False, "empty"
-    script = (f"set -e\nmkdir -p /w/box && cd /w/box\n{setup_sh}\nset +e\n"
-              f"{cmd}\ncd /w/box\n{checker}\n")
+    script = (
+        f"set -e\nmkdir -p /w/box && cd /w/box\n{setup_sh}\nset +e\n"
+        f"{cmd}\ncd /w/box\n{checker}\n"
+    )
     ok, _o, err = sandbox(image, {}, script)
     return ok, (cmd[:80] if not ok else "")
 
@@ -262,9 +338,11 @@ def g_sshcfg(text, alias, spec):
     cfg = code_of(text)
     # grep the keys we care about in-container: ssh -G emits 50+ lines
     keys = "|".join(spec.keys())
-    script = (f"cp /w/cfg /w/c && chmod 600 /w/c && "
-              f"ssh -G -F /w/c {alias} 2>/dev/null | tr 'A-Z' 'a-z' "
-              f"| grep -E '^({keys}) '\n")
+    script = (
+        f"cp /w/cfg /w/c && chmod 600 /w/c && "
+        f"ssh -G -F /w/c {alias} 2>/dev/null | tr 'A-Z' 'a-z' "
+        f"| grep -E '^({keys}) '\n"
+    )
     ok, out, _e = sandbox(IMG_SH, {"cfg": cfg}, script)
     if not ok:
         return False, "ssh -G rejected config"
@@ -340,9 +418,13 @@ def grade(path):
 
     def put(tid, ok, note):
         it = items.get(tid, {})
-        out["results"][tid] = {"ok": bool(ok), "note": note,
-                               "domain": it.get("domain", "?"),
-                               "secs": it.get("secs", 0), "tok": it.get("tok", 0)}
+        out["results"][tid] = {
+            "ok": bool(ok),
+            "note": note,
+            "domain": it.get("domain", "?"),
+            "secs": it.get("secs", 0),
+            "tok": it.get("tok", 0),
+        }
         print(f"  {'PASS' if ok else 'FAIL'}  {tid:<18} {note[:80]}")
 
     for tid, _p, tests in PYTHON:

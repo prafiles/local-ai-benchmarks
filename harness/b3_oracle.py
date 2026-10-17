@@ -4,6 +4,7 @@
 Grading this must yield 600/600. Anything less is a grader bug, and would have
 been charged to the models as a failure.
 """
+
 import json
 import os
 import sys
@@ -11,15 +12,15 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-import b3 as B3          # noqa: E402
-import b3_django as DJ   # noqa: E402
-import b3_git as GITM    # noqa: E402
-import b3_jsts as JSTS   # noqa: E402
-import b3_misc as M1     # noqa: E402
-import b3_python as PY   # noqa: E402
-import b3_rag as RAG     # noqa: E402
-import b3_shell as SH    # noqa: E402
-import b3_sql as SQL     # noqa: E402
+import b3 as B3  # noqa: E402
+import b3_django as DJ  # noqa: E402
+import b3_git as GITM  # noqa: E402
+import b3_jsts as JSTS  # noqa: E402
+import b3_misc as M1  # noqa: E402
+import b3_python as PY  # noqa: E402
+import b3_rag as RAG  # noqa: E402
+import b3_shell as SH  # noqa: E402
+import b3_sql as SQL  # noqa: E402
 
 items = {}
 

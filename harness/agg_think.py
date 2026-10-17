@@ -13,15 +13,32 @@ t_<m>.json for cost, and reports:
 
     agg_think.py [out.json]
 """
+
 import json
 import os
 import sys
 
 HERE = os.environ.get("B4_OUT", "/root/bench2")
-MODELS = [("gemma", "Gemma 4 12B QAT"), ("q35", "Qwen3.5-9B FP8"),
-          ("mellum", "Mellum2-12B-A2.5B"), ("qwen", "Qwen2.5-Coder-14B")]
-CATS = ["Python", "Django", "SQL", "JS", "TS", "Bash", "Git", "SSH", "GitHub",
-        "Docs", "ReactNative", "RAG"]
+MODELS = [
+    ("gemma", "Gemma 4 12B QAT"),
+    ("q35", "Qwen3.5-9B FP8"),
+    ("mellum", "Mellum2-12B-A2.5B"),
+    ("qwen", "Qwen2.5-Coder-14B"),
+]
+CATS = [
+    "Python",
+    "Django",
+    "SQL",
+    "JS",
+    "TS",
+    "Bash",
+    "Git",
+    "SSH",
+    "GitHub",
+    "Docs",
+    "ReactNative",
+    "RAG",
+]
 
 
 def load(p):
@@ -34,7 +51,10 @@ for key, label in MODELS:
     think = load(os.path.join(HERE, "t_%s.graded.json" % key))
     raw = load(os.path.join(HERE, "t_%s.json" % key))
     if not base or not think:
-        print("== %-22s reasoning arm: %s" % (label, "not run" if not think else "no baseline"))
+        print(
+            "== %-22s reasoning arm: %s"
+            % (label, "not run" if not think else "no baseline")
+        )
         continue
 
     b, t = base["results"], think["results"]
@@ -63,18 +83,36 @@ for key, label in MODELS:
     nthink = sum(1 for v in items.values() if v.get("think_chars", 0) > 0)
 
     bt, tt = sum(1 for k in shared if b[k]["ok"]), sum(1 for k in shared if t[k]["ok"])
-    out["models"][key] = {"label": label, "n": len(shared), "base": bt, "think": tt,
-                          "delta": tt - bt, "percat": percat,
-                          "gained": gained, "lost": lost,
-                          "empty": len(empty), "truncated": len(trunc),
-                          "errors": len(errs), "traced": nthink,
-                          "tokens": tok, "think_chars": thk, "secs": round(secs, 1)}
+    out["models"][key] = {
+        "label": label,
+        "n": len(shared),
+        "base": bt,
+        "think": tt,
+        "delta": tt - bt,
+        "percat": percat,
+        "gained": gained,
+        "lost": lost,
+        "empty": len(empty),
+        "truncated": len(trunc),
+        "errors": len(errs),
+        "traced": nthink,
+        "tokens": tok,
+        "think_chars": thk,
+        "secs": round(secs, 1),
+    }
 
-    print("\n== %s   %d/%d -> %d/%d   (%+d)" % (label, bt, len(shared), tt, len(shared), tt - bt))
-    print("   traced %d/%d tasks | %d empty answers | %d truncated | %d errors"
-          % (nthink, len(items), len(empty), len(trunc), len(errs)))
-    print("   cost: %s completion tokens, %.1f h wall, %.0f think-chars/task"
-          % ("{:,}".format(tok), secs / 3600, thk / max(len(items), 1)))
+    print(
+        "\n== %s   %d/%d -> %d/%d   (%+d)"
+        % (label, bt, len(shared), tt, len(shared), tt - bt)
+    )
+    print(
+        "   traced %d/%d tasks | %d empty answers | %d truncated | %d errors"
+        % (nthink, len(items), len(empty), len(trunc), len(errs))
+    )
+    print(
+        "   cost: %s completion tokens, %.1f h wall, %.0f think-chars/task"
+        % ("{:,}".format(tok), secs / 3600, thk / max(len(items), 1))
+    )
     print("   flips: +%d gained, -%d lost" % (len(gained), len(lost)))
     print("   %-13s %5s %6s %6s" % ("category", "n", "base", "think"))
     for c in CATS:

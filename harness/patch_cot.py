@@ -12,6 +12,7 @@ which also fixes a latent bug: code_of() searched for a fenced block WITHOUT
 stripping <think> first, so a code block inside the reasoning would have been
 graded instead of the answer.
 """
+
 import sys
 
 COT_BLOCK = '''
@@ -42,39 +43,39 @@ if "B4_COT" in s:
     sys.exit(0)
 
 # 1. the CoT helper, right after the reasoning helpers the previous patch added
-anchor = "THINK_CAPABLE = (\"gemma-4\", \"qwen3.5\")"
+anchor = 'THINK_CAPABLE = ("gemma-4", "qwen3.5")'
 assert anchor in s, "reasoning patch must be applied first"
 s = s.replace(anchor, anchor + "\n" + COT_BLOCK, 1)
 
 # 2. apply the prefix at the point the prompt becomes a message
-old = '''    payload = sampling({"model": model,
+old = """    payload = sampling({"model": model,
                         "messages": [{"role": "user", "content": prompt}],
-                        "max_tokens": budget(max_tokens)}, model)'''
-new = '''    payload = sampling({"model": model,
+                        "max_tokens": budget(max_tokens)}, model)"""
+new = """    payload = sampling({"model": model,
                         "messages": [{"role": "user",
                                       "content": with_cot(model, prompt)}],
-                        "max_tokens": budget(max_tokens)}, model)'''
+                        "max_tokens": budget(max_tokens)}, model)"""
 assert old in s, "ask() body did not match"
 s = s.replace(old, new, 1)
 
 # 3. code_of must drop the reasoning before hunting for a fenced block, or a
 #    code block written *inside* <think> gets graded instead of the answer
-old_code_of = '''def code_of(t):
+old_code_of = """def code_of(t):
     m = FENCE.search(t)
-    return m.group(1) if m else t'''
-new_code_of = '''def code_of(t):
+    return m.group(1) if m else t"""
+new_code_of = """def code_of(t):
     t = strip_think(t)
     m = FENCE.search(t)
-    return m.group(1) if m else t'''
+    return m.group(1) if m else t"""
 assert old_code_of in s, "code_of did not match"
 s = s.replace(old_code_of, new_code_of, 1)
 
 # strip_think is defined after code_of in this file; move it above so the call resolves
-sd = '''def strip_think(t):
+sd = """def strip_think(t):
     return re.sub(r"<think>.*?</think>", "", t, flags=re.S)
 
 
-'''
+"""
 assert sd in s
 s = s.replace(sd, "", 1)
 s = s.replace("def code_of(t):", sd + "def code_of(t):", 1)

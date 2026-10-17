@@ -4,6 +4,7 @@
 Writes per-task setup/ref/chk files into a staging dir, then runs the whole
 category inside ONE container instead of one container per task.
 """
+
 import os
 import shutil
 import subprocess
@@ -43,10 +44,27 @@ def run(name, rows):
         f.write(RUNNER)
 
     p = subprocess.run(
-        ["docker", "run", "--rm", "--network", "none", "--memory", "1g",
-         "-e", "HOME=/tmp", "-v", f"{d}:/w", "-w", "/w", "bench-sh:1",
-         "sh", "/w/_run.sh"],
-        capture_output=True, text=True, timeout=900,
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            "--memory",
+            "1g",
+            "-e",
+            "HOME=/tmp",
+            "-v",
+            f"{d}:/w",
+            "-w",
+            "/w",
+            "bench-sh:1",
+            "sh",
+            "/w/_run.sh",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=900,
     )
     bad = [ln.split()[1] for ln in p.stdout.splitlines() if ln.startswith("BAD")]
     ok = len([ln for ln in p.stdout.splitlines() if ln.startswith("OK")])

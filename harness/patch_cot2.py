@@ -28,6 +28,7 @@ honours it, rather than the marker being stripped unconditionally -- a Docs or
 RAG answer is free to contain the word ANSWER: on its own merits, and silently
 truncating there would corrupt the baseline and native arms.
 """
+
 p = "/root/bench2/b3.py"
 s = open(p).read()
 
@@ -84,31 +85,31 @@ def after_mark(t):
 assert old in s, "COT_PREFIX block did not match"
 s = s.replace(old, new, 1)
 
-old_strip = '''def strip_think(t):
-    t = re.sub(r"<think>.*?</think>", "", t, flags=re.S)'''
-new_strip = '''def strip_think(t):
+old_strip = """def strip_think(t):
+    t = re.sub(r"<think>.*?</think>", "", t, flags=re.S)"""
+new_strip = """def strip_think(t):
     if COT_SPLIT:
         t = after_mark(t)
-    t = re.sub(r"<think>.*?</think>", "", t, flags=re.S)'''
+    t = re.sub(r"<think>.*?</think>", "", t, flags=re.S)"""
 assert old_strip in s, "strip_think did not match"
 s = s.replace(old_strip, new_strip, 1)
 
 # record the arm on the run so grading is not guesswork
-old_res = '''def run(model, out_path):
+old_res = """def run(model, out_path):
     tasks = all_tasks()
-    res = {"model": model, "items": {}}'''
-new_res = '''def run(model, out_path):
+    res = {"model": model, "items": {}}"""
+new_res = """def run(model, out_path):
     tasks = all_tasks()
     res = {"model": model, "items": {},
            "arm": ("native" if (THINK and can_think(model))
-                   else "cot" if (COT and not can_think(model)) else "plain")}'''
+                   else "cot" if (COT and not can_think(model)) else "plain")}"""
 assert old_res in s, "run() head did not match"
 s = s.replace(old_res, new_res, 1)
 
-old_grade = '''def grade(path):
+old_grade = """def grade(path):
     data = json.load(open(path))
-    items = data["items"]'''
-new_grade = '''def grade(path):
+    items = data["items"]"""
+new_grade = """def grade(path):
     global COT_SPLIT
     data = json.load(open(path))
     COT_SPLIT = data.get("arm") == "cot"
@@ -116,7 +117,7 @@ new_grade = '''def grade(path):
         used = sum(1 for v in data["items"].values() if COT_MARK in (v.get("text") or ""))
         print("  CoT arm: %d/%d answers used the %s marker"
               % (used, len(data["items"]), COT_MARK), flush=True)
-    items = data["items"]'''
+    items = data["items"]"""
 assert old_grade in s, "grade() head did not match"
 s = s.replace(old_grade, new_grade, 1)
 

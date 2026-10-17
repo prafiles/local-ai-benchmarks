@@ -16,22 +16,23 @@ That matters because the CoT arm exists to answer "does prompted reasoning help 
 model with no thinking mode". An instruction that quietly breaks output format
 answers a different and much less interesting question.
 """
+
 p = "/root/bench2/b3.py"
 s = open(p).read()
 
-old = '''COT_SUFFIX = (
+old = """COT_SUFFIX = (
     "\\n\\nDo not answer immediately. First write at least two sentences explaining "
     "your approach and any edge cases. Then write " + COT_MARK + " on its own line, "
     "followed by exactly the requested output and nothing else."
-)'''
+)"""
 
-new = '''COT_SUFFIX = (
+new = """COT_SUFFIX = (
     "\\n\\nDo not answer immediately. First write at least two sentences explaining "
     "your approach and any edge cases. Then write " + COT_MARK + " on its own line, "
     "followed by the answer in exactly the format the task asked for -- keeping "
     "every keyword it specified, such as export or module.exports -- and nothing "
     "else."
-)'''
+)"""
 
 if "keeping " in s and "such as export" in s:
     print("already patched")

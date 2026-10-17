@@ -34,6 +34,7 @@ The serving layer is b3's, imported rather than copied, so every patch already
 applied to it -- the endpoint override, the LM Studio reasoning_effort switch,
 the raw-completions escape, retry-on-empty -- applies here unchanged.
 """
+
 import json
 import os
 import re
@@ -47,11 +48,11 @@ import concurrent.futures
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-import b3                       # noqa: E402  -- serving layer, reused wholesale
-import b5_jsts as JSTS          # noqa: E402
-import b5_python as PY          # noqa: E402
-import b5_shell as SH           # noqa: E402
-import b5_sql as SQL            # noqa: E402
+import b3  # noqa: E402  -- serving layer, reused wholesale
+import b5_jsts as JSTS  # noqa: E402
+import b5_python as PY  # noqa: E402
+import b5_shell as SH  # noqa: E402
+import b5_sql as SQL  # noqa: E402
 
 TMP = os.environ.get("B4_TMP", "/tmp/b5run")
 
@@ -75,45 +76,95 @@ def all_tasks():
     """[(id, category, kind, prompt, max_tokens)]"""
     t = []
     for tid, spec, _tests, _r in PY.T:
-        t.append((tid, "Python", "py",
-                  "Write a Python " + spec +
-                  "\n\nOutput only the code, no explanation.", BUDGET["py"]))
+        t.append(
+            (
+                tid,
+                "Python",
+                "py",
+                "Write a Python " + spec + "\n\nOutput only the code, no explanation.",
+                BUDGET["py"],
+            )
+        )
     for tid, spec, _tests, _r in JSTS.JS:
-        t.append((tid, "JS", "js", "Write JavaScript defining " + spec +
-                  " Export it with module.exports. Output only the code, no explanation.",
-                  BUDGET["js"]))
+        t.append(
+            (
+                tid,
+                "JS",
+                "js",
+                "Write JavaScript defining "
+                + spec
+                + " Export it with module.exports. Output only the code, no explanation.",
+                BUDGET["js"],
+            )
+        )
     for tid, spec, _tests, _r in JSTS.TS:
-        t.append((tid, "TS", "ts", "Write TypeScript in a single module that will be " +
-                  "imported as './sol'. It must " + spec +
-                  " It must typecheck under --strict."
-                  " Output only the code, no explanation.", BUDGET["ts"]))
+        t.append(
+            (
+                tid,
+                "TS",
+                "ts",
+                "Write TypeScript in a single module that will be "
+                + "imported as './sol'. It must "
+                + spec
+                + " It must typecheck under --strict."
+                " Output only the code, no explanation.",
+                BUDGET["ts"],
+            )
+        )
     for tid, prompt, _rows in SQL_TASKS:
         t.append((tid, "SQL", "sql", prompt, BUDGET["sql"]))
     for tid, _s, prompt, _c, _r in SH.SH:
-        t.append((tid, "Bash", "sh", prompt +
-                  " Reply with a single POSIX sh command line only -- the container has no bash --"
-                  " no explanation, no markdown.", BUDGET["sh"]))
+        t.append(
+            (
+                tid,
+                "Bash",
+                "sh",
+                prompt
+                + " Reply with a single POSIX sh command line only -- the container has no bash --"
+                " no explanation, no markdown.",
+                BUDGET["sh"],
+            )
+        )
     for tid, _s, prompt, _c, _r in SH.GIT:
-        t.append((tid, "Git", "git", prompt +
-                  " Reply with a single shell command line only, no explanation, no markdown.",
-                  BUDGET["git"]))
+        t.append(
+            (
+                tid,
+                "Git",
+                "git",
+                prompt
+                + " Reply with a single shell command line only, no explanation, no markdown.",
+                BUDGET["git"],
+            )
+        )
     return t
 
 
 # ------------------------------------------------------------------- runner
 def run(model, out_path):
     tasks = all_tasks()
-    res = {"model": model, "tier": "hard", "items": {},
-           "arm": ("native" if (b3.THINK and b3.can_think(model))
-                   else "cot" if (b3.COT and not b3.can_think(model)) else "plain")}
+    res = {
+        "model": model,
+        "tier": "hard",
+        "items": {},
+        "arm": (
+            "native"
+            if (b3.THINK and b3.can_think(model))
+            else "cot"
+            if (b3.COT and not b3.can_think(model))
+            else "plain"
+        ),
+    }
     if os.path.exists(out_path):
         try:
             prev = json.load(open(out_path))
             if prev.get("model") == model:
-                res["items"] = {k: v for k, v in prev.get("items", {}).items()
-                                if not v.get("error")}
-                print("  resuming: %d/%d already done" % (len(res["items"]), len(tasks)),
-                      flush=True)
+                res["items"] = {
+                    k: v for k, v in prev.get("items", {}).items() if not v.get("error")
+                }
+                print(
+                    "  resuming: %d/%d already done" % (len(res["items"]), len(tasks)),
+                    flush=True,
+                )
         except Exception:  # noqa: BLE001
             print("  existing output unreadable, starting fresh", flush=True)
 
@@ -132,15 +183,17 @@ def run(model, out_path):
     # So a result file now carries its own controls. On a resumed arm this
     # describes the invocation that FINISHED it, which is the honest thing to
     # record but is not the same as "these settings produced every task".
-    res["run"] = {"workers": workers,
-                  "window": int(os.environ.get("B4_WINDOW", "0")),
-                  "budget": int(os.environ.get("B4_BUDGET", "0")),
-                  "retries": int(os.environ.get("B4_RETRIES", "0")),
-                  "escalate": os.environ.get("B4_ESCALATE", ""),
-                  "off_mech": os.environ.get("B4_OFF_MECH", ""),
-                  "think_effort": os.environ.get("B4_THINK_EFFORT", ""),
-                  "profiles": os.environ.get("B4_PROFILES", "")[:400],
-                  "resumed_from": len(res["items"])}
+    res["run"] = {
+        "workers": workers,
+        "window": int(os.environ.get("B4_WINDOW", "0")),
+        "budget": int(os.environ.get("B4_BUDGET", "0")),
+        "retries": int(os.environ.get("B4_RETRIES", "0")),
+        "escalate": os.environ.get("B4_ESCALATE", ""),
+        "off_mech": os.environ.get("B4_OFF_MECH", ""),
+        "think_effort": os.environ.get("B4_THINK_EFFORT", ""),
+        "profiles": os.environ.get("B4_PROFILES", "")[:400],
+        "resumed_from": len(res["items"]),
+    }
 
     lock = threading.Lock()
     t0 = time.time()
@@ -151,7 +204,12 @@ def run(model, out_path):
         try:
             r = b3.ask(model, prompt, mt)
         except Exception as e:  # noqa: BLE001
-            r = {"text": "", "tok": 0, "secs": 0, "error": "%s: %s" % (type(e).__name__, e)}
+            r = {
+                "text": "",
+                "tok": 0,
+                "secs": 0,
+                "error": "%s: %s" % (type(e).__name__, e),
+            }
         r.update(cat=cat, kind=kind)
         with lock:
             res["items"][tid] = r
@@ -167,17 +225,26 @@ def run(model, out_path):
                 # and the only visible symptom was a progress line that said
                 # "elapsed". Report the two numbers that name the cause, and
                 # refuse to spend days on a run whose projection is absurd.
-                cap = sum(1 for v in res["items"].values()
-                          if v.get("finish") == "length")
-                mt = sum(1 for v in res["items"].values()
-                         if not (v.get("text") or "").strip())
-                print("  %d/%d  %.1fm elapsed, ~%.1fh left  [capped %d, no-answer %d]"
-                      % (len(res["items"]), len(tasks), el / 60, left, cap, mt),
-                      flush=True)
+                cap = sum(
+                    1 for v in res["items"].values() if v.get("finish") == "length"
+                )
+                mt = sum(
+                    1
+                    for v in res["items"].values()
+                    if not (v.get("text") or "").strip()
+                )
+                print(
+                    "  %d/%d  %.1fm elapsed, ~%.1fh left  [capped %d, no-answer %d]"
+                    % (len(res["items"]), len(tasks), el / 60, left, cap, mt),
+                    flush=True,
+                )
                 if left > SPIRAL_WARN_H:
-                    print("    WARNING: projected %.0fh for this arm -- %d/%d capped, "
-                          "%d unanswered. Check for non-termination."
-                          % (left, cap, n, mt), flush=True)
+                    print(
+                        "    WARNING: projected %.0fh for this arm -- %d/%d capped, "
+                        "%d unanswered. Check for non-termination."
+                        % (left, cap, n, mt),
+                        flush=True,
+                    )
                 # Save BEFORE aborting. The first version of this guard raised
                 # here and threw away three hours of Qwen3.8, because the write
                 # below never ran and the exception also escaped run()'s final
@@ -191,8 +258,16 @@ def run(model, out_path):
                         "ABORT: projected %.0fh exceeds B5_ABORT_HOURS=%.0f "
                         "(capped %d/%d, unanswered %d). Fix sampling or budget. "
                         "Partial arm saved to %s -- %d tasks."
-                        % (left, SPIRAL_ABORT_H, cap, n, mt, out_path,
-                           len(res["items"])))
+                        % (
+                            left,
+                            SPIRAL_ABORT_H,
+                            cap,
+                            n,
+                            mt,
+                            out_path,
+                            len(res["items"]),
+                        )
+                    )
 
     if todo:
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
@@ -207,6 +282,7 @@ def run(model, out_path):
 # ------------------------------------------------------------------ graders
 def fresh(name):
     import shutil
+
     d = os.path.join(TMP, name)
     shutil.rmtree(d, ignore_errors=True)
     os.makedirs(d, exist_ok=True)
@@ -216,10 +292,30 @@ def fresh(name):
 def container(image, stage, script, timeout=10800, mem="4g"):
     open(os.path.join(stage, "_run.sh"), "w").write(script)
     p = subprocess.run(
-        ["docker", "run", "--rm", "--network", "none", "--memory", mem,
-         "--pids-limit", "512", "-e", "HOME=/tmp", "-v", "%s:/w" % stage, "-w", "/w",
-         image, "sh", "/w/_run.sh"],
-        capture_output=True, text=True, timeout=timeout)
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            "--memory",
+            mem,
+            "--pids-limit",
+            "512",
+            "-e",
+            "HOME=/tmp",
+            "-v",
+            "%s:/w" % stage,
+            "-w",
+            "/w",
+            image,
+            "sh",
+            "/w/_run.sh",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
     return p.stdout, p.stderr
 
 
@@ -230,8 +326,11 @@ def _verdicts(out, ids, label):
         # A grader that returns no verdict at all is not the same as a failure.
         # The b3 tier once reported 0/50 for six whole categories because the
         # sandbox image was missing and the driver died silently; say so loudly.
-        print("    WARNING: %d %s cases produced NO verdict (container died?): %s"
-              % (len(silent), label, silent[:6]), flush=True)
+        print(
+            "    WARNING: %d %s cases produced NO verdict (container died?): %s"
+            % (len(silent), label, silent[:6]),
+            flush=True,
+        )
     return got
 
 
@@ -243,18 +342,21 @@ def grade_py(items):
         cd = os.path.join(d, "cases", tid)
         os.makedirs(cd, exist_ok=True)
         open(os.path.join(cd, "m.py"), "w").write(
-            b3.code_of(items[tid]["text"]) + "\n\n" + tests)
+            b3.code_of(items[tid]["text"]) + "\n\n" + tests
+        )
     # 120s per case, not b3's 60: several tasks are scale-gated and the
     # reference itself legitimately takes 20s.
-    drv = ("import os, subprocess\n"
-           "for tid in sorted(os.listdir('/w/cases')):\n"
-           "    d='/w/cases/'+tid\n"
-           "    try:\n"
-           "        r=subprocess.run(['python','m.py'],capture_output=True,text=True,"
-           "timeout=120,cwd=d)\n"
-           "        print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n"
-           "    except subprocess.TimeoutExpired:\n"
-           "        print('BAD '+tid)\n")
+    drv = (
+        "import os, subprocess\n"
+        "for tid in sorted(os.listdir('/w/cases')):\n"
+        "    d='/w/cases/'+tid\n"
+        "    try:\n"
+        "        r=subprocess.run(['python','m.py'],capture_output=True,text=True,"
+        "timeout=120,cwd=d)\n"
+        "        print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n"
+        "    except subprocess.TimeoutExpired:\n"
+        "        print('BAD '+tid)\n"
+    )
     open(os.path.join(d, "drv.py"), "w").write(drv)
     out, _e = container("bench-py:1", d, "python /w/drv.py\n")
     return _verdicts(out, ids, "python")
@@ -267,13 +369,19 @@ def grade_js(items):
         ids.append(tid)
         cd = os.path.join(d, "cases", tid)
         os.makedirs(cd, exist_ok=True)
-        norm = ("\n;(function(){var m=module.exports;"
-                "if(typeof m==='function'&&m.name){var o={};o[m.name]=m;module.exports=o;}})();\n")
-        open(os.path.join(cd, "sol.js"), "w").write(b3.code_of(items[tid]["text"]) + norm)
+        norm = (
+            "\n;(function(){var m=module.exports;"
+            "if(typeof m==='function'&&m.name){var o={};o[m.name]=m;module.exports=o;}})();\n"
+        )
+        open(os.path.join(cd, "sol.js"), "w").write(
+            b3.code_of(items[tid]["text"]) + norm
+        )
         open(os.path.join(cd, "t.js"), "w").write(tests)
-    script = ("for id in $(ls /w/cases); do\n"
-              "  if (cd /w/cases/$id && timeout 60 node t.js >/dev/null 2>&1); "
-              "then echo \"OK $id\"; else echo \"BAD $id\"; fi\ndone\n")
+    script = (
+        "for id in $(ls /w/cases); do\n"
+        "  if (cd /w/cases/$id && timeout 60 node t.js >/dev/null 2>&1); "
+        'then echo "OK $id"; else echo "BAD $id"; fi\ndone\n'
+    )
     out, _e = container("bench-node:1", d, script)
     return _verdicts(out, ids, "js")
 
@@ -287,12 +395,14 @@ def grade_ts(items):
         os.makedirs(cd, exist_ok=True)
         open(os.path.join(cd, "sol.ts"), "w").write(b3.code_of(items[tid]["text"]))
         open(os.path.join(cd, "t.ts"), "w").write(tests)
-    script = ("for id in $(ls /w/cases); do\n"
-              "  if (cd /w/cases/$id && timeout 150 tsc --strict --module commonjs "
-              "--target es2020 --types node "
-              "--typeRoots /usr/local/lib/node_modules/@types --outDir out sol.ts t.ts "
-              ">/dev/null 2>&1 && timeout 60 node out/t.js >/dev/null 2>&1); "
-              "then echo \"OK $id\"; else echo \"BAD $id\"; fi\ndone\n")
+    script = (
+        "for id in $(ls /w/cases); do\n"
+        "  if (cd /w/cases/$id && timeout 150 tsc --strict --module commonjs "
+        "--target es2020 --types node "
+        "--typeRoots /usr/local/lib/node_modules/@types --outDir out sol.ts t.ts "
+        ">/dev/null 2>&1 && timeout 60 node out/t.js >/dev/null 2>&1); "
+        'then echo "OK $id"; else echo "BAD $id"; fi\ndone\n'
+    )
     out, _e = container("bench-node:1", d, script, mem="6g")
     return _verdicts(out, ids, "ts")
 
@@ -344,13 +454,17 @@ def grade_sql(items):
                 rows = _sql_run(con, sql)
 
                 def norm(rs):
-                    return [tuple(round(v, 2) if isinstance(v, float) else v for v in r)
-                            for r in rs]
+                    return [
+                        tuple(round(v, 2) if isinstance(v, float) else v for v in r)
+                        for r in rs
+                    ]
+
                 g, w = norm(rows), norm(expected)
                 # Extra trailing columns are tolerated, exactly as in b3, but the
                 # row COUNT and ORDER must match: every reference is fully ordered.
-                ok = g == w or (len(g) == len(w) and
-                                all(a[:len(b)] == b for a, b in zip(g, w)))
+                ok = g == w or (
+                    len(g) == len(w) and all(a[: len(b)] == b for a, b in zip(g, w))
+                )
             except Exception:  # noqa: BLE001
                 ok = False
             finally:
@@ -365,18 +479,22 @@ def grade_shell(items, rows, name):
     for tid, setup, _p, chk, _r in rows:
         ids.append(tid)
         open(os.path.join(d, tid + ".setup"), "w").write(setup + "\n")
-        open(os.path.join(d, tid + ".cmd"), "w").write(b3.cmd_of(items[tid]["text"]) + "\n")
+        open(os.path.join(d, tid + ".cmd"), "w").write(
+            b3.cmd_of(items[tid]["text"]) + "\n"
+        )
         open(os.path.join(d, tid + ".chk"), "w").write(chk + "\n")
     open(os.path.join(d, "ids"), "w").write("\n".join(ids) + "\n")
-    script = ("mkdir -p /tmp/outs\n"
-              "for id in $(cat /w/ids); do\n"
-              "  rm -rf /tmp/b/$id; mkdir -p /tmp/b/$id; cd /tmp/b/$id\n"
-              "  sh /w/$id.setup >/dev/null 2>&1\n"
-              "  OUT=/tmp/outs/$id; export OUT\n"
-              "  timeout 60 sh /w/$id.cmd > \"$OUT\" 2>&1\n"
-              "  cd /tmp/b/$id\n"
-              "  if OUT=/tmp/outs/$id sh /w/$id.chk >/dev/null 2>&1; "
-              "then echo \"OK $id\"; else echo \"BAD $id\"; fi\ndone\n")
+    script = (
+        "mkdir -p /tmp/outs\n"
+        "for id in $(cat /w/ids); do\n"
+        "  rm -rf /tmp/b/$id; mkdir -p /tmp/b/$id; cd /tmp/b/$id\n"
+        "  sh /w/$id.setup >/dev/null 2>&1\n"
+        "  OUT=/tmp/outs/$id; export OUT\n"
+        '  timeout 60 sh /w/$id.cmd > "$OUT" 2>&1\n'
+        "  cd /tmp/b/$id\n"
+        "  if OUT=/tmp/outs/$id sh /w/$id.chk >/dev/null 2>&1; "
+        'then echo "OK $id"; else echo "BAD $id"; fi\ndone\n'
+    )
     out, _e = container("bench-sh:1", d, script, mem="2g")
     return _verdicts(out, ids, name)
 
@@ -385,28 +503,41 @@ def grade(path):
     data = json.load(open(path))
     b3.COT_SPLIT = data.get("arm") == "cot"
     if b3.COT_SPLIT:
-        used = sum(1 for v in data["items"].values()
-                   if b3.COT_MARK in (v.get("text") or ""))
-        print("  CoT arm: %d/%d answers used the %s marker"
-              % (used, len(data["items"]), b3.COT_MARK), flush=True)
+        used = sum(
+            1 for v in data["items"].values() if b3.COT_MARK in (v.get("text") or "")
+        )
+        print(
+            "  CoT arm: %d/%d answers used the %s marker"
+            % (used, len(data["items"]), b3.COT_MARK),
+            flush=True,
+        )
     items = data["items"]
     have = set(items)
     want = [t[0] for t in all_tasks()]
     missing = [t for t in want if t not in have]
     if missing:
-        print("  NOTE: %d/%d tasks absent from %s -- scored 0, not graded: %s"
-              % (len(missing), len(want), os.path.basename(path),
-                 missing[:6] + (["..."] if len(missing) > 6 else [])), flush=True)
+        print(
+            "  NOTE: %d/%d tasks absent from %s -- scored 0, not graded: %s"
+            % (
+                len(missing),
+                len(want),
+                os.path.basename(path),
+                missing[:6] + (["..."] if len(missing) > 6 else []),
+            ),
+            flush=True,
+        )
         for tid in missing:
             items[tid] = {"text": "", "tok": 0, "secs": 0, "absent": True}
 
     ok = {}
-    for name, fn in (("python", lambda: grade_py(items)),
-                     ("js", lambda: grade_js(items)),
-                     ("ts", lambda: grade_ts(items)),
-                     ("sql", lambda: grade_sql(items)),
-                     ("bash", lambda: grade_shell(items, SH.SH, "sh")),
-                     ("git", lambda: grade_shell(items, SH.GIT, "git"))):
+    for name, fn in (
+        ("python", lambda: grade_py(items)),
+        ("js", lambda: grade_js(items)),
+        ("ts", lambda: grade_ts(items)),
+        ("sql", lambda: grade_sql(items)),
+        ("bash", lambda: grade_shell(items, SH.SH, "sh")),
+        ("git", lambda: grade_shell(items, SH.GIT, "git")),
+    ):
         print("  grading %s ..." % name, flush=True)
         ok.update(fn())
 
@@ -416,12 +547,21 @@ def grade(path):
     # file reading 0/104, and every completeness check in the aggregators
     # tests len(results) == 104, so it passes as a capability result.
     # Record the real count so a reader can tell a bad model from a dead run.
-    out = {"model": data["model"], "tier": "hard", "results": {},
-           "ran": len(have), "absent": len(missing)}
+    out = {
+        "model": data["model"],
+        "tier": "hard",
+        "results": {},
+        "ran": len(have),
+        "absent": len(missing),
+    }
     for tid, cat, _k, _p, _m in all_tasks():
         it = items.get(tid, {})
-        out["results"][tid] = {"ok": bool(ok.get(tid, False)), "cat": cat,
-                               "secs": it.get("secs", 0), "tok": it.get("tok", 0)}
+        out["results"][tid] = {
+            "ok": bool(ok.get(tid, False)),
+            "cat": cat,
+            "secs": it.get("secs", 0),
+            "tok": it.get("tok", 0),
+        }
         if it.get("absent"):
             out["results"][tid]["absent"] = True
     gp = path.replace(".json", ".graded.json")
@@ -447,6 +587,7 @@ if __name__ == "__main__":
     a = sys.argv[1]
     if a == "count":
         from collections import Counter
+
         t = all_tasks()
         print("total %d" % len(t))
         for c, n in sorted(Counter(x[1] for x in t).items()):

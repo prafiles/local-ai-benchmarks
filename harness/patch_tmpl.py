@@ -7,17 +7,18 @@ the plain `payload.update(profile)` it would instead be posted as a top-level
 `_tmpl` field, which vLLM ignores silently -- the run would look tuned and be
 uncapped. Same class of bug as reasoning_content vs reasoning.
 """
+
 p = "/root/bench2/b3.py"
 s = open(p).read()
 
-old = '''def sampling(payload, model):
+old = """def sampling(payload, model):
     payload.update(profile_for(model))
     if can_think(model):
         # explicit either way: the flag is what separates the two arms
         payload["chat_template_kwargs"] = {"enable_thinking": bool(THINK)}
-    return payload'''
+    return payload"""
 
-new = '''def sampling(payload, model):
+new = """def sampling(payload, model):
     prof = dict(profile_for(model))
     tmpl_extra = prof.pop("_tmpl", {})
     payload.update(prof)
@@ -26,7 +27,7 @@ new = '''def sampling(payload, model):
         tmpl = {"enable_thinking": bool(THINK)}
         tmpl.update(tmpl_extra)
         payload["chat_template_kwargs"] = tmpl
-    return payload'''
+    return payload"""
 
 if "_tmpl" in s:
     print("already patched")

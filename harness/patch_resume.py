@@ -6,7 +6,8 @@ container restart, an OOM or a dropped connection is not acceptable, and the
 existing runner starts from zero every time. This skips tasks already present in
 the output file and keeps a live count so the ETA stays honest across restarts.
 """
-old = '''def run(model, out_path):
+
+old = """def run(model, out_path):
     tasks = all_tasks()
     res = {"model": model, "items": {}}
     t0 = time.time()
@@ -17,9 +18,9 @@ old = '''def run(model, out_path):
             r = {"text": "", "tok": 0, "secs": 0, "error": f"{type(e).__name__}: {e}"}
         r.update(cat=cat, kind=kind)
         res["items"][tid] = r
-        if i % 25 == 0 or i == len(tasks):'''
+        if i % 25 == 0 or i == len(tasks):"""
 
-new = '''def run(model, out_path):
+new = """def run(model, out_path):
     tasks = all_tasks()
     res = {"model": model, "items": {}}
     if os.path.exists(out_path):
@@ -45,7 +46,7 @@ new = '''def run(model, out_path):
         r.update(cat=cat, kind=kind)
         res["items"][tid] = r
         done += 1
-        if done % 10 == 0 or i == len(tasks):'''
+        if done % 10 == 0 or i == len(tasks):"""
 
 path = "/root/bench2/b3.py"
 s = open(path).read()
@@ -56,14 +57,14 @@ assert old in s, "run() body did not match"
 s = s.replace(old, new, 1)
 
 # the ETA line counted every task; it has to count only the ones actually run
-old_eta = '''            el = time.time() - t0
+old_eta = """            el = time.time() - t0
             print(f"  {i}/{len(tasks)}  {el/60:.1f}m elapsed, "
-                  f"~{el/i*(len(tasks)-i)/60:.1f}m left", flush=True)'''
-new_eta = '''            el = time.time() - t0
+                  f"~{el/i*(len(tasks)-i)/60:.1f}m left", flush=True)"""
+new_eta = """            el = time.time() - t0
             left = len(tasks) - len(res["items"])
             rate = el / max(done, 1)
             print(f"  {len(res['items'])}/{len(tasks)}  {el/60:.1f}m elapsed, "
-                  f"~{rate*left/3600:.1f}h left", flush=True)'''
+                  f"~{rate*left/3600:.1f}h left", flush=True)"""
 assert old_eta in s, "progress line did not match"
 s = s.replace(old_eta, new_eta, 1)
 

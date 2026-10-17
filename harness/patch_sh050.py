@@ -25,21 +25,22 @@ the repository is re-graded against it -- baselines included, not just the
 reasoning arm. The task was chosen by an audit that never looked at which model
 it would help.
 """
+
 p = "/root/bench2/b3_shell.py"
 s = open(p).read()
 
-old = '''("sh-050", "mkdir -p arch && echo data > arch/f && tar -czf bundle.tar.gz arch",
+old = """("sh-050", "mkdir -p arch && echo data > arch/f && tar -czf bundle.tar.gz arch",
  "Extract the archive bundle.tar.gz into the current directory after first deleting the arch directory.",
  "test -f arch/f && test \\"$(cat arch/f)\\" = data",
- "rm -rf arch && tar -xzf bundle.tar.gz"),'''
+ "rm -rf arch && tar -xzf bundle.tar.gz"),"""
 
-new = '''("sh-050", "mkdir -p arch && echo data > arch/f && tar -czf bundle.tar.gz arch "
+new = """("sh-050", "mkdir -p arch && echo data > arch/f && tar -czf bundle.tar.gz arch "
  "&& echo stale > arch/f && touch arch/leftover",
  "Extract the archive bundle.tar.gz into the current directory after first deleting the arch directory.",
  # arch/f diverges from the archived copy so only extracting restores it, and
  # arch/leftover is absent from the tarball so only deleting first removes it
  "test -f arch/f && test \\"$(cat arch/f)\\" = data && ! test -e arch/leftover",
- "rm -rf arch && tar -xzf bundle.tar.gz"),'''
+ "rm -rf arch && tar -xzf bundle.tar.gz"),"""
 
 if "leftover" in s:
     print("already patched")

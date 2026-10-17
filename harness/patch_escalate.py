@@ -20,6 +20,7 @@ sampling, which is the number worth reporting.
 `temps` is recorded per task so the report can say how many answers came from a
 hot retry rather than burying it.
 """
+
 p = "/root/bench2/b3.py"
 s = open(p).read()
 
@@ -27,13 +28,13 @@ if "ESCALATE" in s:
     print("already patched")
     raise SystemExit(0)
 
-old = '''def _once(model, prompt, max_tokens):
+old = """def _once(model, prompt, max_tokens):
     payload = sampling({"model": model,
                         "messages": [{"role": "user",
                                       "content": with_cot(model, prompt)}],
-                        "max_tokens": budget(max_tokens)}, model)'''
+                        "max_tokens": budget(max_tokens)}, model)"""
 
-new = '''# Temperature to use on each retry, hottest last. Only reached after an empty
+new = """# Temperature to use on each retry, hottest last. Only reached after an empty
 # answer, so a task that works normally never sees these.
 ESCALATE = [float(x) for x in
             os.environ.get("B4_ESCALATE", "0.9,1.0").split(",") if x.strip()]
@@ -45,7 +46,7 @@ def _once(model, prompt, max_tokens, temp=None):
                                       "content": with_cot(model, prompt)}],
                         "max_tokens": budget(max_tokens)}, model)
     if temp is not None:
-        payload["temperature"] = temp'''
+        payload["temperature"] = temp"""
 
 assert old in s, "_once() head did not match"
 s = s.replace(old, new, 1)

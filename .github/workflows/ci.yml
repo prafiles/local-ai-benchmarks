@@ -1,0 +1,29 @@
+name: CI
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BENCH_TMP: /tmp/bench2
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+      - name: Compile harness and serving helpers
+        run: python -m compileall -q harness serving
+      - name: Build offline grader images
+        run: python harness/b2.py setup
+      - name: Exercise graders with reference answers
+        run: python harness/b2_selftest.py

@@ -12,6 +12,7 @@ session (`deep`), and once with only the convention-setting turns in front of it
 this task" from "the model couldn't reach the fact any more". Without it a low
 deep score is unattributable.
 """
+
 import concurrent.futures
 import json
 import os
@@ -28,27 +29,50 @@ import urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-import b4_ctx as C1     # noqa: E402
-import b4_ctx2 as C2    # noqa: E402
-import b4_gen as GEN    # noqa: E402
+import b4_ctx as C1  # noqa: E402
+import b4_ctx2 as C2  # noqa: E402
+import b4_gen as GEN  # noqa: E402
 
 URL = os.environ.get("B4_URL", "http://localhost:8000/v1/chat/completions")
 TMP = os.environ.get("B4_TMP", "/root/bench2/tmp/b4")
-CPT = 3.4               # nominal chars per token
+CPT = 3.4  # nominal chars per token
 
 # Per-category correction, measured against the served tokenizer. The generators
 # differ in density -- one flat constant landed the deepest probe anywhere from
 # 104K (Docs) to 152K (Bash), and 152K is a hard reject against a 131K window.
 # These factors put every category's deepest probe within a few percent of its
 # target, which is what makes a cross-category comparison mean anything.
-SCALE = {"Python": 1.122, "Django": 1.193, "SQL": 0.960, "JS": 0.907, "TS": 0.911,
-         "Bash": 0.817, "Git": 0.879, "SSH": 0.897, "GitHub": 0.880, "Docs": 1.183,
-         "ReactNative": 1.000, "RAG": 1.183}
+SCALE = {
+    "Python": 1.122,
+    "Django": 1.193,
+    "SQL": 0.960,
+    "JS": 0.907,
+    "TS": 0.911,
+    "Bash": 0.817,
+    "Git": 0.879,
+    "SSH": 0.897,
+    "GitHub": 0.880,
+    "Docs": 1.183,
+    "ReactNative": 1.000,
+    "RAG": 1.183,
+}
 
 SESSIONS = dict(C1.PART1)
 SESSIONS.update(C2.PART2)
-ORDER = ["Python", "Django", "SQL", "JS", "TS", "Bash", "Git", "SSH", "GitHub",
-         "Docs", "ReactNative", "RAG"]
+ORDER = [
+    "Python",
+    "Django",
+    "SQL",
+    "JS",
+    "TS",
+    "Bash",
+    "Git",
+    "SSH",
+    "GitHub",
+    "Docs",
+    "ReactNative",
+    "RAG",
+]
 
 
 def probes():
@@ -108,10 +132,11 @@ def build_shallow(cat):
     out = []
     for p in s["probes"]:
         out.append((msgs + [{"role": "user", "content": p["prompt"]}], p))
-        msgs = msgs + [{"role": "user", "content": p["prompt"]},
-                       {"role": "assistant", "content": p["ref"]}]
+        msgs = msgs + [
+            {"role": "user", "content": p["prompt"]},
+            {"role": "assistant", "content": p["ref"]},
+        ]
     return out
-
 
 
 # --------------------------------------------------------------- reasoning
@@ -132,8 +157,11 @@ THINK_CAPABLE = ("gemma-4", "qwen3.5")
 # as non-thinking is the worst failure available here: it routes the model to the
 # prompted-CoT arm, whose baseline would then also be thinking, and every entry
 # for that model becomes a reasoning run with a baseline label.
-THINK_CAPABLE += tuple(x.strip().lower() for x in
-                       os.environ.get("B4_THINK_CAPABLE", "").split(",") if x.strip())
+THINK_CAPABLE += tuple(
+    x.strip().lower()
+    for x in os.environ.get("B4_THINK_CAPABLE", "").split(",")
+    if x.strip()
+)
 
 # How the two arms are separated. "template" is chat_template_kwargs, which is
 # what vLLM honours and what every published number used. "reasoning_effort" is
@@ -201,7 +229,7 @@ COT_SPLIT = False
 
 def after_mark(t):
     i = t.rfind(COT_MARK)
-    return t[i + len(COT_MARK):] if i >= 0 else t
+    return t[i + len(COT_MARK) :] if i >= 0 else t
 
 
 def with_cot(model, msgs):
@@ -230,8 +258,9 @@ RETRIES = int(os.environ.get("B4_RETRIES", "0"))
 # patch_timeout.py for why those are different knobs.
 REQ_TIMEOUT = int(os.environ.get("B4_TIMEOUT", "3600"))
 
-ESCALATE = [float(x) for x in
-            os.environ.get("B4_ESCALATE", "0.9,1.0").split(",") if x.strip()]
+ESCALATE = [
+    float(x) for x in os.environ.get("B4_ESCALATE", "0.9,1.0").split(",") if x.strip()
+]
 
 # "maximum context length is N tokens. However, you requested M tokens (P in the
 # messages, C in the completion)" -- the server has already done the arithmetic,
@@ -239,8 +268,11 @@ ESCALATE = [float(x) for x in
 CTXMAX = re.compile(r"maximum context length is (\d+) tokens", re.S)
 # two wordings in the wild: "N in the messages" (older) and "your prompt contains
 # at least N input tokens" (this build)
-CTXPROMPT = re.compile(r"(?:(\d+) in the messages"
-                       r"|prompt contains at least (\d+) input tokens)", re.S)
+CTXPROMPT = re.compile(
+    r"(?:(\d+) in the messages"
+    r"|prompt contains at least (\d+) input tokens)",
+    re.S,
+)
 
 
 def ctx_overflow(body):
@@ -253,10 +285,14 @@ def ctx_overflow(body):
 
 # ------------------------------------------------------------------- runner
 def _post(model, msgs, cap):
-    payload = sampling({"model": model, "messages": with_cot(model, msgs),
-                        "max_tokens": cap}, model)
-    req = urllib.request.Request(URL, data=json.dumps(payload).encode(),
-                                 headers={"Content-Type": "application/json"})
+    payload = sampling(
+        {"model": model, "messages": with_cot(model, msgs), "max_tokens": cap}, model
+    )
+    req = urllib.request.Request(
+        URL,
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json"},
+    )
     with urllib.request.urlopen(req, timeout=REQ_TIMEOUT) as r:
         return json.loads(r.read())
 
@@ -285,23 +321,29 @@ def _once(model, msgs, max_tokens, temp=None):
             window, ptok = hit
             room = window - ptok - 8
             if room <= 64 or room >= cap:
-                raise NoRoom("prompt does not fit the window: %d in a %d window"
-                             % (ptok, window))
+                raise NoRoom(
+                    "prompt does not fit the window: %d in a %d window" % (ptok, window)
+                )
             cap = room
             squeezed += 1
     else:
-        raise NoRoom("prompt does not fit the window after %d squeezes (cap %d)"
-                     % (SQUEEZE_MAX, cap))
+        raise NoRoom(
+            "prompt does not fit the window after %d squeezes (cap %d)"
+            % (SQUEEZE_MAX, cap)
+        )
     ch = d["choices"][0]
     msg = ch["message"]
     think = msg.get("reasoning") or msg.get("reasoning_content") or ""
-    return {"text": msg.get("content") or "",
-            "tok": d["usage"]["completion_tokens"],
-            "ptok": d["usage"]["prompt_tokens"],
-            "think_chars": len(think),
-            "finish": ch.get("finish_reason", ""),
-            "cap": cap, "squeezed": squeezed,
-            "secs": round(time.time() - t0, 2)}
+    return {
+        "text": msg.get("content") or "",
+        "tok": d["usage"]["completion_tokens"],
+        "ptok": d["usage"]["prompt_tokens"],
+        "think_chars": len(think),
+        "finish": ch.get("finish_reason", ""),
+        "cap": cap,
+        "squeezed": squeezed,
+        "secs": round(time.time() - t0, 2),
+    }
 
 
 def ask(model, msgs, max_tokens):
@@ -321,18 +363,31 @@ def ask(model, msgs, max_tokens):
 
 
 def run(model, out_path, mode="both"):
-    res = {"model": model, "deep": {}, "shallow": {},
-           "arm": ("native" if (THINK and can_think(model))
-                   else "cot" if (COT and not can_think(model)) else "plain")}
+    res = {
+        "model": model,
+        "deep": {},
+        "shallow": {},
+        "arm": (
+            "native"
+            if (THINK and can_think(model))
+            else "cot"
+            if (COT and not can_think(model))
+            else "plain"
+        ),
+    }
     if os.path.exists(out_path):
         try:
             prev = json.load(open(out_path))
             if prev.get("model") == model and prev.get("arm") == res["arm"]:
                 for b in ("deep", "shallow"):
-                    res[b] = {k: v for k, v in prev.get(b, {}).items()
-                              if not v.get("error")}
-                print("  resuming: deep %d, shallow %d already done"
-                      % (len(res["deep"]), len(res["shallow"])), flush=True)
+                    res[b] = {
+                        k: v for k, v in prev.get(b, {}).items() if not v.get("error")
+                    }
+                print(
+                    "  resuming: deep %d, shallow %d already done"
+                    % (len(res["deep"]), len(res["shallow"])),
+                    flush=True,
+                )
         except Exception:  # noqa: BLE001
             print("  existing output unreadable, starting fresh", flush=True)
 
@@ -360,8 +415,14 @@ def run(model, out_path, mode="both"):
         try:
             r = ask(model, msgs, p["max_tokens"])
         except Exception as e:  # noqa: BLE001
-            r = {"text": "", "tok": 0, "ptok": 0, "secs": 0, "finish": "error",
-                 "error": f"{type(e).__name__}: {str(e)[:200]}"}
+            r = {
+                "text": "",
+                "tok": 0,
+                "ptok": 0,
+                "secs": 0,
+                "finish": "error",
+                "error": f"{type(e).__name__}: {str(e)[:200]}",
+            }
         r["cat"] = cat
         with lock:
             res[bucket][p["id"]] = r
@@ -369,9 +430,12 @@ def run(model, out_path, mode="both"):
             n = done[0]
             el = time.time() - t0
             sq = (" squeezed->%d" % r.get("cap")) if r.get("squeezed") else ""
-            print(f"  {n}/{len(plan)} {bucket:<7} {p['id']:<10} "
-                  f"ptok={r.get('ptok', 0):>6} {r['secs']:>6.1f}s{sq}  "
-                  f"[{el/60:.1f}m, ~{el/n*(len(plan)-n)/60:.0f}m left]", flush=True)
+            print(
+                f"  {n}/{len(plan)} {bucket:<7} {p['id']:<10} "
+                f"ptok={r.get('ptok', 0):>6} {r['secs']:>6.1f}s{sq}  "
+                f"[{el / 60:.1f}m, ~{el / n * (len(plan) - n) / 60:.0f}m left]",
+                flush=True,
+            )
             with open(out_path + ".tmp", "w") as f:
                 json.dump(res, f)
             os.replace(out_path + ".tmp", out_path)
@@ -418,9 +482,30 @@ def cmd_of(t):
 def container(image, stage, script, timeout=5400, mem="2g"):
     open(os.path.join(stage, "_run.sh"), "w").write(script)
     p = subprocess.run(
-        ["docker", "run", "--rm", "--network", "none", "--memory", mem,
-         "--pids-limit", "512", "-e", "HOME=/tmp", "-v", f"{stage}:/w", "-w", "/w",
-         image, "sh", "/w/_run.sh"], capture_output=True, text=True, timeout=timeout)
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            "--memory",
+            mem,
+            "--pids-limit",
+            "512",
+            "-e",
+            "HOME=/tmp",
+            "-v",
+            f"{stage}:/w",
+            "-w",
+            "/w",
+            image,
+            "sh",
+            "/w/_run.sh",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
     return p.stdout, p.stderr
 
 
@@ -460,12 +545,14 @@ def g_pyx(items, tag):
         # the answer on its own, so source-inspecting tests can't match themselves
         open(os.path.join(cd, "sol.txt"), "w").write(sol)
         open(os.path.join(cd, "m.py"), "w").write(sol + "\n\n" + p["payload"])
-    drv = ("import os, subprocess\n"
-           "for tid in sorted(os.listdir('/w/cases')):\n"
-           "    d='/w/cases/'+tid\n"
-           "    r=subprocess.run(['python','m.py'],capture_output=True,text=True,"
-           "timeout=60,cwd=d)\n"
-           "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n")
+    drv = (
+        "import os, subprocess\n"
+        "for tid in sorted(os.listdir('/w/cases')):\n"
+        "    d='/w/cases/'+tid\n"
+        "    r=subprocess.run(['python','m.py'],capture_output=True,text=True,"
+        "timeout=60,cwd=d)\n"
+        "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n"
+    )
     open(os.path.join(d, "drv.py"), "w").write(drv)
     out, _e = container("bench-py:1", d, "python /w/drv.py\n")
     return parse_okbad(out, ids)
@@ -489,21 +576,25 @@ def g_djx(items, tag):
     open(os.path.join(d, "aerelith", "__init__.py"), "w").close()
     open(os.path.join(wk, "__init__.py"), "w").close()
     open(os.path.join(wk, "models.py"), "w").write(
-        "from bench_app.models import Tenant, Project, Task, Comment  # noqa: F401\n")
+        "from bench_app.models import Tenant, Project, Task, Comment  # noqa: F401\n"
+    )
     ids = []
     for _cat, p in rows:
         ids.append(p["id"])
         cd = os.path.join(d, "cases", p["id"])
         os.makedirs(cd, exist_ok=True)
         open(os.path.join(cd, "sol.py"), "w").write(
-            code_of(items.get(p["id"], {}).get("text", "")))
+            code_of(items.get(p["id"], {}).get("text", ""))
+        )
         open(os.path.join(cd, "test.py"), "w").write(p["payload"])
-    drv = ("import os, subprocess\n"
-           "for tid in sorted(os.listdir('/w/cases')):\n"
-           "    e=dict(os.environ); e['CASE']='/w/cases/'+tid\n"
-           "    r=subprocess.run(['python','/w/h.py'],capture_output=True,text=True,"
-           "timeout=90,env=e,cwd='/w')\n"
-           "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n")
+    drv = (
+        "import os, subprocess\n"
+        "for tid in sorted(os.listdir('/w/cases')):\n"
+        "    e=dict(os.environ); e['CASE']='/w/cases/'+tid\n"
+        "    r=subprocess.run(['python','/w/h.py'],capture_output=True,text=True,"
+        "timeout=90,env=e,cwd='/w')\n"
+        "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n"
+    )
     open(os.path.join(d, "drv.py"), "w").write(drv)
     out, _e = container("bench-py:1", d, "cd /w && python /w/drv.py\n")
     return parse_okbad(out, ids)
@@ -532,11 +623,15 @@ def g_sqlx(items, _tag):
                 rows = con.execute(sql).fetchall()
 
                 def norm(rs):
-                    return [tuple(round(v, 2) if isinstance(v, float) else v for v in r)
-                            for r in rs]
+                    return [
+                        tuple(round(v, 2) if isinstance(v, float) else v for v in r)
+                        for r in rs
+                    ]
+
                 g, w = norm(rows), norm(exp[p["id"]])
-                ok = g == w or (len(g) == len(w) and
-                                all(a[:len(b)] == b for a, b in zip(g, w)))
+                ok = g == w or (
+                    len(g) == len(w) and all(a[: len(b)] == b for a, b in zip(g, w))
+                )
             except Exception:  # noqa: BLE001
                 ok = False
             finally:
@@ -556,12 +651,15 @@ def g_jsx(items, tag):
         # no export-shape normaliser here: object-literal exports are a stated
         # rule of this session, so getting it wrong is a real failure
         open(os.path.join(cd, "sol.js"), "w").write(
-            code_of(items.get(p["id"], {}).get("text", "")))
+            code_of(items.get(p["id"], {}).get("text", ""))
+        )
         open(os.path.join(cd, "aerutil.js"), "w").write(C1.JS_UTIL)
         open(os.path.join(cd, "t.js"), "w").write(p["payload"])
-    script = ("for id in $(ls /w/cases); do\n"
-              "  if (cd /w/cases/$id && timeout 30 node t.js >/dev/null 2>&1); "
-              "then echo \"OK $id\"; else echo \"BAD $id\"; fi\ndone\n")
+    script = (
+        "for id in $(ls /w/cases); do\n"
+        "  if (cd /w/cases/$id && timeout 30 node t.js >/dev/null 2>&1); "
+        'then echo "OK $id"; else echo "BAD $id"; fi\ndone\n'
+    )
     out, _e = container("bench-node:1", d, script)
     return parse_okbad(out, ids)
 
@@ -575,16 +673,19 @@ def g_tsx(items, tag):
         cd = os.path.join(d, "cases", p["id"])
         os.makedirs(cd, exist_ok=True)
         open(os.path.join(cd, "sol.ts"), "w").write(
-            code_of(items.get(p["id"], {}).get("text", "")))
+            code_of(items.get(p["id"], {}).get("text", ""))
+        )
         open(os.path.join(cd, "result.ts"), "w").write(C1.TS_RESULT)
         open(os.path.join(cd, "t.ts"), "w").write(p["payload"])
-    script = ("for id in $(ls /w/cases); do\n"
-              "  if (cd /w/cases/$id && timeout 90 tsc --strict --module commonjs "
-              "--target es2020 --types node "
-              "--typeRoots /usr/local/lib/node_modules/@types --outDir out "
-              "sol.ts result.ts t.ts >/dev/null 2>&1 && "
-              "timeout 30 node out/t.js >/dev/null 2>&1); "
-              "then echo \"OK $id\"; else echo \"BAD $id\"; fi\ndone\n")
+    script = (
+        "for id in $(ls /w/cases); do\n"
+        "  if (cd /w/cases/$id && timeout 90 tsc --strict --module commonjs "
+        "--target es2020 --types node "
+        "--typeRoots /usr/local/lib/node_modules/@types --outDir out "
+        "sol.ts result.ts t.ts >/dev/null 2>&1 && "
+        "timeout 30 node out/t.js >/dev/null 2>&1); "
+        'then echo "OK $id"; else echo "BAD $id"; fi\ndone\n'
+    )
     out, _e = container("bench-node:1", d, script, timeout=7200)
     return parse_okbad(out, ids)
 
@@ -595,22 +696,27 @@ def g_shellish(items, kind, tag):
     ids = []
     for _cat, p in rows:
         ids.append(p["id"])
-        open(os.path.join(d, p["id"] + ".setup"), "w").write(p["payload"]["setup"] + "\n")
+        open(os.path.join(d, p["id"] + ".setup"), "w").write(
+            p["payload"]["setup"] + "\n"
+        )
         open(os.path.join(d, p["id"] + ".cmd"), "w").write(
-            cmd_of(items.get(p["id"], {}).get("text", "")) + "\n")
+            cmd_of(items.get(p["id"], {}).get("text", "")) + "\n"
+        )
         open(os.path.join(d, p["id"] + ".chk"), "w").write(p["payload"]["chk"] + "\n")
     open(os.path.join(d, "ids"), "w").write("\n".join(ids) + "\n")
-    script = ("mkdir -p /tmp/outs\n"
-              "AER_LOG_DIR=/srv/aer/log; export AER_LOG_DIR\n"
-              "for id in $(cat /w/ids); do\n"
-              "  rm -rf /tmp/b/$id /tmp/origin.git /tmp/mirror.git \"$AER_LOG_DIR\"\n"
-              "  mkdir -p /tmp/b/$id \"$AER_LOG_DIR\"; cd /tmp/b/$id\n"
-              "  sh /w/$id.setup >/dev/null 2>&1\n"
-              "  OUT=/tmp/outs/$id; export OUT\n"
-              "  timeout 30 sh /w/$id.cmd > \"$OUT\" 2>&1\n"
-              "  cd /tmp/b/$id\n"
-              "  if OUT=/tmp/outs/$id sh /w/$id.chk >/dev/null 2>&1; "
-              "then echo \"OK $id\"; else echo \"BAD $id\"; fi\ndone\n")
+    script = (
+        "mkdir -p /tmp/outs\n"
+        "AER_LOG_DIR=/srv/aer/log; export AER_LOG_DIR\n"
+        "for id in $(cat /w/ids); do\n"
+        '  rm -rf /tmp/b/$id /tmp/origin.git /tmp/mirror.git "$AER_LOG_DIR"\n'
+        '  mkdir -p /tmp/b/$id "$AER_LOG_DIR"; cd /tmp/b/$id\n'
+        "  sh /w/$id.setup >/dev/null 2>&1\n"
+        "  OUT=/tmp/outs/$id; export OUT\n"
+        '  timeout 30 sh /w/$id.cmd > "$OUT" 2>&1\n'
+        "  cd /tmp/b/$id\n"
+        "  if OUT=/tmp/outs/$id sh /w/$id.chk >/dev/null 2>&1; "
+        'then echo "OK $id"; else echo "BAD $id"; fi\ndone\n'
+    )
     out, _e = container("bench-sh:1", d, script)
     return parse_okbad(out, ids)
 
@@ -626,13 +732,17 @@ def g_sshcfgx(items, tag):
         cfg = code_of(items.get(p["id"], {}).get("text", ""))
         raws[p["id"]] = cfg
         open(os.path.join(d, p["id"] + ".cfg"), "w").write(cfg)
-        open(os.path.join(d, p["id"] + ".alias"), "w").write(p["payload"]["alias"] + "\n")
+        open(os.path.join(d, p["id"] + ".alias"), "w").write(
+            p["payload"]["alias"] + "\n"
+        )
     open(os.path.join(d, "ids"), "w").write("\n".join(ids) + "\n")
-    script = ("for id in $(cat /w/ids); do\n"
-              "  cp /w/$id.cfg /tmp/c && chmod 600 /tmp/c\n"
-              "  echo \"### $id\"\n"
-              "  ssh -G -F /tmp/c $(cat /w/$id.alias) 2>/dev/null | tr 'A-Z' 'a-z'\n"
-              "done\n")
+    script = (
+        "for id in $(cat /w/ids); do\n"
+        "  cp /w/$id.cfg /tmp/c && chmod 600 /tmp/c\n"
+        '  echo "### $id"\n'
+        "  ssh -G -F /tmp/c $(cat /w/$id.alias) 2>/dev/null | tr 'A-Z' 'a-z'\n"
+        "done\n"
+    )
     out, _e = container("bench-sh:1", d, script)
     blocks, cur = {}, None
     for ln in out.splitlines():
@@ -643,8 +753,12 @@ def g_sshcfgx(items, tag):
             q = ln.strip().split(None, 1)
             if len(q) == 2:
                 blocks[cur].setdefault(q[0], q[1])
-    equiv = {"no": {"no", "false"}, "yes": {"yes", "true"},
-             "false": {"no", "false"}, "true": {"yes", "true"}}
+    equiv = {
+        "no": {"no", "false"},
+        "yes": {"yes", "true"},
+        "false": {"no", "false"},
+        "true": {"yes", "true"},
+    }
 
     def m(got, want):
         want = want.lower()
@@ -668,21 +782,26 @@ def g_yamlx(items, tag):
         cd = os.path.join(d, "cases", p["id"])
         os.makedirs(cd, exist_ok=True)
         open(os.path.join(cd, "w.yml"), "w").write(
-            code_of(items.get(p["id"], {}).get("text", "")))
-        body = ("import yaml, json\n"
-                "d=yaml.safe_load(open('w.yml'))\n"
-                "on=d.get('on', d.get(True))\n"
-                "s=json.dumps(on)\n"
-                "j=list(d['jobs'].values())[0]\n"
-                "st=json.dumps(d['jobs'])\n"
-                "st_all=json.dumps(d)\n" + p["payload"] + "\nprint('ok')\n")
+            code_of(items.get(p["id"], {}).get("text", ""))
+        )
+        body = (
+            "import yaml, json\n"
+            "d=yaml.safe_load(open('w.yml'))\n"
+            "on=d.get('on', d.get(True))\n"
+            "s=json.dumps(on)\n"
+            "j=list(d['jobs'].values())[0]\n"
+            "st=json.dumps(d['jobs'])\n"
+            "st_all=json.dumps(d)\n" + p["payload"] + "\nprint('ok')\n"
+        )
         open(os.path.join(cd, "chk.py"), "w").write(body)
-    drv = ("import os, subprocess\n"
-           "for tid in sorted(os.listdir('/w/cases')):\n"
-           "    d='/w/cases/'+tid\n"
-           "    r=subprocess.run(['python','chk.py'],capture_output=True,text=True,"
-           "timeout=30,cwd=d)\n"
-           "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n")
+    drv = (
+        "import os, subprocess\n"
+        "for tid in sorted(os.listdir('/w/cases')):\n"
+        "    d='/w/cases/'+tid\n"
+        "    r=subprocess.run(['python','chk.py'],capture_output=True,text=True,"
+        "timeout=30,cwd=d)\n"
+        "    print(('OK ' if r.returncode==0 else 'BAD ')+tid)\n"
+    )
     open(os.path.join(d, "drv.py"), "w").write(drv)
     out, _e = container("bench-py:1", d, "python /w/drv.py\n")
     return parse_okbad(out, ids)
@@ -707,14 +826,24 @@ def g_ragx(items, _tag):
             res[p["id"]] = any(re.search(x, body, re.I) for x in C2.REFUSAL)
         else:
             res[p["id"]] = bool(body.strip()) and all(
-                re.search(x, body, re.I) for x in p["payload"]["must"])
+                re.search(x, body, re.I) for x in p["payload"]["must"]
+            )
     return res
 
 
-GRADERS = [("pyx", g_pyx), ("djx", g_djx), ("sqlx", g_sqlx), ("jsx", g_jsx),
-           ("tsx", g_tsx), ("shx", lambda i, t: g_shellish(i, "shx", t)),
-           ("gitx", lambda i, t: g_shellish(i, "gitx", t)), ("sshcfgx", g_sshcfgx),
-           ("yamlx", g_yamlx), ("rubricx", g_rubricx), ("ragx", g_ragx)]
+GRADERS = [
+    ("pyx", g_pyx),
+    ("djx", g_djx),
+    ("sqlx", g_sqlx),
+    ("jsx", g_jsx),
+    ("tsx", g_tsx),
+    ("shx", lambda i, t: g_shellish(i, "shx", t)),
+    ("gitx", lambda i, t: g_shellish(i, "gitx", t)),
+    ("sshcfgx", g_sshcfgx),
+    ("yamlx", g_yamlx),
+    ("rubricx", g_rubricx),
+    ("ragx", g_ragx),
+]
 
 
 def grade_bucket(items, tag):
@@ -730,12 +859,17 @@ def grade(path):
     data = json.load(open(path))
     COT_SPLIT = data.get("arm") == "cot"
     if COT_SPLIT:
-        n = sum(1 for b in ("deep", "shallow")
-                for v in data.get(b, {}).values()
-                if COT_MARK in (v.get("text") or ""))
+        n = sum(
+            1
+            for b in ("deep", "shallow")
+            for v in data.get(b, {}).values()
+            if COT_MARK in (v.get("text") or "")
+        )
         tot = sum(len(data.get(b, {})) for b in ("deep", "shallow"))
-        print("  CoT arm: %d/%d answers used the %s marker" % (n, tot, COT_MARK),
-              flush=True)
+        print(
+            "  CoT arm: %d/%d answers used the %s marker" % (n, tot, COT_MARK),
+            flush=True,
+        )
     out = {"model": data["model"], "results": {}}
     deep_ok = grade_bucket(data.get("deep", {}), "deep")
     shal_ok = grade_bucket(data.get("shallow", {}), "shal")
@@ -743,13 +877,18 @@ def grade(path):
         dd = data.get("deep", {}).get(p["id"], {})
         ss = data.get("shallow", {}).get(p["id"], {})
         out["results"][p["id"]] = {
-            "cat": cat, "depth": p["depth"],
+            "cat": cat,
+            "depth": p["depth"],
             "deep": bool(deep_ok.get(p["id"], False)),
             "shallow": bool(shal_ok.get(p["id"], False)),
-            "deep_ptok": dd.get("ptok", 0), "deep_secs": dd.get("secs", 0),
-            "deep_tok": dd.get("tok", 0), "deep_finish": dd.get("finish", ""),
-            "shal_ptok": ss.get("ptok", 0), "shal_tok": ss.get("tok", 0),
-            "shal_secs": ss.get("secs", 0)}
+            "deep_ptok": dd.get("ptok", 0),
+            "deep_secs": dd.get("secs", 0),
+            "deep_tok": dd.get("tok", 0),
+            "deep_finish": dd.get("finish", ""),
+            "shal_ptok": ss.get("ptok", 0),
+            "shal_tok": ss.get("tok", 0),
+            "shal_secs": ss.get("secs", 0),
+        }
     gp = path.replace(".json", ".graded.json")
     json.dump(out, open(gp, "w"), indent=1)
 
@@ -773,19 +912,28 @@ def grade(path):
         rs = [r for r in out["results"].values() if r["depth"] == depth]
         pt = [r["deep_ptok"] for r in rs if r["deep_ptok"]]
         avg = sum(pt) // len(pt) if pt else 0
-        print(f"   ~{depth//1000:>3}K (measured {avg:>6} tok): "
-              f"deep {sum(r['deep'] for r in rs):>2}/{len(rs)}   "
-              f"shallow {sum(r['shallow'] for r in rs):>2}/{len(rs)}")
+        print(
+            f"   ~{depth // 1000:>3}K (measured {avg:>6} tok): "
+            f"deep {sum(r['deep'] for r in rs):>2}/{len(rs)}   "
+            f"shallow {sum(r['shallow'] for r in rs):>2}/{len(rs)}"
+        )
     print(f"graded -> {gp}")
 
 
 def oracle(path):
     items = {}
     for _cat, p in probes():
-        items[p["id"]] = {"text": p["ref"], "tok": 0, "ptok": 0, "secs": 0,
-                          "finish": "stop"}
-    json.dump({"model": "ORACLE(reference)", "deep": items,
-               "shallow": dict(items)}, open(path, "w"))
+        items[p["id"]] = {
+            "text": p["ref"],
+            "tok": 0,
+            "ptok": 0,
+            "secs": 0,
+            "finish": "stop",
+        }
+    json.dump(
+        {"model": "ORACLE(reference)", "deep": items, "shallow": dict(items)},
+        open(path, "w"),
+    )
     print(f"oracle written: {len(items)} items -> {path}")
 
 
@@ -794,6 +942,7 @@ if __name__ == "__main__":
     if a == "count":
         n = 0
         from collections import Counter
+
         cc, kk = Counter(), Counter()
         ids = []
         for cat, p in probes():
@@ -802,7 +951,7 @@ if __name__ == "__main__":
             kk[p["kind"]] += 1
             ids.append(p["id"])
         assert len(ids) == len(set(ids)), "DUPLICATE IDS"
-        print(f"probes {n} (x2 = {n*2} generations per model)")
+        print(f"probes {n} (x2 = {n * 2} generations per model)")
         for c in ORDER:
             print(f"  {c:<13} {cc[c]}")
         print("kinds:", dict(kk))
@@ -833,13 +982,21 @@ if __name__ == "__main__":
                 try:
                     r = ask(model, msgs, p["max_tokens"])
                 except Exception as e:  # noqa: BLE001
-                    r = {"text": "", "tok": 0, "ptok": 0, "secs": 0, "finish": "error",
-                         "error": f"{type(e).__name__}: {str(e)[:200]}"}
+                    r = {
+                        "text": "",
+                        "tok": 0,
+                        "ptok": 0,
+                        "secs": 0,
+                        "finish": "error",
+                        "error": f"{type(e).__name__}: {str(e)[:200]}",
+                    }
                 r["cat"] = cat
                 r["retried_scale"] = sc
                 data["deep"][p["id"]] = r
-                print(f"  {p['id']:<10} ptok={r.get('ptok', 0):>6} "
-                      f"finish={r['finish']}", flush=True)
+                print(
+                    f"  {p['id']:<10} ptok={r.get('ptok', 0):>6} finish={r['finish']}",
+                    flush=True,
+                )
         json.dump(data, open(path, "w"))
         still = [k for k, v in data["deep"].items() if v.get("finish") == "error"]
         print(f"still rejected: {still}")

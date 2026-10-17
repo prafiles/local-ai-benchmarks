@@ -4,6 +4,7 @@
 The rubric grader is pure regex over saved text, so re-running the whole suite
 (tsc, docker, sqlite) to change one pattern would be 30 minutes of nothing.
 """
+
 import json
 import sys
 

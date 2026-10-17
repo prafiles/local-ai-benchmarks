@@ -16,6 +16,7 @@ the published number is missing.
 Nothing here touches the graders. The substituted text goes through the same
 b3.py grade path as any other answer.
 """
+
 import json
 import os
 import subprocess
@@ -33,9 +34,13 @@ OUT = REPO + "/results/mac/t_nemotron.djctl.json"
 
 raw = json.load(open(SRC))
 items = raw["items"]
-targets = [k for k, v in items.items()
-           if v["cat"] == "Django" and not (v.get("text") or "").strip()
-           and v.get("finish") == "stop"]
+targets = [
+    k
+    for k, v in items.items()
+    if v["cat"] == "Django"
+    and not (v.get("text") or "").strip()
+    and v.get("finish") == "stop"
+]
 print(f"{len(targets)} Django tasks to re-run: {targets}", flush=True)
 
 prompts = {t[0]: t for t in b3.all_tasks()} if hasattr(b3, "all_tasks") else {}
@@ -46,10 +51,17 @@ for i, tid in enumerate(targets, 1):
         print(f"  {tid}: not found in task list", flush=True)
         continue
     prompt = task[3]
-    payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}],
-               "max_tokens": 8000, "temperature": 0}
-    req = urllib.request.Request(URL, data=json.dumps(payload).encode(),
-                                 headers={"Content-Type": "application/json"})
+    payload = {
+        "model": MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 8000,
+        "temperature": 0,
+    }
+    req = urllib.request.Request(
+        URL,
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json"},
+    )
     try:
         d = json.loads(urllib.request.urlopen(req, timeout=1800).read())
     except Exception as e:  # noqa: BLE001
@@ -63,14 +75,20 @@ for i, tid in enumerate(targets, 1):
     text = content or trace
     if text:
         items[tid]["text"] = text
-        items[tid]["_djctl"] = "recovered from reasoning_content" if not content else "answered normally"
+        items[tid]["_djctl"] = (
+            "recovered from reasoning_content" if not content else "answered normally"
+        )
         recovered += 1
-    print(f"  [{i}/{len(targets)}] {tid}: content={len(content)}ch trace={len(trace)}ch "
-          f"-> {'recovered' if text else 'still empty'}", flush=True)
+    print(
+        f"  [{i}/{len(targets)}] {tid}: content={len(content)}ch trace={len(trace)}ch "
+        f"-> {'recovered' if text else 'still empty'}",
+        flush=True,
+    )
 
 json.dump(raw, open(OUT, "w"))
 print(f"\n{recovered}/{len(targets)} recovered -> {OUT}", flush=True)
 
 env = dict(os.environ, B4_TMP=REPO + "/results/mac/tmp/grade")
-subprocess.run([sys.executable, "-u", "b3.py", "grade", OUT],
-               cwd=REPO + "/harness", env=env)
+subprocess.run(
+    [sys.executable, "-u", "b3.py", "grade", OUT], cwd=REPO + "/harness", env=env
+)

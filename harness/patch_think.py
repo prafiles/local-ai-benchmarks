@@ -11,10 +11,11 @@
 Applied to b3.py (600 short tasks) and b4.py (60 long-context probes) so the two
 suites stay consistent with each other.
 """
+
 import re
 import sys
 
-ASK_HELPERS = '''
+ASK_HELPERS = """
 # --------------------------------------------------------------- reasoning
 # Only two of the four models have a reasoning mode at all: Gemma 4 defaults
 # enable_thinking to false in its template, and Qwen3.5 thinks unless told not
@@ -47,27 +48,28 @@ def sampling(payload, model):
         # explicit either way: the flag is what separates the two arms
         payload["chat_template_kwargs"] = {"enable_thinking": bool(THINK)}
     return payload
-'''
+"""
 
 
 def patch_b3(src):
     src = src.replace(
-        '''def ask(model, prompt, max_tokens):
+        """def ask(model, prompt, max_tokens):
     payload = {"model": model, "messages": [{"role": "user", "content": prompt}],
                "max_tokens": max_tokens, "temperature": 0}
     # Qwen3.5 thinks by default and burns the whole budget before answering
     # (finish_reason=length, content=None). The other three answer directly, so
     # disable thinking to keep the token budgets — and the comparison — valid.
     if "qwen3.5" in model.lower():
-        payload["chat_template_kwargs"] = {"enable_thinking": False}''',
-        '''def ask(model, prompt, max_tokens):
+        payload["chat_template_kwargs"] = {"enable_thinking": False}""",
+        """def ask(model, prompt, max_tokens):
     payload = sampling({"model": model,
                         "messages": [{"role": "user", "content": prompt}],
-                        "max_tokens": budget(max_tokens)}, model)''')
+                        "max_tokens": budget(max_tokens)}, model)""",
+    )
     src = src.replace(
-        '''    return {"text": d["choices"][0]["message"]["content"] or "",
-            "tok": d["usage"]["completion_tokens"], "secs": round(time.time() - t0, 2)}''',
-        '''    ch = d["choices"][0]
+        """    return {"text": d["choices"][0]["message"]["content"] or "",
+            "tok": d["usage"]["completion_tokens"], "secs": round(time.time() - t0, 2)}""",
+        """    ch = d["choices"][0]
     msg = ch["message"]
     # vLLM 0.22 puts the chain of thought in `reasoning`, NOT `reasoning_content`;
     # `content` is left holding the final answer only, so graders need no change
@@ -76,37 +78,50 @@ def patch_b3(src):
             "tok": d["usage"]["completion_tokens"],
             "think_chars": len(think),
             "finish": ch.get("finish_reason", ""),
-            "secs": round(time.time() - t0, 2)}''')
+            "secs": round(time.time() - t0, 2)}""",
+    )
     return src
 
 
 def patch_b4(src):
     src = src.replace(
-        '''    payload = {"model": model, "messages": msgs, "max_tokens": max_tokens,
+        """    payload = {"model": model, "messages": msgs, "max_tokens": max_tokens,
                "temperature": 0}
     if "qwen3.5" in model.lower():
-        payload["chat_template_kwargs"] = {"enable_thinking": False}''',
-        '''    payload = sampling({"model": model, "messages": msgs,
-                        "max_tokens": budget(max_tokens)}, model)''')
+        payload["chat_template_kwargs"] = {"enable_thinking": False}""",
+        """    payload = sampling({"model": model, "messages": msgs,
+                        "max_tokens": budget(max_tokens)}, model)""",
+    )
     src = src.replace(
-        '''    return {"text": ch["message"]["content"] or "",
+        """    return {"text": ch["message"]["content"] or "",
             "tok": d["usage"]["completion_tokens"],
             "ptok": d["usage"]["prompt_tokens"],
             "finish": ch.get("finish_reason", ""),
-            "secs": round(time.time() - t0, 2)}''',
-        '''    msg = ch["message"]
+            "secs": round(time.time() - t0, 2)}""",
+        """    msg = ch["message"]
     think = msg.get("reasoning") or msg.get("reasoning_content") or ""
     return {"text": msg.get("content") or "",
             "tok": d["usage"]["completion_tokens"],
             "ptok": d["usage"]["prompt_tokens"],
             "think_chars": len(think),
             "finish": ch.get("finish_reason", ""),
-            "secs": round(time.time() - t0, 2)}''')
+            "secs": round(time.time() - t0, 2)}""",
+    )
     return src
 
 
-for path, fn, anchor in (("/root/bench2/b3.py", patch_b3, "# ------------------------------------------------------------------- runner"),
-                         ("/root/bench2/b4.py", patch_b4, "# ------------------------------------------------------------------- runner")):
+for path, fn, anchor in (
+    (
+        "/root/bench2/b3.py",
+        patch_b3,
+        "# ------------------------------------------------------------------- runner",
+    ),
+    (
+        "/root/bench2/b4.py",
+        patch_b4,
+        "# ------------------------------------------------------------------- runner",
+    ),
+):
     s = open(path).read()
     if "B4_THINK" in s:
         print(f"{path}: already patched, skipping")
@@ -114,7 +129,9 @@ for path, fn, anchor in (("/root/bench2/b3.py", patch_b3, "# -------------------
     before = s
     s = fn(s)
     if s == before:
-        print(f"{path}: PATCH DID NOT APPLY -- ask() text did not match", file=sys.stderr)
+        print(
+            f"{path}: PATCH DID NOT APPLY -- ask() text did not match", file=sys.stderr
+        )
         sys.exit(1)
     s = s.replace(anchor, ASK_HELPERS + "\n\n" + anchor, 1)
     open(path, "w").write(s)

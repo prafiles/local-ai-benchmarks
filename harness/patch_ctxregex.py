@@ -17,11 +17,12 @@ mistake that would misreport a model's depth limit as a capability limit.
 Both wordings are accepted now, and the parse is verified against a live 400
 rather than assumed.
 """
+
 p = "/root/bench2/b4.py"
 s = open(p).read()
 
-old = '''CTXERR = re.compile(r"maximum context length is (\\d+) tokens.*?"
-                    r"(\\d+) in the messages", re.S)'''
+old = """CTXERR = re.compile(r"maximum context length is (\\d+) tokens.*?"
+                    r"(\\d+) in the messages", re.S)"""
 
 new = '''CTXMAX = re.compile(r"maximum context length is (\\d+) tokens", re.S)
 # two wordings in the wild: "N in the messages" (older) and "your prompt contains
@@ -40,7 +41,7 @@ def ctx_overflow(body):
 assert old in s, "CTXERR did not match"
 s = s.replace(old, new, 1)
 
-old_use = '''            body = e.read().decode("utf-8", "replace")
+old_use = """            body = e.read().decode("utf-8", "replace")
             m = CTXERR.search(body)
             # The session plus a full reasoning budget does not fit the window.
             # Shrink the budget to exactly what is left instead of failing: the
@@ -49,9 +50,9 @@ old_use = '''            body = e.read().decode("utf-8", "replace")
             if not m:
                 raise
             window, ptok = int(m.group(1)), int(m.group(2))
-            room = window - ptok - 8'''
+            room = window - ptok - 8"""
 
-new_use = '''            body = e.read().decode("utf-8", "replace")
+new_use = """            body = e.read().decode("utf-8", "replace")
             hit = ctx_overflow(body)
             # The session plus a full reasoning budget does not fit the window.
             # Shrink the budget to exactly what is left instead of failing: the
@@ -60,7 +61,7 @@ new_use = '''            body = e.read().decode("utf-8", "replace")
             if not hit:
                 raise
             window, ptok = hit
-            room = window - ptok - 8'''
+            room = window - ptok - 8"""
 
 assert old_use in s, "overflow handler did not match"
 s = s.replace(old_use, new_use, 1)

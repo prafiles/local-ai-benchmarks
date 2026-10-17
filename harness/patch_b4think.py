@@ -25,6 +25,7 @@ That makes the squeeze visible rather than fatal. A probe that could only be giv
 1,800 tokens to think in is recorded as such, which is itself a finding: at the
 deepest rung these models cannot both hold the session and reason about it.
 """
+
 import re
 
 p = "/root/bench2/b4.py"
@@ -35,14 +36,14 @@ if "PROFILES" in s:
     raise SystemExit(0)
 
 # ----------------------------------------------------------------- sampling
-old = '''def sampling(payload, model):
+old = """def sampling(payload, model):
     payload["temperature"] = TEMP
     if TEMP > 0:
         payload["top_p"] = TOPP
     if can_think(model):
         # explicit either way: the flag is what separates the two arms
         payload["chat_template_kwargs"] = {"enable_thinking": bool(THINK)}
-    return payload'''
+    return payload"""
 
 new = '''PROFILES = json.loads(os.environ.get("B4_PROFILES", "{}"))
 
@@ -120,7 +121,7 @@ assert old in s, "sampling() did not match"
 s = s.replace(old, new, 1)
 
 # --------------------------------------------------------------------- ask
-old_ask = '''def ask(model, msgs, max_tokens):
+old_ask = """def ask(model, msgs, max_tokens):
     payload = sampling({"model": model, "messages": msgs,
                         "max_tokens": budget(max_tokens)}, model)
     req = urllib.request.Request(URL, data=json.dumps(payload).encode(),
@@ -136,7 +137,7 @@ old_ask = '''def ask(model, msgs, max_tokens):
             "ptok": d["usage"]["prompt_tokens"],
             "think_chars": len(think),
             "finish": ch.get("finish_reason", ""),
-            "secs": round(time.time() - t0, 2)}'''
+            "secs": round(time.time() - t0, 2)}"""
 
 new_ask = '''def _post(model, msgs, cap):
     payload = sampling({"model": model, "messages": with_cot(model, msgs),
@@ -201,10 +202,13 @@ assert old_ask in s, "ask() did not match"
 s = s.replace(old_ask, new_ask, 1)
 
 # --------------------------------------------------------------------- run
-old_run = s[s.index("def run(model, out_path, mode=\"both\"):"):
-            s.index("# ------------------------------------------------------------------ helpers")]
+old_run = s[
+    s.index('def run(model, out_path, mode="both"):') : s.index(
+        "# ------------------------------------------------------------------ helpers"
+    )
+]
 
-new_run = '''def run(model, out_path, mode="both"):
+new_run = """def run(model, out_path, mode="both"):
     res = {"model": model, "deep": {}, "shallow": {},
            "arm": ("native" if (THINK and can_think(model))
                    else "cot" if (COT and not can_think(model)) else "plain")}
@@ -273,27 +277,27 @@ new_run = '''def run(model, out_path, mode="both"):
     print(f"saved -> {out_path}")
 
 
-'''
+"""
 
 s = s.replace(old_run, new_run, 1)
 
 # ------------------------------------------------------------- strip_think
-old_strip = '''def strip_think(t):
-    return re.sub(r"<think>.*?</think>", "", t, flags=re.S)'''
-new_strip = '''def strip_think(t):
+old_strip = """def strip_think(t):
+    return re.sub(r"<think>.*?</think>", "", t, flags=re.S)"""
+new_strip = """def strip_think(t):
     if COT_SPLIT:
         t = after_mark(t)
     t = re.sub(r"<think>.*?</think>", "", t, flags=re.S)
     # unclosed <think> means the cap landed mid-thought; everything after it is
     # deliberation and must not be graded as if it were the answer
-    return re.sub(r"<think>.*\\Z", "", t, flags=re.S)'''
+    return re.sub(r"<think>.*\\Z", "", t, flags=re.S)"""
 assert old_strip in s, "strip_think did not match"
 s = s.replace(old_strip, new_strip, 1)
 
 # ------------------------------------------------------------------ grade
-old_grade = '''def grade(path):
-    data = json.load(open(path))'''
-new_grade = '''def grade(path):
+old_grade = """def grade(path):
+    data = json.load(open(path))"""
+new_grade = """def grade(path):
     global COT_SPLIT
     data = json.load(open(path))
     COT_SPLIT = data.get("arm") == "cot"
@@ -303,17 +307,22 @@ new_grade = '''def grade(path):
                 if COT_MARK in (v.get("text") or ""))
         tot = sum(len(data.get(b, {})) for b in ("deep", "shallow"))
         print("  CoT arm: %d/%d answers used the %s marker" % (n, tot, COT_MARK),
-              flush=True)'''
+              flush=True)"""
 assert old_grade in s, "grade() did not match"
 s = s.replace(old_grade, new_grade, 1)
 
 # imports
-s = s.replace("import json\nimport os\n",
-              "import concurrent.futures\nimport json\nimport os\n", 1)
-s = s.replace("import sys\nimport time\n", "import sys\nimport threading\nimport time\n", 1)
+s = s.replace(
+    "import json\nimport os\n", "import concurrent.futures\nimport json\nimport os\n", 1
+)
+s = s.replace(
+    "import sys\nimport time\n", "import sys\nimport threading\nimport time\n", 1
+)
 assert "import threading" in s and "import concurrent.futures" in s
 if "import urllib.error" not in s:
-    s = s.replace("import urllib.request", "import urllib.error\nimport urllib.request", 1)
+    s = s.replace(
+        "import urllib.request", "import urllib.error\nimport urllib.request", 1
+    )
 
 open(p, "w").write(s)
 print("b4.py: profiles, CoT, retry/escalate, adaptive budget, concurrency, resume, arm")
