@@ -28,3 +28,6 @@ tmp/
 /docs/design-implementation-*/**/*.gif
 /docs/design-implementation-*/**/*.avif
 /docs/design-implementation-*/**/*.svg
+
+# Local review media stays outside source history.
+/docs/design-expression-20261024/evidence/

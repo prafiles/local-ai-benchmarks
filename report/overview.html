@@ -169,6 +169,67 @@
     .marks span:last-child { transform:translateX(-100%); }
     .legend { line-height:1.8; }
   }
+
+  /* Research folio: retain the report's paper, serif and exact comparisons. */
+  body { margin:0; }
+  header { position:relative; padding:0 0 1.7rem; border-bottom:2px solid var(--ink); }
+  h1 { max-width:22ch; font-size:clamp(2rem,4.6vw,3.4rem); letter-spacing:-.035em; line-height:1.06; }
+  .eyebrow { color:var(--on); line-height:1.7; }
+  .lead-finding { display:grid; grid-template-columns:auto minmax(0,1fr); gap:1.8rem; margin-top:1.8rem; padding:1.5rem 0 0; border-top:1px solid var(--rule); }
+  .finding-number { font:500 clamp(3.4rem,7vw,5rem)/.95 var(--serif); letter-spacing:-.08em; color:var(--on); }
+  .finding-number small { display:block; font: .65rem/1.7 var(--mono); letter-spacing:.03em; color:var(--ink-3); margin-top:.7rem; }
+  .lead-finding .note { margin:0; border:0; padding:0; font-size:.94rem; max-width:48rem; }
+  .lead-finding .note b { display:block; font:600 1.3rem/1.25 var(--serif); color:var(--ink); margin-bottom:.5rem; }
+  .compare-launch { display:inline-block; margin-top:1rem; color:var(--on); font-size:.82rem; text-underline-offset:4px; }
+  .card { border-radius:7px; border-top:3px solid var(--rule); box-shadow:0 8px 24px #152b1f04; }
+  .card > h2 { font-size:1.5rem; letter-spacing:-.02em; }
+  .card:nth-of-type(3n+1) { border-top-color:var(--on); }
+  .pair-compare { border:1px solid var(--rule); border-left:3px solid var(--on); background:var(--panel); border-radius:7px; }
+  .pair-compare summary { cursor:pointer; padding:1rem 1.25rem; font-size:.92rem; color:var(--ink); }
+  .pair-body { padding:0 1.25rem 1.25rem; }
+  .pair-selectors { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+  .pair-selectors label { font: .7rem/1.6 var(--mono); color:var(--ink-3); min-width:0; }
+  .pair-selectors select { display:block; width:100%; min-width:0; margin-top:.4rem; min-height:42px; padding:.55rem; background:var(--bg); border:1px solid var(--rule); border-radius:5px; color:var(--ink); font: .85rem var(--sans); }
+  .pair-arms { display:flex; gap:1rem; flex-wrap:wrap; border:0; padding:0; margin:1rem 0 1.3rem; font-size:.85rem; color:var(--ink-2); }
+  .pair-arms legend { float:left; margin-right:1.2rem; font-weight:600; }
+  .pair-arms label { display:flex; align-items:center; gap:.35rem; }
+  .pair-arms input { accent-color:var(--on); }
+  .compare-row { padding:1rem 0 1.2rem; border-top:1px solid var(--rule); }
+  .compare-heading { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; }
+  .compare-heading strong { font:600 1rem var(--serif); }
+  .compare-heading span { font: .67rem var(--mono); color:var(--ink-3); }
+  .compare-track { height:24px; position:relative; margin:1rem 8px .4rem; }
+  .compare-track::before { content:""; position:absolute; top:11px; left:0; right:0; height:2px; background:var(--rule-2); }
+  .compare-marker { position:absolute; top:6px; width:12px; height:12px; border-radius:50%; transform:translateX(-50%); box-sizing:border-box; }
+  .compare-marker.off { background:var(--panel); border:2px solid var(--off); }
+  .compare-marker.on { background:var(--on); box-shadow:0 0 0 2px var(--panel); }
+  .compare-focus { position:absolute; top:1px; width:22px; height:22px; border:1px solid var(--on); border-radius:50%; transform:translateX(-50%); transition:left 450ms cubic-bezier(.2,.8,.2,1); }
+  .compare-axis,.compare-values { display:flex; justify-content:space-between; gap:1rem; font:.7rem/1.6 var(--mono); color:var(--ink-3); }
+  .compare-values { margin-top:.75rem; color:var(--ink-2); flex-wrap:wrap; }
+  .compare-values [data-selected="true"] { color:var(--on); font-weight:650; }
+  .compare-caveat { color:var(--ink-3); font-size:.76rem; line-height:1.65; margin:.7rem 0 0; }
+  .compare-missing { position:absolute; right:0; top:2px; font:.7rem var(--mono); color:var(--ink-3); }
+  .folio-arrive header { animation:folio-paper 760ms cubic-bezier(.2,.8,.2,1) both; }
+  .pair-body.is-arriving { animation:folio-paper 420ms cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes folio-paper { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
+  :focus-visible { outline:2px solid var(--on); outline-offset:4px; }
+  @media(max-width:600px) {
+    .lead-finding { gap:1rem; margin-top:1.35rem; }
+    .lead-finding .note { font-size:.84rem; }
+    .lead-finding .note b { font-size:1.1rem; }
+    .pair-selectors { grid-template-columns:1fr; gap:.7rem; }
+    .compare-heading { align-items:flex-start; flex-direction:column; gap:.35rem; }
+    .lead-finding { grid-template-columns:1fr; gap:.9rem; }
+    .finding-number { display:flex; align-items:baseline; gap:1rem; font-size:3.8rem; }
+    .finding-number small { margin:0; font-size:.7rem; letter-spacing:.03em; }
+  }
+  @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } }
+  @media print {
+    .pair-compare,.compare-launch { display:none !important; }
+    *,*::before,*::after { animation:none !important; transition:none !important; }
+    .card { box-shadow:none; break-inside:avoid; }
+  }
+
 </style>
 
 <div class="wrap"><div class="col">
@@ -179,7 +240,22 @@
     <p class="lede">Every model runs the same 600 execution-graded tasks twice — reasoning off,
       then on — across two GPUs and two serving stacks. Nothing is judged by another model:
       answers are executed, typechecked, or run against fixture repositories.</p>
+
+    <aside class="lead-finding" aria-label="Main finding"><div class="finding-number" aria-hidden="true">11<small>tasks out of 600</small></div><div><p class="note key"><b>The top four are separated by 11 tasks out of 600.</b> Gemma 4 26B,
+      Gemma 4 12B, Qwen3.6 27B and Qwen3.6 35B land within 2% of each other, so treating this as
+      a ranking overstates what the numbers support — the measured noise floor alone is ~6 tasks.
+      The honest reading is one leading cluster, then a gap.</p></div></aside>
   </header>
+
+
+  <details class="pair-compare" id="pair-compare" hidden>
+    <summary>Compare two models · reasoning off and on</summary>
+    <div class="pair-body"><p class="sub">Exact values from the hardware tables below, on the same 0–600 scale.</p>
+      <div class="pair-selectors"><label>First model<select id="compare-a"></select></label><label>Second model<select id="compare-b"></select></label></div>
+      <fieldset class="pair-arms"><legend>Focus</legend><label><input type="radio" name="reasoning-arm" value="off" checked>Reasoning off</label><label><input type="radio" name="reasoning-arm" value="on">Reasoning on</label></fieldset>
+      <div id="compare-rows"></div><p id="compare-status" class="compare-caveat" role="status" aria-live="polite"></p>
+    </div>
+  </details>
 
   <!-- =================================================== ranking -->
   <section class="card">
@@ -209,10 +285,7 @@
       <span style="left:50%">300</span><span style="left:75%">450</span>
       <span style="left:100%">600</span></span><span></span></div>
 
-    <p class="note key"><b>The top four are separated by 11 tasks out of 600.</b> Gemma 4 26B,
-      Gemma 4 12B, Qwen3.6 27B and Qwen3.6 35B land within 2% of each other, so treating this as
-      a ranking overstates what the numbers support — the measured noise floor alone is ~6 tasks.
-      The honest reading is one leading cluster, then a gap.</p>
+
     <p class="note"><b>Doubling the parameters bought four tasks.</b> Gemma 4 12B on a 16 GB
       consumer GPU scores 575; Gemma 4 26B on a 64 GB Mac scores 579. Same family, 2× the
       parameters, 4 tasks apart — and the 12B did it while the 26B was the better of the two
@@ -479,3 +552,46 @@
     reference + null oracles on both stacks · raw runs and graded output committed</footer>
 
 </div></div>
+
+<script>
+(() => {
+  const pickerA=document.getElementById('compare-a'),pickerB=document.getElementById('compare-b'),rows=document.getElementById('compare-rows'),detail=document.getElementById('pair-compare');
+  if(!pickerA||!pickerB||!rows||!detail)return;
+  const models=[];
+  document.querySelectorAll('.scroll table').forEach(table=>{
+    const headers=[...table.querySelectorAll('thead th')].map(e=>e.textContent.trim());
+    const off=headers.indexOf('Off'),on=headers.indexOf('On');
+    if(off<0||on<0||!headers.includes('Reasoning'))return;
+    table.querySelectorAll('tbody tr').forEach(row=>{
+      const name=row.cells[0]?.querySelector('b')?.textContent.trim();if(!name)return;
+      const parse=cell=>/^\d+$/.test(cell.textContent.trim())?Number(cell.textContent.trim()):null;
+      models.push({name,off:parse(row.cells[off]),on:parse(row.cells[on]),hardware:table.closest('section').querySelector('h2').textContent.trim(),caveat:row.cells[headers.indexOf('Comparison')]?.textContent.trim()||'See hardware notes for sampling and comparability.'});
+    });
+  });
+  if(models.length<2)return;
+  for(const picker of [pickerA,pickerB])models.forEach((m,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=m.name;picker.append(option)});
+  pickerB.value=String(Math.max(1,models.findIndex(m=>m.name==='Gemma 4 12B QAT')));
+  const pref=window.matchMedia?.('(prefers-reduced-motion: reduce)');
+  const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const selected=()=>document.querySelector('input[name="reasoning-arm"]:checked')?.value||'off';
+  const position=n=>Math.max(0,Math.min(100,n/600*100))+'%';
+  const value=n=>n===null?'not available':n+' / 600';
+  function render(){
+    const arm=selected();rows.innerHTML=[pickerA,pickerB].map(p=>{
+      const m=models[Number(p.value)],available=m[arm]!==null;
+      return `<div class="compare-row"><div class="compare-heading"><strong>${esc(m.name)}</strong><span>${esc(m.hardware)}</span></div><div class="compare-track" aria-hidden="true">${['off','on'].filter(k=>m[k]!==null).map(k=>`<span class="compare-marker ${k}" style="left:${position(m[k])}"></span>`).join('')}${available?`<span class="compare-focus" style="left:${position(m[arm])}"></span>`:'<span class="compare-missing">Selected arm not available</span>'}</div><div class="compare-axis" aria-hidden="true"><span>0</span><span>150</span><span>300</span><span>450</span><span>600</span></div><div class="compare-values"><span data-arm="off" data-selected="${arm==='off'}">Off ${value(m.off)}</span><span data-arm="on" data-selected="${arm==='on'}">On ${value(m.on)}</span></div><p class="compare-caveat">${esc(m.caveat)}</p></div>`;
+    }).join('');status();
+  }
+  function status(){const arm=selected();document.getElementById('compare-status').textContent=[pickerA,pickerB].map(p=>{const m=models[Number(p.value)];return m.name+': reasoning '+arm+' '+value(m[arm])}).join('. ')}
+  function focusArm(){
+    const arm=selected();if([pickerA,pickerB].some((p,i)=>models[Number(p.value)][arm]===null||!rows.children[i]?.querySelector('.compare-focus'))){render();return}[...rows.children].forEach((row,i)=>{const m=models[Number((i?pickerB:pickerA).value)];const focus=row.querySelector('.compare-focus');focus.style.left=position(m[arm]);row.querySelectorAll('[data-arm]').forEach(e=>e.dataset.selected=String(e.dataset.arm===arm))});status();
+  }
+  pickerA.addEventListener('change',render);pickerB.addEventListener('change',render);
+  document.querySelectorAll('input[name="reasoning-arm"]').forEach(input=>input.addEventListener('change',focusArm));
+  const settle=event=>{if(event.matches){document.querySelector('.wrap')?.classList.remove('folio-arrive');document.querySelector('.pair-body')?.classList.remove('is-arriving');rows.querySelectorAll('.compare-focus').forEach(e=>e.getAnimations?.().forEach(a=>a.finish()))}};
+  if(pref?.addEventListener)pref.addEventListener('change',settle);else pref?.addListener?.(settle);
+  window.addEventListener('pagehide',()=>{document.querySelector('.wrap')?.classList.remove('folio-arrive');if(pref?.removeEventListener)pref.removeEventListener('change',settle);else pref?.removeListener?.(settle)});
+  const body=detail.querySelector('.pair-body');detail.addEventListener('toggle',()=>{body.classList.toggle('is-arriving',detail.open&&!pref?.matches)});body.addEventListener('animationend',()=>body.classList.remove('is-arriving'));
+  render();detail.hidden=false;if(!pref?.matches)document.querySelector('.wrap')?.classList.add('folio-arrive');
+})();
+</script>
