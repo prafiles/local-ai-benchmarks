@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>How eleven local coding models compare</title>
 <style>
   :root {
@@ -140,6 +142,27 @@
          padding:.08em .32em; border-radius:3px; }
   footer { color:var(--ink-3); font-size:.78rem; font-family:var(--mono);
            border-top:1px solid var(--rule); padding-top:.9rem; }
+
+  .scroll-hint { display:none; }
+  .scroll { max-width:100%; }
+  .scroll:focus-visible { outline:2px solid var(--ink-2); outline-offset:3px; }
+  @media(max-width:600px) {
+    .scroll-hint { display:block; color:var(--ink-2); font-size:.8rem; margin:.6rem 0; }
+  }
+
+  @media(max-width:600px) {
+    .wrap { padding:1.4rem .8rem; }
+    .card { padding:1.2rem 1rem; min-width:0; }
+    .dumb,.dgrid { grid-template-columns:minmax(0,1fr) 3.4rem; gap:.5rem .7rem; }
+    .dname { grid-column:1/-1; min-width:0; flex-wrap:wrap; }
+    .dtrack,.dtrack2 { grid-column:1; min-width:0; height:16px; margin-bottom:.7rem; }
+    .dnum { grid-column:2; align-self:center; }
+    .axis,.axis2 { grid-template-columns:minmax(0,1fr) 3.4rem; }
+    .axis>span:first-child,.axis2>span:first-child { display:none; }
+    .marks span:first-child { transform:none; }
+    .marks span:last-child { transform:translateX(-100%); }
+    .legend { line-height:1.8; }
+  }
 </style>
 
 <div class="wrap"><div class="col">
@@ -284,7 +307,8 @@
     <h2>Where the differences actually are</h2>
     <p class="sub">Tasks passed per category, out of 50 — each model's better arm. Darker is
       stronger. DeepSeek VL2 is omitted: at 167/600 overall it would flatten the scale.</p>
-    <div class="scroll"><table class="heatmap">
+    <p class="scroll-hint">Scroll the table horizontally to compare all columns.</p>
+    <div class="scroll" role="region" aria-label="Model comparison table" tabindex="0"><table class="heatmap">
       <thead><tr><th>Category</th><th class="num">Gemma 4 26B<br><small>M2</small></th><th class="num">Gemma 4 12B<br><small>CUDA</small></th><th class="num">Qwen3.6 27B<br><small>M2</small></th><th class="num">Qwen3.6 35B<br><small>M2</small></th><th class="num">Coder-Next<br><small>M2</small></th><th class="num">Qwen3.8 27B<br><small>M2</small></th><th class="num">Qwen3.5 9B<br><small>CUDA</small></th><th class="num">Coder 14B<br><small>CUDA</small></th><th class="num">Mellum2 12B<br><small>CUDA</small></th><th class="num">GLM 4.7<br><small>M2</small></th><th class="num">mean</th></tr></thead>
       <tbody>
       <tr><td>Python</td><td class="num heat q5">49</td><td class="num heat q5">50</td><td class="num heat q5">50</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q5">49</td><td class="num heat q4">48</td><td class="num heat q2">42</td><td class="num heat q3">45</td><td class="num heat q4">47</td><td class="num mean">47.7</td></tr>
@@ -320,7 +344,8 @@
   <section class="card">
     <h2>Apple M2 Max · LM Studio / MLX</h2>
     <p class="sub">64 GB unified memory, single stream, 6-bit to 4-bit quantisation.</p>
-    <div class="scroll"><table>
+    <p class="scroll-hint">Scroll the table horizontally to compare all columns.</p>
+    <div class="scroll" role="region" aria-label="Model comparison table" tabindex="0"><table>
       <thead><tr><th>Model</th><th>Reasoning</th><th class="num">Off</th><th class="num">On</th>
         <th class="num">Δ</th><th class="num">Think:answer</th><th class="num">tok/s</th><th>Comparison</th></tr></thead>
       <tbody>
@@ -371,7 +396,8 @@
   <section class="card">
     <h2>RTX 4060 Ti 16 GB · vLLM</h2>
     <p class="sub">The original run. Same 600 tasks, same graders.</p>
-    <div class="scroll"><table>
+    <p class="scroll-hint">Scroll the table horizontally to compare all columns.</p>
+    <div class="scroll" role="region" aria-label="Model comparison table" tabindex="0"><table>
       <thead><tr><th>Model</th><th>Reasoning</th><th class="num">Off</th><th class="num">On</th>
         <th class="num">Δ</th><th class="num">Think:answer</th><th class="num">Flips</th></tr></thead>
       <tbody>

@@ -12,3 +12,19 @@ tmp/
 *.env
 .bench_*_env
 *_api_key*
+
+# Generated interface-review evidence is retained locally outside Git.
+/docs/design-review-*/**/*.png
+/docs/design-review-*/**/*.jpg
+/docs/design-review-*/**/*.jpeg
+/docs/design-review-*/**/*.webp
+/docs/design-review-*/**/*.gif
+/docs/design-review-*/**/*.avif
+/docs/design-review-*/**/*.svg
+/docs/design-implementation-*/**/*.png
+/docs/design-implementation-*/**/*.jpg
+/docs/design-implementation-*/**/*.jpeg
+/docs/design-implementation-*/**/*.webp
+/docs/design-implementation-*/**/*.gif
+/docs/design-implementation-*/**/*.avif
+/docs/design-implementation-*/**/*.svg
