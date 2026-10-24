@@ -78,6 +78,12 @@
   .pt.on  { background:var(--on); }
   .legend-pt { position:static; transform:none; display:inline-block; vertical-align:-2px;
                margin-right:.34rem; box-shadow:none; }
+  .legend { display:flex; flex-wrap:wrap; column-gap:1rem; row-gap:.3rem;
+            font-size:.83rem; line-height:1.6; color:var(--ink-2); margin-bottom:.7rem; }
+  .legend > span { display:inline-flex; align-items:center; gap:.34rem; }
+  .legend > span:not(:last-child) { white-space:nowrap; }
+  .legend .legend-pt { margin:0; flex:none; }
+  .legend > span:last-child { flex-basis:100%; font-size:.8rem; color:var(--ink-3); line-height:1.6; }
   .axis2 { display:grid; grid-template-columns:13rem 1fr 3.2rem; gap:.8rem;
            font-family:var(--mono); font-size:.66rem; color:var(--ink-3); margin-top:.5rem; }
   .axis2 .marks { position:relative; height:1rem; }
