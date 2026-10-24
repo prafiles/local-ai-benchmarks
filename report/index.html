@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Four local models, short and long context, one 16 GB GPU</title>
 
 <style>
@@ -155,6 +157,20 @@
   .foot { font-family: var(--mono); font-size: .7rem; color: var(--ink-3);
           border-top: 1px solid var(--rule); padding-top: 1.2rem; line-height: 1.7; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+  .scroll-hint { display:none; }
+  .scroll { max-width:100%; }
+  .scroll:focus-visible { outline:2px solid var(--ink-2); outline-offset:3px; }
+  @media(max-width:600px) {
+    .scroll-hint { display:block; color:var(--ink-2); font-size:.8rem; margin:.6rem 0; }
+  }
+
+  .grid2 > *, .col > *, .bars { min-width:0; }
+  .row { grid-template-columns:7.5rem minmax(0,1fr); }
+  @media(max-width:600px) {
+    .row { grid-template-columns:minmax(0,1fr); gap:.4rem; }
+    .rowlab { overflow-wrap:anywhere; }
+  }
 </style>
 
 <div class="wrap">
@@ -488,7 +504,8 @@
       <p>The same four models, the same 60 probes, with reasoning off and on. Deep is the
         probe at depth; control is the identical probe with the padding removed.</p>
     </div>
-    <div class="scroll">
+    <p class="scroll-hint">Scroll the table horizontally to compare all columns.</p>
+    <div class="scroll" role="region" aria-label="Model comparison table" tabindex="0">
       <table>
         <thead><tr><th>Model</th><th class="num">at depth</th><th class="num">control</th>
           <th class="num">kept</th><th>note</th></tr></thead>
@@ -573,7 +590,8 @@
         the task passed &#8212; separates forgetting from ordinary error. <strong>Reverted</strong> means
         the answer contains a generic default the session had explicitly ruled out by name.</p>
     </div>
-    <div class="scroll">
+    <p class="scroll-hint">Scroll the table horizontally to compare all columns.</p>
+    <div class="scroll" role="region" aria-label="Model comparison table" tabindex="0">
       <table>
         <thead><tr><th>Depth</th><th class="num">Gemma kept</th><th class="num">Qwen3.5 kept</th>
           <th class="num">Mellum2 kept</th><th class="num">Mellum2 reverted</th></tr></thead>
@@ -730,7 +748,8 @@
         thing rather than blended in &#8212; asking a model to reason is not the same as one trained
         to. The distinction turns out to be the entire result.</p>
     </div>
-    <div class="scroll">
+    <p class="scroll-hint">Scroll the table horizontally to compare all columns.</p>
+    <div class="scroll" role="region" aria-label="Model comparison table" tabindex="0">
       <table>
         <thead><tr><th>Model</th><th>kind</th><th class="num">off</th><th class="num">on</th>
           <th class="num">&#916;</th><th class="num">think:answer</th><th class="num">flips</th></tr></thead>
@@ -768,7 +787,8 @@
         (The two prompted-CoT arms are a separate matter &#8212; they barely reason at all, at
         1.2&times; and 2.5&times; think-to-answer.)</p>
     </div>
-    <div class="scroll">
+    <p class="scroll-hint">Scroll the table horizontally to compare all columns.</p>
+    <div class="scroll" role="region" aria-label="Model comparison table" tabindex="0">
       <table>
         <thead><tr><th></th><th class="num">Gemma 4</th><th class="num">Qwen3.5</th></tr></thead>
         <tbody>
@@ -834,7 +854,8 @@
           doubled them.</p>
       </div>
       <div>
-        <div class="scroll">
+        <p class="scroll-hint">Scroll the table horizontally to compare all columns.</p>
+    <div class="scroll" role="region" aria-label="Model comparison table" tabindex="0">
           <table>
             <thead><tr><th>probe</th><th class="num">trace @8,000</th><th class="num">@16,000</th></tr></thead>
             <tbody>
@@ -856,7 +877,8 @@
       <p><strong>Temperature is the lever &#8212; and only Qwen3.5 needs it.</strong> On the six probes
         that actually spiral, two passes each:</p>
     </div>
-    <div class="scroll">
+    <p class="scroll-hint">Scroll the table horizontally to compare all columns.</p>
+    <div class="scroll" role="region" aria-label="Model comparison table" tabindex="0">
       <table>
         <thead><tr><th>first-attempt sampling</th><th class="num">Qwen3.5 answered</th><th class="num">tokens</th>
           <th class="num">Gemma answered</th><th class="num">tokens</th></tr></thead>
@@ -887,7 +909,8 @@
 
   <section>
     <h2>Where each model actually fails</h2>
-    <div class="scroll">
+    <p class="scroll-hint">Scroll the table horizontally to compare all columns.</p>
+    <div class="scroll" role="region" aria-label="Model comparison table" tabindex="0">
       <table>
         <thead><tr><th>Model</th><th class="num">Solo failures</th><th>Weakest categories</th>
           <th>Character</th></tr></thead>
