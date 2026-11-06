@@ -1,0 +1,46 @@
+# Minimal tooling config: pytest + coverage only. The harness is a collection of
+# scripts run in place, not a package, so there is no build-system section here
+# and nothing that changes how any existing script is invoked.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -m 'not slow'"
+markers = [
+    "slow: needs Docker sandbox images (harness/b2.py setup), a live model endpoint, or real network",
+]
+
+[tool.coverage.run]
+source = ["harness"]
+omit = [
+    # One-off migration scripts that rewrite /root/bench2/b3.py on one host.
+    "harness/patch_*",
+    # One-off analysis/probe/tuning scripts with module-level side effects.
+    "harness/agg4.py",
+    "harness/agg8.py",
+    "harness/agg_think.py",
+    "harness/aggmac.py",
+    "harness/aggb5.py",
+    "harness/audit.py",
+    "harness/b2_selftest.py",
+    "harness/b3_oracle.py",
+    "harness/b3_verify_*.py",
+    "harness/b4_gen.py",
+    "harness/b5_oracle.py",
+    "harness/budgettest.py",
+    "harness/cotcheck.py",
+    "harness/cotfmt.py",
+    "harness/cotprompt.py",
+    "harness/hardtemp.py",
+    "harness/mkprofiles.py",
+    "harness/nulloracle*.py",
+    "harness/peek.py",
+    "harness/probe*.py",
+    "harness/regrade_rubric.py",
+    "harness/tempcheck.py",
+    "harness/think.py",
+    "harness/tune*.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
